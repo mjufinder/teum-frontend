@@ -1,6 +1,6 @@
-# mjufinder-fe
+# teum-frontend
 
-mjufinder 프로젝트의 프론트엔드입니다.
+teum (mjufinder) 프로젝트의 프론트엔드입니다.
 
 ## 기술 스택
 
@@ -61,4 +61,5 @@ src/
 
 ## 연관 레포
 
-- 백엔드: [mjufinder-be](https://github.com/mjufinder/mjufinder-be)
+- 백엔드: [teum-backend](https://github.com/mjufinder/teum-backend)
+- 문서: [teum-docs](https://github.com/mjufinder/teum-docs)
