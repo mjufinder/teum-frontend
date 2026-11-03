@@ -16,21 +16,43 @@ export class ApiError extends Error {
   }
 }
 
+function getDefaultMessage(status: number) {
+  if (status === 401) return "로그인이 필요해요.";
+  if (status === 403) return "권한이 없어요.";
+  if (status === 404) return "찾을 수 없어요.";
+  if (status >= 500) return "서버에 문제가 있어요. 잠시 후 다시 시도해 주세요.";
+  return "요청을 처리하지 못했어요.";
+}
+
+async function getErrorMessage(res: Response) {
+  try {
+    const { detail } = await res.json();
+    if (typeof detail === "string") return detail;
+    if (Array.isArray(detail)) return "입력값을 확인해 주세요.";
+  } catch {
+    // JSON이 아닌 응답은 상태 코드별 기본 문장을 쓴다.
+  }
+  return getDefaultMessage(res.status);
+}
+
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
+  // FormData는 브라우저가 boundary를 포함한 Content-Type을 직접 넣는다.
+  const contentType: Record<string, string> =
+    options.body instanceof FormData ? {} : { "Content-Type": "application/json" };
+
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
+      ...contentType,
       ...options.headers,
     },
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => res.statusText);
-    throw new ApiError(res.status, text || res.statusText);
+    throw new ApiError(res.status, await getErrorMessage(res));
   }
 
   // 204 No Content 대응
@@ -54,7 +76,7 @@ export async function authFetch<T>(
   } = await supabase.auth.getSession();
 
   if (!session) {
-    throw new ApiError(401, "로그인이 필요합니다.");
+    throw new ApiError(401, "로그인이 필요해요.");
   }
 
   return apiFetch<T>(path, {
