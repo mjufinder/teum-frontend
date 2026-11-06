@@ -1,24 +1,174 @@
 @import "tailwindcss";
 
+/*
+ * Tactile Soft Product (design-diversity: web-tactile-soft-product)
+ * 따뜻한 그레이지 배경 위 둥근 카드가 다중 소프트 그림자로 떠 있고,
+ * 세이지 민트·클레이 코랄 두 색만 강조로 쓴다. 보라·순백·청회색은 쓰지 않는다.
+ * 명세 색 중 글자 대비가 4.5:1에 못 미치는 값은 글자용으로 한 단계 진하게 둔다.
+ */
 :root {
-  --background: #f6f6f4;
-  --foreground: #18181b;
+  --background: #f1efec;
+  --foreground: #3a3733;
+  --shadow-soft: 0 1px 2px rgba(58, 55, 51, 0.04), 0 8px 24px rgba(58, 55, 51, 0.06),
+    0 2px 6px rgba(58, 55, 51, 0.05);
+  --shadow-lift: 0 1px 2px rgba(58, 55, 51, 0.04), 0 16px 36px rgba(58, 55, 51, 0.1),
+    0 2px 6px rgba(58, 55, 51, 0.05);
+  --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-brand: #2f6f62;
-  --color-brand-strong: #245a4f;
-  --color-brand-soft: #e7f1ee;
-  --color-line: #e4e4e7;
-  --color-muted: #71717a;
-  --color-danger: #dc2626;
-  --color-surface: #ffffff;
+  /* 세이지 민트: 면(칸·칩·포커스 링)용 */
+  --color-brand: #6fae9b;
+  /* 글자·버튼 면용 진한 민트 (오프화이트 대비 4.5:1 이상) */
+  --color-brand-strong: #3b7765;
+  --color-brand-deep: #2f6252;
+  --color-brand-soft: #e3efea;
+  /* 클레이 코랄: 2차 강조 */
+  --color-accent: #e08a6a;
+  --color-accent-strong: #9a4a2f;
+  --color-accent-soft: #f8e6de;
+  --color-line: #e4e0da;
+  --color-muted: #6f6a63;
+  --color-danger: #b5543a;
+  --color-danger-soft: #f6e4dd;
+  --color-surface: #faf9f7;
+  --color-sunken: #f6f4f1;
+  --font-sans: "Plus Jakarta Sans Variable", "Pretendard Variable", Pretendard,
+    "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+@layer components {
+  .page-title {
+    @apply text-2xl font-bold tracking-[-0.02em] text-foreground;
+  }
+
+  .section-title {
+    @apply text-base font-semibold;
+  }
+
+  .card {
+    @apply rounded-[20px] bg-surface p-6;
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* 사용: className="btn btn-primary", "badge badge-accent" 처럼 기본 클래스와 함께 쓴다. */
+
+  /* 눌러서 이동하는 카드: 호버 시 살짝 들리며 스냅 */
+  .card-link {
+    @apply block rounded-[20px] bg-surface p-6;
+    box-shadow: var(--shadow-soft);
+    transition:
+      transform 180ms var(--ease-snap),
+      box-shadow 180ms ease-out;
+  }
+  .card-link:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .field-label {
+    @apply flex flex-col gap-1.5 text-sm font-semibold;
+  }
+
+  .input {
+    @apply h-12 w-full rounded-[14px] border-[1.5px] border-line bg-surface px-4 text-[0.9375rem] font-normal text-foreground;
+    transition:
+      border-color 160ms ease-out,
+      box-shadow 160ms ease-out;
+  }
+  textarea.input {
+    @apply h-auto py-3;
+  }
+  .input:focus {
+    @apply border-brand outline-none;
+    box-shadow: 0 0 0 4px rgba(111, 174, 155, 0.16);
+  }
+  .input::placeholder {
+    @apply text-muted;
+  }
+  input[type="file"].input {
+    @apply h-auto py-3 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-brand-soft file:px-4 file:py-1.5 file:text-sm file:font-semibold file:text-brand-strong;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[14px] px-5 py-2.5 text-[0.9375rem] font-semibold disabled:cursor-not-allowed disabled:opacity-50;
+    transition:
+      background-color 140ms ease-out,
+      box-shadow 140ms ease-out,
+      transform 90ms ease-out;
+  }
+  .btn:not(:disabled):active {
+    transform: scale(0.97);
+  }
+  .btn-primary {
+    @apply bg-brand-strong text-surface hover:bg-brand-deep;
+    box-shadow: 0 6px 16px rgba(111, 174, 155, 0.28);
+  }
+  .btn-secondary {
+    @apply border border-line bg-surface text-foreground hover:bg-sunken;
+  }
+  .btn-danger {
+    @apply border border-danger/40 bg-surface text-danger hover:bg-danger-soft;
+  }
+  .btn-sm {
+    @apply rounded-[10px] px-3 py-1.5 text-sm;
+  }
+
+  /* 알약형 칩: 도구 선택·단계 표시 */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-sunken;
+    transition:
+      background-color 140ms ease-out,
+      color 140ms ease-out,
+      transform 140ms var(--ease-snap);
+  }
+  .chip[aria-pressed="true"],
+  .chip[aria-current] {
+    @apply border-brand-strong bg-brand-strong text-surface;
+    transform: scale(1.04);
+  }
+
+  /* 상태 배지 */
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+  .badge-brand {
+    @apply bg-brand-soft text-brand-strong;
+  }
+  .badge-accent {
+    @apply bg-accent-soft text-accent-strong;
+  }
+  .badge-accent::before {
+    content: "";
+    @apply size-1.5 rounded-full bg-accent;
+  }
+
+  .text-link {
+    @apply font-semibold text-brand-strong underline-offset-4 hover:underline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-link,
+  .btn,
+  .chip {
+    transition: none;
+  }
+  .card-link:hover,
+  .btn:not(:disabled):active,
+  .chip[aria-pressed="true"],
+  .chip[aria-current] {
+    transform: none;
+  }
 }
