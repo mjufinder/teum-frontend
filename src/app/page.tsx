@@ -57,7 +57,7 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center px-5 py-16 text-center">
       <div className="flex w-full max-w-xl flex-col items-center gap-6">
         <Logo size="lg" />
-        <span className="badge badge-accent border border-line bg-surface px-3 py-1 text-foreground">
+        <span className="badge badge-accent px-3 py-1">
           팀 회의 시간 찾기
         </span>
         <h1 className="text-[clamp(2rem,6vw,3.25rem)] font-bold leading-[1.15] tracking-[-0.02em]">
@@ -76,9 +76,21 @@ export default function Home() {
             회원가입
           </Link>
         </div>
-        <ul className="flex flex-wrap justify-center gap-2">
+        <ul className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted">
           {["이미지로 시간표 등록", "드래그로 바로 수정", "이메일로 팀원 추가"].map((label) => (
-            <li key={label} className="chip pointer-events-none">
+            <li key={label} className="flex items-center gap-1.5">
+              <svg
+                aria-hidden
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-4 text-brand-strong"
+              >
+                <path d="m5 12 5 5 9-10" />
+              </svg>
               {label}
             </li>
           ))}

@@ -55,7 +55,7 @@ export default function AddMemberForm({
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="이메일"
+          placeholder="teammate@example.com"
           className="input"
         />
         <button

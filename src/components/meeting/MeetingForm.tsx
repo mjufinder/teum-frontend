@@ -132,9 +132,11 @@ export default function MeetingForm({
         </select>
       </div>
 
-      <details className="rounded-[14px] border-[1.5px] border-line bg-sunken/60 px-4 py-3">
-        <summary className="cursor-pointer text-sm font-semibold text-foreground marker:text-muted">
-          세부 조건 <span className="font-normal text-muted">(선택)</span>
+      <details className="disclosure rounded-[14px] border-[1.5px] border-line-strong bg-field px-4 py-3">
+        <summary>
+          <span>
+            세부 조건 <span className="font-normal text-muted">(선택 · 눌러서 펼치기)</span>
+          </span>
         </summary>
         <div className="mt-3 flex flex-col gap-4 pb-1">
           <div className="flex flex-col gap-1">

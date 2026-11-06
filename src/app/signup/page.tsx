@@ -62,6 +62,8 @@ export default function SignupPage() {
           이메일
           <input
             type="email"
+            autoComplete="email"
+            placeholder="name@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -72,6 +74,7 @@ export default function SignupPage() {
           비밀번호
           <input
             type="password"
+            autoComplete="new-password"
             placeholder="6자 이상"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

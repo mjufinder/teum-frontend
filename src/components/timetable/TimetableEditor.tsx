@@ -69,25 +69,30 @@ export default function TimetableEditor({
         </p>
       ))}
 
-      <div className="flex flex-wrap gap-2">
-        {tools.map((item) => (
-          <button
-            key={item.state}
-            type="button"
-            aria-pressed={tool === item.state}
-            onClick={() => setTool(item.state)}
-            className="chip"
-          >
-            <span aria-hidden className={`size-2.5 rounded-full ring-2 ring-surface/70 ${item.swatch}`} />
-            {item.label}
-          </button>
-        ))}
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-semibold">
+          칠할 종류를 고른 뒤, 칸을 누르거나 끌어서 칠해 주세요.
+        </p>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="칠하기 도구">
+          {tools.map((item) => (
+            <button
+              key={item.state}
+              type="button"
+              aria-pressed={tool === item.state}
+              onClick={() => setTool(item.state)}
+              className="chip"
+            >
+              <span aria-hidden className={`size-2.5 rounded-full ring-2 ring-surface/70 ${item.swatch}`} />
+              {item.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <TimetableGrid bits={bits} onPaint={handlePaint} />
 
       {error && <p className="text-sm text-danger">{error}</p>}
-      {saved && <p className="text-sm text-muted">저장했어요.</p>}
+      {saved && <p className="text-sm font-semibold text-brand-strong">저장했어요.</p>}
 
       <div>
         <button

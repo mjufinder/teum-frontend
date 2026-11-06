@@ -29,7 +29,11 @@
   --color-accent: #e08a6a;
   --color-accent-strong: #9a4a2f;
   --color-accent-soft: #f8e6de;
+  /* 구분선용 옅은 선 */
   --color-line: #e4e0da;
+  /* 입력창·버튼처럼 누르거나 적는 요소의 테두리 (배경 대비 3:1 이상) */
+  --color-line-strong: #8f897f;
+  --color-field: #fffefb;
   --color-muted: #6f6a63;
   --color-danger: #b5543a;
   --color-danger-soft: #f6e4dd;
@@ -48,6 +52,28 @@ body {
   word-break: keep-all;
 }
 
+@layer base {
+  /* Tailwind v4 는 버튼 커서를 기본값으로 두므로, 누를 수 있는 요소는 손가락 커서로 구분한다 */
+  button:not(:disabled),
+  [role="button"],
+  summary,
+  select:not(:disabled),
+  input[type="file"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* 키보드로 이동할 때 지금 어디에 있는지 분명히 보이게 한다 */
+  a:focus-visible,
+  button:focus-visible,
+  summary:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--color-brand-strong);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+}
+
+/* 사용: className="btn btn-primary", "badge badge-accent" 처럼 기본 클래스와 함께 쓴다. */
 @layer components {
   .page-title {
     @apply text-2xl font-bold tracking-[-0.02em] text-foreground;
@@ -58,88 +84,113 @@ body {
   }
 
   .card {
-    @apply rounded-[20px] bg-surface p-6;
+    @apply rounded-[20px] border border-line bg-surface p-6;
     box-shadow: var(--shadow-soft);
   }
 
-  /* 사용: className="btn btn-primary", "badge badge-accent" 처럼 기본 클래스와 함께 쓴다. */
-
-  /* 눌러서 이동하는 카드: 호버 시 살짝 들리며 스냅 */
+  /* 눌러서 이동하는 카드: 오른쪽 화살표 + 호버 시 테두리 강조·살짝 들림 */
   .card-link {
-    @apply block rounded-[20px] bg-surface p-6;
+    @apply relative block rounded-[20px] border border-line bg-surface p-6 pr-12;
     box-shadow: var(--shadow-soft);
     transition:
       transform 180ms var(--ease-snap),
-      box-shadow 180ms ease-out;
+      box-shadow 180ms ease-out,
+      border-color 140ms ease-out;
+  }
+  .card-link::after {
+    content: "";
+    @apply absolute top-1/2 right-5 size-2.5 -translate-y-1/2 rotate-45 border-t-2 border-r-2 border-muted;
   }
   .card-link:hover {
-    transform: translateY(-4px);
+    @apply border-brand;
+    transform: translateY(-3px);
     box-shadow: var(--shadow-lift);
+  }
+  .card-link:hover::after {
+    @apply border-brand-strong;
   }
 
   .field-label {
-    @apply flex flex-col gap-1.5 text-sm font-semibold;
+    @apply flex flex-col gap-1.5 text-sm font-semibold text-foreground;
+  }
+  .field-hint {
+    @apply text-xs font-normal text-muted;
   }
 
+  /* 적는 칸: 진한 테두리 + 카드보다 밝은 바탕으로 경계를 분명히 */
   .input {
-    @apply h-12 w-full rounded-[14px] border-[1.5px] border-line bg-surface px-4 text-[0.9375rem] font-normal text-foreground;
+    @apply h-12 w-full rounded-[14px] border-[1.5px] border-line-strong bg-field px-4 text-[0.9375rem] font-normal text-foreground hover:border-foreground/70;
     transition:
-      border-color 160ms ease-out,
+      border-color 140ms ease-out,
       box-shadow 160ms ease-out;
   }
   textarea.input {
     @apply h-auto py-3;
   }
+  select.input {
+    @apply appearance-none pr-11;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233a3733' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 18px;
+  }
   .input:focus {
-    @apply border-brand outline-none;
-    box-shadow: 0 0 0 4px rgba(111, 174, 155, 0.16);
+    @apply border-brand-strong outline-none;
+    box-shadow: 0 0 0 4px rgba(111, 174, 155, 0.25);
+  }
+  .input:disabled {
+    @apply cursor-not-allowed bg-sunken text-muted;
   }
   .input::placeholder {
-    @apply text-muted;
+    @apply text-muted/80;
   }
   input[type="file"].input {
-    @apply h-auto py-3 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-brand-soft file:px-4 file:py-1.5 file:text-sm file:font-semibold file:text-brand-strong;
+    @apply h-auto border-dashed py-3 text-sm file:mr-3 file:cursor-pointer file:rounded-[10px] file:border-0 file:bg-brand-strong file:px-4 file:py-2 file:text-sm file:font-semibold file:text-surface;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[14px] px-5 py-2.5 text-[0.9375rem] font-semibold disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-[14px] px-5 py-2.5 text-[0.9375rem] font-semibold disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none;
     transition:
       background-color 140ms ease-out,
+      border-color 140ms ease-out,
       box-shadow 140ms ease-out,
       transform 90ms ease-out;
   }
   .btn:not(:disabled):active {
     transform: scale(0.97);
   }
+  /* 주 버튼: 꽉 찬 진한 민트 */
   .btn-primary {
     @apply bg-brand-strong text-surface hover:bg-brand-deep;
-    box-shadow: 0 6px 16px rgba(111, 174, 155, 0.28);
+    box-shadow: 0 6px 16px rgba(59, 119, 101, 0.28);
   }
+  /* 보조 버튼: 진한 테두리 + 그림자로 '눌리는 것'임을 보이게 */
   .btn-secondary {
-    @apply border border-line bg-surface text-foreground hover:bg-sunken;
+    @apply border-[1.5px] border-line-strong bg-field text-foreground hover:border-foreground hover:bg-sunken;
+    box-shadow: 0 1px 2px rgba(58, 55, 51, 0.08);
   }
   .btn-danger {
-    @apply border border-danger/40 bg-surface text-danger hover:bg-danger-soft;
+    @apply border-[1.5px] border-danger bg-field text-danger hover:bg-danger-soft;
   }
   .btn-sm {
-    @apply rounded-[10px] px-3 py-1.5 text-sm;
+    @apply min-h-9 rounded-[10px] px-3 py-1.5 text-sm;
   }
 
-  /* 알약형 칩: 도구 선택·단계 표시 */
+  /* 선택하는 알약 버튼(도구 고르기 등). 표시용 라벨에는 쓰지 않는다. */
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-sunken;
+    @apply inline-flex min-h-10 items-center gap-1.5 rounded-full border-[1.5px] border-line-strong bg-field px-4 py-2 text-sm font-semibold text-foreground hover:border-foreground hover:bg-sunken;
     transition:
       background-color 140ms ease-out,
+      border-color 140ms ease-out,
       color 140ms ease-out,
       transform 140ms var(--ease-snap);
   }
-  .chip[aria-pressed="true"],
-  .chip[aria-current] {
-    @apply border-brand-strong bg-brand-strong text-surface;
+  .chip[aria-pressed="true"] {
+    @apply border-brand-strong bg-brand-strong text-surface hover:bg-brand-deep;
     transform: scale(1.04);
   }
 
-  /* 상태 배지 */
+  /* 상태 배지 (누를 수 없음): 테두리 없이 옅은 면 */
   .badge {
     @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold;
   }
@@ -154,21 +205,40 @@ body {
     @apply size-1.5 rounded-full bg-accent;
   }
 
+  /* 글자 링크: 항상 밑줄 */
   .text-link {
-    @apply font-semibold text-brand-strong underline-offset-4 hover:underline;
+    @apply font-semibold text-brand-strong underline decoration-brand/60 decoration-2 underline-offset-4 hover:decoration-brand-strong;
+  }
+
+  /* 접었다 펴는 영역의 머리: 버튼처럼 보이는 행 + 펼침 화살표 */
+  .disclosure > summary {
+    @apply flex list-none items-center justify-between gap-2 rounded-[12px] px-1 py-1 text-sm font-semibold hover:text-brand-strong;
+  }
+  .disclosure > summary::-webkit-details-marker {
+    display: none;
+  }
+  .disclosure > summary::after {
+    content: "";
+    @apply size-[18px] shrink-0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233a3733' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+    transition: transform 160ms ease-out;
+  }
+  .disclosure[open] > summary::after {
+    transform: rotate(180deg);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .card-link,
   .btn,
-  .chip {
+  .chip,
+  .input {
     transition: none;
   }
   .card-link:hover,
   .btn:not(:disabled):active,
-  .chip[aria-pressed="true"],
-  .chip[aria-current] {
+  .chip[aria-pressed="true"] {
     transform: none;
   }
 }

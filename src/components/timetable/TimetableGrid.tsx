@@ -77,14 +77,11 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap gap-2 text-xs font-semibold text-muted">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-muted">
         {legend.map((item) => (
-          <span
-            key={item.state}
-            className="flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1"
-          >
+          <span key={item.state} className="flex items-center gap-1.5">
             <span
-              className={`size-3 rounded-[4px] border border-line ${cellColors[item.state]}`}
+              className={`size-3 rounded-[4px] border border-line-strong/40 ${cellColors[item.state]}`}
             />
             {item.label}
           </span>
@@ -122,7 +119,9 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
                     } ${day === DAY_LABELS.length - 1 ? "border-r" : ""} ${
                       slot === SLOT_COUNT - 1 ? "border-b" : ""
                     } ${cellColors[slotState(bits, cell)]} ${
-                      onPaint ? "cursor-pointer touch-none" : ""
+                      onPaint
+                        ? "cursor-pointer touch-none hover:brightness-95 hover:outline-2 hover:-outline-offset-2 hover:outline-brand-strong"
+                        : ""
                     }`}
                   />
                 );

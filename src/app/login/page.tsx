@@ -64,6 +64,8 @@ export default function LoginPage() {
           이메일
           <input
             type="email"
+            autoComplete="email"
+            placeholder="name@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -74,6 +76,8 @@ export default function LoginPage() {
           비밀번호
           <input
             type="password"
+            autoComplete="current-password"
+            placeholder="비밀번호"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
