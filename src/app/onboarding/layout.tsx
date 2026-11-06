@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import Logo from "@/components/layout/Logo";
 import { supabase } from "@/lib/supabase";
 
 const steps = [
@@ -45,31 +46,32 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
 
   return (
     <>
-      <header className="border-b border-line bg-surface">
-        <ol className="mx-auto flex w-full max-w-3xl items-center gap-2 px-4 py-3 text-sm">
-          {steps.map((step, index) => (
-            <li key={step.href} className="flex items-center gap-2">
-              {index > 0 && <span className="text-muted">·</span>}
-              <span
-                aria-current={pathname === step.href ? "step" : undefined}
-                className={pathname === step.href ? "font-medium text-brand" : "text-muted"}
-              >
-                {step.label}
-              </span>
-            </li>
-          ))}
-          <li className="ml-auto">
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="text-sm text-muted hover:underline"
-            >
-              로그아웃
-            </button>
-          </li>
-        </ol>
+      <header className="sticky top-0 z-20 border-b border-line bg-background/85 backdrop-blur-md">
+        <div className="mx-auto flex min-h-[72px] w-full max-w-3xl items-center gap-4 px-5 py-3">
+          <Logo />
+          <ol className="flex items-center gap-2 text-sm">
+            {steps.map((step, index) => (
+              <li key={step.href} className="flex items-center gap-2">
+                {index > 0 && <span aria-hidden className="h-px w-4 bg-line" />}
+                <span
+                  aria-current={pathname === step.href ? "step" : undefined}
+                  className="chip pointer-events-none px-3 py-1.5"
+                >
+                  {step.label}
+                </span>
+              </li>
+            ))}
+          </ol>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="ml-auto whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold text-muted transition-colors hover:bg-surface/70 hover:text-foreground"
+          >
+            로그아웃
+          </button>
+        </div>
       </header>
-      <main className="mx-auto w-full max-w-3xl px-4 py-8">
+      <main className="mx-auto w-full max-w-3xl px-5 py-10">
         {ready ? children : <p className="text-sm text-muted">불러오는 중...</p>}
       </main>
     </>

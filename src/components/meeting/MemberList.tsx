@@ -26,27 +26,37 @@ export default function MemberList({
   busy = false,
 }: MemberListProps) {
   return (
-    <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
+    <ul className="card divide-y divide-line !p-0">
       {members.map((m) => (
         <li
           key={m.member_id}
-          className="flex items-center gap-2 px-5 py-3 text-sm"
+          className="flex items-center gap-3 px-5 py-3.5 text-sm"
         >
-          <span>{m.user_id === myUserId ? "나" : `팀원 ${m.user_id}`}</span>
+          <span
+            aria-hidden
+            className={`grid size-9 shrink-0 place-items-center rounded-full text-xs font-bold ${
+              m.user_id === myUserId
+                ? "bg-brand-strong text-surface"
+                : "bg-brand-soft text-brand-strong"
+            }`}
+          >
+            {m.user_id === myUserId ? "나" : m.user_id}
+          </span>
+          <span className="font-semibold">
+            {m.user_id === myUserId ? "나" : `팀원 ${m.user_id}`}
+          </span>
           {emails[m.user_id] && (
-            <span className="text-muted">{emails[m.user_id]}</span>
+            <span className="min-w-0 truncate text-muted">{emails[m.user_id]}</span>
           )}
           {m.role === "ADMIN" && (
-            <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs text-brand">
-              관리자
-            </span>
+            <span className="badge badge-brand">관리자</span>
           )}
           {onTransfer && m.role !== "ADMIN" && m.user_id !== myUserId && (
             <button
               type="button"
               onClick={() => onTransfer(m)}
               disabled={busy}
-              className="ml-auto whitespace-nowrap rounded-md border border-line bg-surface px-3 py-1 text-xs hover:bg-zinc-50 disabled:opacity-50"
+              className="btn btn-secondary btn-sm ml-auto"
             >
               관리자 넘기기
             </button>

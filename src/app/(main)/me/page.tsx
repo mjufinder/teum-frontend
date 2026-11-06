@@ -99,30 +99,30 @@ export default function MePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">내 정보</h1>
+      <h1 className="page-title">내 정보</h1>
 
-      <form onSubmit={saveProfile} className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-5">
-        <label className="flex flex-col gap-1 text-sm font-medium">
+      <form onSubmit={saveProfile} className="card flex flex-col gap-5">
+        <label className="field-label">
           이름
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm font-normal focus:border-brand focus:outline-none"
+            className="input"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm font-medium">
+        <label className="field-label">
           전공
           <input
             value={major}
             onChange={(e) => setMajor(e.target.value)}
-            className="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm font-normal focus:border-brand focus:outline-none"
+            className="input"
           />
         </label>
         <div>
           <button
             type="submit"
             disabled={saving || !name.trim() || !major.trim()}
-            className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-strong disabled:opacity-50"
+            className="btn btn-primary"
           >
             {saving ? "저장 중..." : "저장"}
           </button>
@@ -131,11 +131,11 @@ export default function MePage() {
         {saveError && <p className="text-sm text-danger">{saveError}</p>}
       </form>
 
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-line bg-surface p-5">
-        <p className="text-sm font-medium">내 시간표</p>
+      <div className="card flex items-center justify-between gap-4">
+        <p className="text-sm font-semibold">내 시간표</p>
         <Link
           href="/me/timetable"
-          className="whitespace-nowrap rounded-md border border-line bg-surface px-4 py-2 text-sm hover:bg-zinc-50"
+          className="btn btn-secondary"
         >
           내 시간표 수정
         </Link>
@@ -146,7 +146,7 @@ export default function MePage() {
           type="button"
           onClick={withdraw}
           disabled={withdrawing}
-          className="rounded-md border border-danger px-4 py-2 text-sm text-danger hover:bg-red-50 disabled:opacity-50"
+          className="btn btn-danger"
         >
           {withdrawing ? "처리 중..." : "회원 탈퇴"}
         </button>

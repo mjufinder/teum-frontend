@@ -27,8 +27,7 @@ interface MeetingFormProps {
   onSubmit: (values: MeetingFormValues) => Promise<boolean | void>;
 }
 
-const inputClass =
-  "w-full rounded-md border border-line bg-surface px-3 py-2 text-sm focus:border-brand focus:outline-none";
+const inputClass = "input";
 
 function validate(values: MeetingFormValues) {
   if (!values.name.trim()) return "모임 이름을 입력해 주세요.";
@@ -87,10 +86,10 @@ export default function MeetingForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-5"
+      className="card flex flex-col gap-5"
     >
       <div className="flex flex-col gap-1">
-        <label htmlFor="meeting-name" className="text-sm font-medium">
+        <label htmlFor="meeting-name" className="text-sm font-semibold">
           모임 이름
         </label>
         <input
@@ -102,7 +101,7 @@ export default function MeetingForm({
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="meeting-description" className="text-sm font-medium">
+        <label htmlFor="meeting-description" className="text-sm font-semibold">
           설명 <span className="font-normal text-muted">(선택)</span>
         </label>
         <textarea
@@ -116,7 +115,7 @@ export default function MeetingForm({
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="meeting-duration" className="text-sm font-medium">
+        <label htmlFor="meeting-duration" className="text-sm font-semibold">
           최소 회의시간
         </label>
         <select
@@ -133,13 +132,13 @@ export default function MeetingForm({
         </select>
       </div>
 
-      <details className="rounded-md border border-line px-3 py-2">
-        <summary className="cursor-pointer text-sm font-medium">
+      <details className="rounded-[14px] border-[1.5px] border-line bg-sunken/60 px-4 py-3">
+        <summary className="cursor-pointer text-sm font-semibold text-foreground marker:text-muted">
           세부 조건 <span className="font-normal text-muted">(선택)</span>
         </summary>
         <div className="mt-3 flex flex-col gap-4 pb-1">
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium">탐색 시간대</span>
+            <span className="text-sm font-semibold">탐색 시간대</span>
             <div className="flex items-center gap-2">
               <select
                 aria-label="탐색 시작 시각"
@@ -170,7 +169,7 @@ export default function MeetingForm({
             <p className="text-xs text-muted">이 시간대 안에서만 회의 후보를 찾아요.</p>
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="meeting-buffer" className="text-sm font-medium">
+            <label htmlFor="meeting-buffer" className="text-sm font-semibold">
               이동 여유시간
             </label>
             <select
@@ -197,7 +196,7 @@ export default function MeetingForm({
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-strong disabled:opacity-50"
+          className="btn btn-primary"
         >
           {submitLabel}
         </button>
