@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 
 import AddMemberForm from "@/components/meeting/AddMemberForm";
+import CandidateList from "@/components/meeting/CandidateList";
 import MeetingActions from "@/components/meeting/MeetingActions";
 import MemberList, { memberLabel } from "@/components/meeting/MemberList";
 import { ApiError, authFetch } from "@/lib/api";
+import { getCandidates } from "@/lib/candidates";
 import { getMeeting, getMembers, toHHMM, transferAdmin } from "@/lib/meetings";
+import type { CandidateSet } from "@/types/candidate";
 import type { Meeting, Member } from "@/types/meeting";
 
 function MeetingDetail() {
@@ -21,6 +24,44 @@ function MeetingDetail() {
   const [error, setError] = useState<string | null>(null);
   const [transferring, setTransferring] = useState(false);
   const [transferError, setTransferError] = useState<string | null>(null);
+  // undefined: 불러오는 중, null: 아직 계산된 후보 없음
+  const [candidateSet, setCandidateSet] = useState<CandidateSet | null | undefined>(undefined);
+  const [candidateError, setCandidateError] = useState<string | null>(null);
+
+  const handleCandidateError = useCallback(
+    (e: unknown) => {
+      if (e instanceof ApiError && e.status === 401) {
+        router.replace("/login");
+        return;
+      }
+      setCandidateError(e instanceof ApiError ? e.message : "추천 시간을 불러오지 못했어요.");
+    },
+    [router]
+  );
+
+  const loadCandidates = useCallback(async () => {
+    setCandidateError(null);
+    try {
+      setCandidateSet(await getCandidates(meetingId));
+    } catch (e) {
+      handleCandidateError(e);
+    }
+  }, [meetingId, handleCandidateError]);
+
+  // 팀원 추가 뒤 구성원·재계산 상태·추천 시간을 함께 새로 고친다.
+  const refreshAfterMemberChange = useCallback(async () => {
+    const [meetingResult, membersResult] = await Promise.allSettled([
+      getMeeting(meetingId),
+      getMembers(meetingId),
+    ]);
+    if (meetingResult.status === "fulfilled") setMeeting(meetingResult.value);
+    if (membersResult.status === "fulfilled") setMembers(membersResult.value);
+    await loadCandidates();
+  }, [meetingId, loadCandidates]);
+
+  useEffect(() => {
+    getCandidates(meetingId).then(setCandidateSet).catch(handleCandidateError);
+  }, [meetingId, handleCandidateError]);
 
   useEffect(() => {
     Promise.all([
@@ -48,14 +89,11 @@ function MeetingDetail() {
 
   async function handleAdded(member: Member, email: string) {
     setEmails((prev) => ({ ...prev, [member.user_id]: email }));
-    try {
-      setMembers(await getMembers(meetingId));
-    } catch {
-      // 추가는 이미 성공했으므로 목록 갱신 실패는 응답 값으로 보완한다.
-      setMembers((prev) =>
-        prev.some((m) => m.member_id === member.member_id) ? prev : [...prev, member]
-      );
-    }
+    // 추가는 이미 성공했으므로 목록 갱신이 실패해도 응답 값으로 보완한다.
+    setMembers((prev) =>
+      prev.some((m) => m.member_id === member.member_id) ? prev : [...prev, member]
+    );
+    await refreshAfterMemberChange();
   }
 
   async function handleTransfer(target: Member) {
@@ -147,6 +185,18 @@ function MeetingDetail() {
         ))}
       </dl>
 
+      <CandidateList
+        meetingId={meetingId}
+        candidateSet={candidateSet}
+        error={candidateError}
+        onRetry={loadCandidates}
+        needsRecalc={meeting.needs_recalc}
+        isAdmin={isAdmin}
+        members={members}
+        myUserId={myUserId}
+        emails={emails}
+      />
+
       <section className="flex flex-col gap-3">
         <h2 className="section-title">
           구성원 <span className="text-muted">{members.length}</span>
@@ -161,7 +211,13 @@ function MeetingDetail() {
         {transferError && <p className="text-sm text-danger">{transferError}</p>}
       </section>
 
-      {isAdmin && <AddMemberForm meetingId={meetingId} onAdded={handleAdded} />}
+      {isAdmin && (
+        <AddMemberForm
+          meetingId={meetingId}
+          onAdded={handleAdded}
+          onPartiallyAdded={refreshAfterMemberChange}
+        />
+      )}
 
       <MeetingActions
         meetingId={meetingId}

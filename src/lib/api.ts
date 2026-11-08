@@ -9,10 +9,13 @@ const API_BASE_URL =
 
 export class ApiError extends Error {
   status: number;
-  constructor(status: number, message: string) {
+  // 서버가 보낸 detail 원본. 문자열이 아닌 객체로 추가 정보를 줄 때가 있다.
+  detail: unknown;
+  constructor(status: number, message: string, detail?: unknown) {
     super(message);
     this.name = "ApiError";
     this.status = status;
+    this.detail = detail;
   }
 }
 
@@ -24,15 +27,27 @@ function getDefaultMessage(status: number) {
   return "요청을 처리하지 못했어요.";
 }
 
-async function getErrorMessage(res: Response) {
+async function toApiError(res: Response) {
+  let detail: unknown;
   try {
-    const { detail } = await res.json();
-    if (typeof detail === "string") return detail;
-    if (Array.isArray(detail)) return "입력값을 확인해 주세요.";
+    ({ detail } = await res.json());
   } catch {
     // JSON이 아닌 응답은 상태 코드별 기본 문장을 쓴다.
   }
-  return getDefaultMessage(res.status);
+  let message = getDefaultMessage(res.status);
+  if (typeof detail === "string") {
+    message = detail;
+  } else if (Array.isArray(detail)) {
+    message = "입력값을 확인해 주세요.";
+  } else if (
+    detail &&
+    typeof detail === "object" &&
+    typeof (detail as { message?: unknown }).message === "string"
+  ) {
+    // 예: 팀원 추가 후 추천 계산 실패 시 { message, member_added, needs_recalc }
+    message = (detail as { message: string }).message;
+  }
+  return new ApiError(res.status, message, detail);
 }
 
 export async function apiFetch<T>(
@@ -52,7 +67,7 @@ export async function apiFetch<T>(
   });
 
   if (!res.ok) {
-    throw new ApiError(res.status, await getErrorMessage(res));
+    throw await toApiError(res);
   }
 
   // 204 No Content 대응
