@@ -7,6 +7,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import AddMemberForm from "@/components/meeting/AddMemberForm";
 import CandidateList from "@/components/meeting/CandidateList";
 import MeetingActions from "@/components/meeting/MeetingActions";
+import MemoBoard from "@/components/meeting/MemoBoard";
 import MemberList, { memberLabel } from "@/components/meeting/MemberList";
 import { ApiError, authFetch } from "@/lib/api";
 import { getCandidates } from "@/lib/candidates";
@@ -218,6 +219,14 @@ function MeetingDetail() {
           onPartiallyAdded={refreshAfterMemberChange}
         />
       )}
+
+      <MemoBoard
+        meetingId={meetingId}
+        myUserId={myUserId}
+        isAdmin={isAdmin}
+        members={members}
+        emails={emails}
+      />
 
       <MeetingActions
         meetingId={meetingId}
