@@ -30,3 +30,27 @@ export interface Tally {
   // 득표 → 참석 인원 → 추천 순위 순으로 고른 현재 1위. 아무도 투표하지 않아도 값이 온다.
   winner_candidate_id: number | null;
 }
+
+export interface ConfirmResult {
+  confirmed: boolean;
+  // false 면 계산 이후 팀원 시간표가 바뀌어 확정하지 않은 것
+  recheck_passed: boolean;
+  detail: string;
+  meeting_id: number;
+  candidate_id: number;
+  confirmed_id: number | null;
+}
+
+export interface ShareLink {
+  share_token: string;
+  // 백엔드 API 경로라 사용자에게는 프론트 /share/{token} 주소로 바꿔 보여 준다
+  share_url: string;
+}
+
+export interface PublicSchedule {
+  meeting_name: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  confirmed_at: string;
+}
