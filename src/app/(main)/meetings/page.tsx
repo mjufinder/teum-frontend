@@ -57,16 +57,19 @@ export default function MeetingsPage() {
             <li key={m.meeting_id}>
               <Link
                 href={`/meetings/${m.meeting_id}`}
-                className="flex items-center justify-between rounded-lg border border-line bg-surface p-5 hover:border-brand"
+                className="flex items-center justify-between gap-4 rounded-lg border border-line bg-surface p-5 hover:border-brand"
               >
-                <div className="flex flex-col gap-1">
+                <div className="flex min-w-0 flex-col gap-1">
                   <span className="font-medium">{m.name}</span>
+                  {m.description && (
+                    <span className="truncate text-sm text-muted">{m.description}</span>
+                  )}
                   <span className="text-sm text-muted">
                     최소 {m.min_duration_min}분
                   </span>
                 </div>
                 {m.needs_recalc && (
-                  <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs text-brand">
+                  <span className="shrink-0 rounded-full bg-brand-soft px-2 py-0.5 text-xs text-brand">
                     재계산 필요
                   </span>
                 )}
