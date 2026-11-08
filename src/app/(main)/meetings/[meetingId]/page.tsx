@@ -89,7 +89,7 @@ function MeetingDetail() {
         <p className="text-sm text-danger">{error}</p>
         <Link
           href="/meetings"
-          className="rounded-md border border-line bg-surface px-4 py-2 text-sm hover:bg-zinc-50"
+          className="btn btn-secondary"
         >
           내 모임으로
         </Link>
@@ -110,7 +110,10 @@ function MeetingDetail() {
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold">{meeting.name}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="page-title">{meeting.name}</h1>
+            {meeting.needs_recalc && <span className="badge badge-accent">재계산 필요</span>}
+          </div>
           {meeting.description && (
             <p className="text-sm text-muted">{meeting.description}</p>
           )}
@@ -118,35 +121,36 @@ function MeetingDetail() {
         {isAdmin && (
           <Link
             href={`/meetings/${meetingId}/edit`}
-            className="shrink-0 rounded-md border border-line bg-surface px-4 py-2 text-sm hover:bg-zinc-50"
+            className="btn btn-secondary shrink-0"
           >
             수정
           </Link>
         )}
       </div>
 
-      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-lg border border-line bg-surface p-5 text-sm">
-        <dt className="text-muted">최소 회의시간</dt>
-        <dd className="flex items-center gap-2">
-          {meeting.min_duration_min}분
-          {meeting.needs_recalc && (
-            <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs text-brand">
-              재계산 필요
-            </span>
-          )}
-        </dd>
-        <dt className="text-muted">탐색 시간대</dt>
-        <dd>
-          {toHHMM(meeting.search_start_time)} ~ {toHHMM(meeting.search_end_time)}
-        </dd>
-        <dt className="text-muted">이동 여유시간</dt>
-        <dd>
-          {meeting.travel_buffer_min === 0 ? "없음" : `${meeting.travel_buffer_min}분`}
-        </dd>
+      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {[
+          { label: "최소 회의시간", value: `${meeting.min_duration_min}분` },
+          {
+            label: "탐색 시간대",
+            value: `${toHHMM(meeting.search_start_time)} ~ ${toHHMM(meeting.search_end_time)}`,
+          },
+          {
+            label: "이동 여유시간",
+            value: meeting.travel_buffer_min === 0 ? "없음" : `${meeting.travel_buffer_min}분`,
+          },
+        ].map((item) => (
+          <div key={item.label} className="card flex flex-col gap-1 !p-5">
+            <dt className="text-xs font-semibold text-muted">{item.label}</dt>
+            <dd className="text-lg font-bold tabular-nums tracking-[-0.01em]">{item.value}</dd>
+          </div>
+        ))}
       </dl>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold">구성원</h2>
+        <h2 className="section-title">
+          구성원 <span className="text-muted">{members.length}</span>
+        </h2>
         <MemberList
           members={members}
           myUserId={myUserId}

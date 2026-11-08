@@ -57,7 +57,7 @@ export default function MeetingActions({
   }
 
   return (
-    <section className="flex flex-col items-start gap-2 rounded-lg border border-line bg-surface p-5">
+    <section className="card flex flex-col items-start gap-3">
       {isAdmin ? (
         <>
           <p className="text-sm text-muted">
@@ -69,7 +69,7 @@ export default function MeetingActions({
             type="button"
             onClick={handleDelete}
             disabled={busy}
-            className="rounded-md border border-danger px-4 py-2 text-sm text-danger hover:bg-red-50 disabled:opacity-50"
+            className="btn btn-danger"
           >
             {busy ? "처리 중..." : "모임 삭제"}
           </button>
@@ -79,7 +79,7 @@ export default function MeetingActions({
           type="button"
           onClick={handleLeave}
           disabled={busy}
-          className="rounded-md border border-danger px-4 py-2 text-sm text-danger hover:bg-red-50 disabled:opacity-50"
+          className="btn btn-danger"
         >
           {busy ? "처리 중..." : "모임 나가기"}
         </button>

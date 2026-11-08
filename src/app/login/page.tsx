@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { ApiError } from "@/lib/api";
 import { getNextPath } from "@/lib/auth-flow";
+import Logo from "@/components/layout/Logo";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
@@ -47,42 +48,52 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-8">
-      <h1 className="text-xl font-semibold">로그인</h1>
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-5 py-12">
+      <Link href="/" aria-label="틈 처음 화면">
+        <Logo />
+      </Link>
+      <div className="flex flex-col items-center gap-1 text-center">
+        <h1 className="page-title">로그인</h1>
+        <p className="text-sm text-muted">다시 만나서 반가워요.</p>
+      </div>
       <form
         onSubmit={handleSubmit}
-        className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-line bg-surface p-5"
+        className="card flex w-full max-w-sm flex-col gap-5"
       >
-        <label className="flex flex-col gap-1 text-sm font-medium">
+        <label className="field-label">
           이메일
           <input
             type="email"
+            autoComplete="email"
+            placeholder="name@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm font-normal focus:border-brand focus:outline-none"
+            className="input"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm font-medium">
+        <label className="field-label">
           비밀번호
           <input
             type="password"
+            autoComplete="current-password"
+            placeholder="비밀번호"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm font-normal focus:border-brand focus:outline-none"
+            className="input"
           />
         </label>
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-strong disabled:opacity-50"
+          className="btn btn-primary"
         >
           {loading ? "처리 중..." : "로그인"}
         </button>
         {error && <p className="text-sm text-danger">{error}</p>}
       </form>
-      <Link href="/signup" className="text-sm text-muted underline">
+      <Link href="/signup" className="text-sm text-muted underline underline-offset-4 hover:text-foreground">
         계정이 없으신가요? 회원가입
       </Link>
     </main>

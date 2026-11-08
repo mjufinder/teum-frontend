@@ -44,9 +44,9 @@ export default function AddMemberForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-2 rounded-lg border border-line bg-surface p-5"
+      className="card flex flex-col gap-3"
     >
-      <label htmlFor="member-email" className="text-sm font-medium">
+      <label htmlFor="member-email" className="text-sm font-semibold">
         팀원 추가
       </label>
       <div className="flex gap-2">
@@ -55,13 +55,13 @@ export default function AddMemberForm({
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="이메일"
-          className="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm focus:border-brand focus:outline-none"
+          placeholder="teammate@example.com"
+          className="input"
         />
         <button
           type="submit"
           disabled={submitting}
-          className="shrink-0 rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-strong disabled:opacity-50"
+          className="btn btn-primary shrink-0"
         >
           추가
         </button>

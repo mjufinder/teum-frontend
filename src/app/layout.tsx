@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import "@fontsource-variable/plus-jakarta-sans/wght.css";
+import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
 
 export const metadata: Metadata = {

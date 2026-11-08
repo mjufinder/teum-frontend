@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
+import Logo from "@/components/layout/Logo";
 import { supabase } from "@/lib/supabase";
 
 const links = [
@@ -27,12 +28,12 @@ export default function AppHeader() {
   }
 
   return (
-    <header className="border-b border-line bg-surface">
-      <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
-        <Link href="/meetings" className="text-lg font-semibold text-brand">
-          틈
+    <header className="sticky top-0 z-20 border-b border-line bg-background/85 backdrop-blur-md">
+      <div className="mx-auto flex min-h-[72px] w-full max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 py-3">
+        <Link href="/meetings" aria-label="틈 홈">
+          <Logo />
         </Link>
-        <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+        <nav className="flex flex-wrap items-center gap-1 text-sm font-semibold">
           {links.map((link) => {
             const active = isActive(pathname, link.href);
             return (
@@ -42,8 +43,8 @@ export default function AppHeader() {
                 aria-current={active ? "page" : undefined}
                 className={
                   active
-                    ? "whitespace-nowrap font-medium text-brand"
-                    : "whitespace-nowrap text-muted hover:text-foreground"
+                    ? "whitespace-nowrap rounded-full bg-surface px-3.5 py-2 text-brand-strong shadow-[var(--shadow-soft)]"
+                    : "whitespace-nowrap rounded-full px-3.5 py-2 text-muted transition-colors hover:bg-surface/70 hover:text-foreground"
                 }
               >
                 {link.label}
@@ -53,7 +54,7 @@ export default function AppHeader() {
           <button
             type="button"
             onClick={logout}
-            className="whitespace-nowrap text-muted hover:text-foreground"
+            className="whitespace-nowrap rounded-full px-3.5 py-2 text-muted transition-colors hover:bg-surface/70 hover:text-foreground"
           >
             로그아웃
           </button>

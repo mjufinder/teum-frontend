@@ -28,10 +28,10 @@ export default function MeetingsPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">내 모임</h1>
+        <h1 className="page-title">내 모임</h1>
         <Link
           href="/meetings/new"
-          className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-strong"
+          className="btn btn-primary"
         >
           새 모임
         </Link>
@@ -41,11 +41,11 @@ export default function MeetingsPage() {
         <p className="text-sm text-muted">불러오는 중...</p>
       )}
       {meetings && meetings.length === 0 && (
-        <div className="flex flex-col items-start gap-3 rounded-lg border border-line bg-surface p-5">
+        <div className="card flex flex-col items-start gap-3">
           <p className="text-sm text-muted">아직 참여한 모임이 없어요.</p>
           <Link
             href="/meetings/new"
-            className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-strong"
+            className="btn btn-primary"
           >
             모임 만들기
           </Link>
@@ -57,10 +57,10 @@ export default function MeetingsPage() {
             <li key={m.meeting_id}>
               <Link
                 href={`/meetings/${m.meeting_id}`}
-                className="flex items-center justify-between gap-4 rounded-lg border border-line bg-surface p-5 hover:border-brand"
+                className="card-link flex items-center justify-between gap-4"
               >
                 <div className="flex min-w-0 flex-col gap-1">
-                  <span className="font-medium">{m.name}</span>
+                  <span className="text-base font-semibold">{m.name}</span>
                   {m.description && (
                     <span className="truncate text-sm text-muted">{m.description}</span>
                   )}
@@ -69,7 +69,7 @@ export default function MeetingsPage() {
                   </span>
                 </div>
                 {m.needs_recalc && (
-                  <span className="shrink-0 rounded-full bg-brand-soft px-2 py-0.5 text-xs text-brand">
+                  <span className="badge badge-accent shrink-0">
                     재계산 필요
                   </span>
                 )}

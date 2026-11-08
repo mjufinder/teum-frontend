@@ -33,7 +33,7 @@ export default function NewMeetingPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-semibold">새 모임</h1>
+      <h1 className="page-title">새 모임</h1>
       <MeetingForm initial={initial} submitLabel="만들기" onSubmit={handleSubmit} />
     </div>
   );

@@ -45,7 +45,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   if (!ready) {
     return (
-      <main className="mx-auto w-full max-w-3xl px-4 py-8">
+      <main className="mx-auto w-full max-w-3xl px-5 py-10">
         {error ? (
           <p className="text-sm text-danger">{error}</p>
         ) : (
@@ -58,7 +58,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <>
       <AppHeader />
-      <main className="mx-auto w-full max-w-3xl px-4 py-8">{children}</main>
+      <main className="mx-auto w-full max-w-3xl px-5 py-10">{children}</main>
     </>
   );
 }

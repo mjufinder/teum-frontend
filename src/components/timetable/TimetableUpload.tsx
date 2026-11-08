@@ -66,24 +66,24 @@ export default function TimetableUpload({
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-5">
+    <div className="card flex flex-col gap-5">
       <p className="text-sm text-muted">
         에브리타임 앱의 시간표 탭에서 설정 아이콘을 누르고 이미지로 저장을 고르면 돼요.
       </p>
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium">시간표 이미지 (PNG, JPEG / 10MB 이하)</span>
+        <span className="text-sm font-semibold">시간표 이미지 <span className="font-normal text-muted">(PNG, JPEG / 10MB 이하)</span></span>
         <input
           type="file"
           accept="image/png,image/jpeg"
           onChange={handleFile}
           disabled={loading}
-          className="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm focus:border-brand focus:outline-none"
+          className="input"
         />
       </label>
 
       {preview && (
-        <div className="relative h-40 w-full">
+        <div className="relative h-40 w-full overflow-hidden rounded-[14px] bg-sunken">
           <Image
             src={preview}
             alt="고른 시간표 이미지"
@@ -96,12 +96,12 @@ export default function TimetableUpload({
 
       {error && <p className="text-sm text-danger">{error}</p>}
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           disabled={!file || loading}
           onClick={handleRecognize}
-          className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-strong disabled:opacity-50"
+          className="btn btn-primary"
         >
           {loading ? "읽는 중이에요..." : "인식하기"}
         </button>
@@ -110,7 +110,7 @@ export default function TimetableUpload({
             type="button"
             onClick={onManual}
             disabled={loading}
-            className="rounded-md border border-line bg-surface px-4 py-2 text-sm hover:bg-zinc-50 disabled:opacity-50"
+            className="btn btn-secondary"
           >
             직접 입력하기
           </button>
@@ -119,7 +119,7 @@ export default function TimetableUpload({
           type="button"
           onClick={onCancel}
           disabled={loading}
-          className="rounded-md border border-line bg-surface px-4 py-2 text-sm hover:bg-zinc-50 disabled:opacity-50"
+          className="btn btn-secondary"
         >
           취소
         </button>
