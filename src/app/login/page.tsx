@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { ApiError } from "@/lib/api";
 import { getNextPath } from "@/lib/auth-flow";
+import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
 import Logo from "@/components/layout/Logo";
 import { supabase } from "@/lib/supabase";
 
@@ -93,6 +94,7 @@ export default function LoginPage() {
         </button>
         {error && <p className="text-sm text-danger">{error}</p>}
       </form>
+      <GoogleLoginButton />
       <Link href="/signup" className="text-sm text-muted underline underline-offset-4 hover:text-foreground">
         계정이 없으신가요? 회원가입
       </Link>
