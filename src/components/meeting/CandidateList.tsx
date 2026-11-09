@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import ConfirmedSchedule from "@/components/meeting/ConfirmedSchedule";
 import { memberLabel } from "@/components/meeting/MemberList";
 import { ApiError } from "@/lib/api";
+import { confirmSchedule } from "@/lib/confirm";
 import { toHHMM } from "@/lib/meetings";
 import { DAY_LABELS } from "@/lib/timetable";
 import { closeVote, getTally, submitVote } from "@/lib/votes";
-import type { CandidateSet } from "@/types/candidate";
+import type { Candidate, CandidateSet } from "@/types/candidate";
 import type { Member } from "@/types/meeting";
 import type { Tally } from "@/types/vote";
 
@@ -60,7 +62,7 @@ function Notice({
   );
 }
 
-// 팀원 추가 시 서버가 자동 계산한 추천 시간 Top 3 (MATCH) + 선호 투표·집계·마감 (VOTE-01, 02)
+// 팀원 추가 시 서버가 자동 계산한 추천 시간 Top 3 (MATCH) + 투표·집계·마감·확정 (VOTE-01~03)
 export default function CandidateList(props: CandidateListProps) {
   const { meetingId, candidateSet, error, onRetry, isAdmin } = props;
 
@@ -163,6 +165,10 @@ function CandidateBoard({
   const [voted, setVoted] = useState(false);
   const [voteError, setVoteError] = useState<string | null>(null);
   const [closing, setClosing] = useState(false);
+  // undefined: 이번 화면에서 확정 안 함, null: 이미 확정돼 있었음(시간은 알 수 없음)
+  const [confirmedLabel, setConfirmedLabel] = useState<string | null | undefined>(undefined);
+  const [confirmingId, setConfirmingId] = useState<number | null>(null);
+  const [confirmWarning, setConfirmWarning] = useState<string | null>(null);
 
   useEffect(() => {
     getTally(meetingId, setId)
@@ -226,6 +232,36 @@ function CandidateBoard({
     }
   }
 
+  async function handleConfirm(c: Candidate) {
+    const label = formatSlot(c.day_of_week, c.start_time, c.end_time);
+    if (
+      !confirm(
+        `${label}으로 확정할까요? 확정 직전에 팀원 시간표가 바뀌었는지 다시 확인하고, 모임당 한 번만 확정할 수 있어요.`
+      )
+    ) {
+      return;
+    }
+    setVoteError(null);
+    setConfirmWarning(null);
+    setConfirmingId(c.candidate_id);
+    try {
+      const result = await confirmSchedule(meetingId, c.candidate_id);
+      if (result.confirmed) {
+        setConfirmedLabel(label);
+      } else {
+        setConfirmWarning(result.detail);
+      }
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 409) {
+        setConfirmedLabel(null);
+      } else {
+        handleError(e, "일정을 확정하지 못했어요.");
+      }
+    } finally {
+      setConfirmingId(null);
+    }
+  }
+
   async function handleClose() {
     if (!confirm("투표를 마감할까요? 마감하면 더 이상 투표할 수 없어요.")) return;
     setVoteError(null);
@@ -239,8 +275,18 @@ function CandidateBoard({
     }
   }
 
+  const canConfirm = isAdmin && confirmedLabel === undefined && !stale;
+
   return (
     <div className="flex flex-col gap-3">
+      {confirmedLabel !== undefined && (
+        <ConfirmedSchedule meetingId={meetingId} slotLabel={confirmedLabel} isAdmin={isAdmin} />
+      )}
+      {confirmWarning && (
+        <Notice tone="warning">
+          {confirmWarning} 팀원을 새로 추가하면 다시 계산돼요.
+        </Notice>
+      )}
       {stale && (
         <Notice tone="warning">
           모임 조건이나 구성원이 바뀌어 아래 추천은 이전 기준이에요. 팀원을 새로 추가하면 다시
@@ -344,13 +390,23 @@ function CandidateBoard({
                 <span className="text-sm font-semibold tabular-nums">
                   {tally ? `${votesById.get(c.candidate_id) ?? 0}표` : "-표"}
                 </span>
+                {canConfirm && (
+                  <button
+                    type="button"
+                    onClick={() => handleConfirm(c)}
+                    disabled={confirmingId !== null}
+                    className="btn btn-secondary btn-sm ml-auto"
+                  >
+                    {confirmingId === c.candidate_id ? "확정 중..." : "이 시간으로 확정"}
+                  </button>
+                )}
                 {canVote && (
                   <button
                     type="button"
                     aria-pressed={picked}
                     onClick={() => toggle(c.candidate_id)}
                     disabled={submitting}
-                    className="chip ml-auto min-h-9 py-1.5"
+                    className={`chip min-h-9 py-1.5 ${canConfirm ? "" : "ml-auto"}`}
                   >
                     {picked ? "✓ 이 시간 좋아요" : "이 시간 좋아요"}
                   </button>
