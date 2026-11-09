@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { supabase } from "@/lib/supabase";
 
-/** 임시 로그인 페이지 (이메일/비밀번호). 소셜 로그인은 추후 추가 예정. */
+/** 임시 로그인 페이지 (이메일/비밀번호 + 구글 소셜 로그인). */
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -26,6 +26,16 @@ export default function LoginPage() {
       return;
     }
     router.push("/me");
+  }
+
+  async function handleGoogle() {
+    setError(null);
+    // 구글 로그인 → Supabase 콜백 → 로그인 후 /me 로 복귀
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/me` },
+    });
+    if (error) setError(error.message);
   }
 
   return (
@@ -57,6 +67,17 @@ export default function LoginPage() {
         </button>
         {error && <p className="text-sm text-red-500">{error}</p>}
       </form>
+
+      <div className="flex w-full max-w-sm items-center gap-3 text-xs text-gray-400">
+        <span className="h-px flex-1 bg-gray-200" />또는<span className="h-px flex-1 bg-gray-200" />
+      </div>
+      <button
+        onClick={handleGoogle}
+        className="flex w-full max-w-sm items-center justify-center gap-2 rounded border px-3 py-2"
+      >
+        <span>구글로 로그인</span>
+      </button>
+
       <a href="/signup" className="text-sm text-gray-500 underline">
         계정이 없으신가요? 회원가입
       </a>

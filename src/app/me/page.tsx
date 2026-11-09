@@ -37,7 +37,32 @@ export default function MePage() {
   }
 
   useEffect(() => {
-    loadMe();
+    // OAuth(구글) 리디렉션 직후엔 Supabase 세션이 늦게 잡힌다.
+    // 세션이 준비되면 그때 백엔드를 호출(프로비저닝)하고,
+    // 일정 시간 내 세션이 없으면 로그인으로 보낸다.
+    let handled = false;
+    const onSession = (session: unknown) => {
+      if (handled || !session) return;
+      handled = true;
+      loadMe();
+    };
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) =>
+      onSession(session),
+    );
+    supabase.auth.getSession().then(({ data }) => onSession(data.session));
+
+    const timer = setTimeout(() => {
+      if (!handled) {
+        handled = true;
+        router.replace("/login");
+      }
+    }, 3000);
+
+    return () => {
+      sub.subscription.unsubscribe();
+      clearTimeout(timer);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
