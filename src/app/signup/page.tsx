@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
 import Logo from "@/components/layout/Logo";
 import { supabase } from "@/lib/supabase";
 
@@ -92,6 +93,7 @@ export default function SignupPage() {
         </button>
         {error && <p className="text-sm text-danger">{error}</p>}
       </form>
+      <GoogleLoginButton />
       <Link href="/login" className="text-sm text-muted underline underline-offset-4 hover:text-foreground">
         이미 계정이 있으신가요? 로그인
       </Link>
