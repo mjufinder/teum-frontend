@@ -1,46 +1,48 @@
 @import "tailwindcss";
 
 /*
- * Tactile Soft Product (design-diversity: web-tactile-soft-product)
- * 따뜻한 그레이지 배경 위 둥근 카드가 다중 소프트 그림자로 떠 있고,
- * 세이지 민트·클레이 코랄 두 색만 강조로 쓴다. 보라·순백·청회색은 쓰지 않는다.
- * 명세 색 중 글자 대비가 4.5:1에 못 미치는 값은 글자용으로 한 단계 진하게 둔다.
+ * 틈 디자인 시스템: 시간표 격자
+ * 화면의 구조는 대학 시간표의 구조를 따른다. 선과 칸이 곧 정보이고,
+ * 초록(#036635)은 '차 있는 시간'과 '누를 수 있는 것'에만 쓴다. 바탕과 빈 시간은 흰색이다.
+ * 두 번째 강조색은 두지 않고, 구분이 필요하면 초록의 농도와 빗금으로 나눈다.
  */
 :root {
-  --background: #f1efec;
-  --foreground: #3a3733;
-  --shadow-soft: 0 1px 2px rgba(58, 55, 51, 0.04), 0 8px 24px rgba(58, 55, 51, 0.06),
-    0 2px 6px rgba(58, 55, 51, 0.05);
-  --shadow-lift: 0 1px 2px rgba(58, 55, 51, 0.04), 0 16px 36px rgba(58, 55, 51, 0.1),
-    0 2px 6px rgba(58, 55, 51, 0.05);
-  --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --background: #ffffff;
+  --foreground: #1e4d35;
+  /* 개인 일정 칸 등 '부분적으로 찬' 상태를 표시하는 초록 빗금 */
+  --hatch: repeating-linear-gradient(
+    135deg,
+    #036635 0 2px,
+    #ffffff 2px 6px
+  );
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* 세이지 민트: 면(칸·칩·포커스 링)용 */
-  --color-brand: #6fae9b;
-  /* 글자·버튼 면용 진한 민트 (오프화이트 대비 4.5:1 이상) */
-  --color-brand-strong: #3b7765;
-  --color-brand-deep: #2f6252;
-  --color-brand-soft: #e3efea;
-  /* 클레이 코랄: 2차 강조 */
-  --color-accent: #e08a6a;
-  --color-accent-strong: #9a4a2f;
-  --color-accent-soft: #f8e6de;
-  /* 구분선용 옅은 선 */
-  --color-line: #e4e0da;
-  /* 입력창·버튼처럼 누르거나 적는 요소의 테두리 (배경 대비 3:1 이상) */
-  --color-line-strong: #8f897f;
-  --color-field: #fffefb;
-  --color-muted: #6f6a63;
-  --color-danger: #b5543a;
-  --color-danger-soft: #f6e4dd;
-  --color-surface: #faf9f7;
-  --color-sunken: #f6f4f1;
-  --font-sans: "Plus Jakarta Sans Variable", "Pretendard Variable", Pretendard,
-    "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  /* 캠퍼스 그린: 수업 블록, 주 버튼, 선택 상태 */
+  --color-brand: #036635;
+  --color-brand-strong: #036635;
+  --color-brand-deep: #024d28;
+  /* 아주 옅은 초록: 선택된 행, 비어 있는 강조 영역 */
+  --color-brand-soft: #e6f0ea;
+  /* 강조색을 따로 두지 않으므로 '보조 표시'도 초록 계열로 맞춘다 */
+  --color-accent: #036635;
+  --color-accent-strong: #1e4d35;
+  --color-accent-soft: #f2f7f4;
+  /* 격자선·구분선 */
+  --color-line: #cfe0d6;
+  /* 입력창·보조 버튼 테두리 (흰 바탕 대비 3:1 이상) */
+  --color-line-strong: #6e8f7c;
+  /* 보조 글자 (흰 바탕 대비 4.5:1 이상) */
+  --color-muted: #557563;
+  --color-danger: #b42318;
+  --color-danger-soft: #fdecea;
+  --color-surface: #ffffff;
+  --color-sunken: #f4f8f5;
+  --color-field: #ffffff;
+  --font-sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui,
+    sans-serif;
 }
 
 body {
@@ -48,8 +50,9 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   font-size: 0.9375rem;
-  line-height: 1.6;
+  line-height: 1.65;
   word-break: keep-all;
+  font-variant-numeric: tabular-nums;
 }
 
 @layer base {
@@ -62,183 +65,213 @@ body {
     cursor: pointer;
   }
 
-  /* 키보드로 이동할 때 지금 어디에 있는지 분명히 보이게 한다 */
+  /* 키보드로 이동할 때 지금 위치가 분명히 보이게 한다 */
   a:focus-visible,
   button:focus-visible,
   summary:focus-visible,
   [tabindex]:focus-visible {
-    outline: 2px solid var(--color-brand-strong);
+    outline: 2px solid var(--color-brand);
     outline-offset: 2px;
-    border-radius: 8px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: var(--color-foreground);
   }
 }
 
-/* 사용: className="btn btn-primary", "badge badge-accent" 처럼 기본 클래스와 함께 쓴다. */
+/* 사용: className="btn btn-primary" 처럼 기본 클래스와 함께 쓴다. */
 @layer components {
   .page-title {
-    @apply text-2xl font-bold tracking-[-0.02em] text-foreground;
+    @apply text-[1.75rem] leading-[1.25] font-bold tracking-[-0.015em];
   }
 
   .section-title {
-    @apply text-base font-semibold;
+    @apply text-[1.0625rem] font-bold;
   }
 
+  /* 구획: 상자 대신 시간표 머리처럼 위에 초록 굵은 선을 긋는다 */
   .card {
-    @apply rounded-[20px] border border-line bg-surface p-6;
-    box-shadow: var(--shadow-soft);
+    @apply border-t-2 border-brand pt-5;
   }
 
-  /* 눌러서 이동하는 카드: 오른쪽 화살표 + 호버 시 테두리 강조·살짝 들림 */
-  .card-link {
-    @apply relative block rounded-[20px] border border-line bg-surface p-6 pr-12;
-    box-shadow: var(--shadow-soft);
-    transition:
-      transform 180ms var(--ease-snap),
-      box-shadow 180ms ease-out,
-      border-color 140ms ease-out;
+  /* 목록의 한 행: 아래 격자선으로만 구분한다 */
+  .row {
+    @apply border-b border-line py-4;
   }
-  .card-link::after {
+
+  /* 눌러서 이동하는 행: 호버 시 왼쪽에 수업 블록 같은 초록 막대가 생긴다 */
+  .row-link {
+    @apply relative block border-b border-line py-4 pr-8 pl-4 transition-colors hover:bg-brand-soft;
+  }
+  .row-link::before {
     content: "";
-    @apply absolute top-1/2 right-5 size-2.5 -translate-y-1/2 rotate-45 border-t-2 border-r-2 border-muted;
+    @apply absolute top-0 bottom-0 left-0 w-1 bg-transparent transition-colors;
   }
-  .card-link:hover {
-    @apply border-brand;
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lift);
+  .row-link:hover::before {
+    @apply bg-brand;
   }
-  .card-link:hover::after {
-    @apply border-brand-strong;
+  .row-link::after {
+    content: "";
+    @apply absolute top-1/2 right-3 size-2 -translate-y-1/2 rotate-45 border-t-2 border-r-2 border-muted;
   }
 
   .field-label {
-    @apply flex flex-col gap-1.5 text-sm font-semibold text-foreground;
+    @apply flex flex-col gap-1.5 text-sm font-bold text-foreground;
   }
   .field-hint {
     @apply text-xs font-normal text-muted;
   }
 
-  /* 적는 칸: 진한 테두리 + 카드보다 밝은 바탕으로 경계를 분명히 */
   .input {
-    @apply h-12 w-full rounded-[14px] border-[1.5px] border-line-strong bg-field px-4 text-[0.9375rem] font-normal text-foreground hover:border-foreground/70;
-    transition:
-      border-color 140ms ease-out,
-      box-shadow 160ms ease-out;
+    @apply h-12 w-full rounded-[8px] border-[1.5px] border-line-strong bg-field px-3.5 text-[0.9375rem] font-normal text-foreground hover:border-foreground;
   }
   textarea.input {
     @apply h-auto py-3;
   }
   select.input {
-    @apply appearance-none pr-11;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233a3733' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    @apply appearance-none pr-10;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23036635' stroke-width='2.5' stroke-linecap='square'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 14px center;
-    background-size: 18px;
+    background-position: right 12px center;
+    background-size: 16px;
   }
   .input:focus {
-    @apply border-brand-strong outline-none;
-    box-shadow: 0 0 0 4px rgba(111, 174, 155, 0.25);
+    @apply border-brand outline-2 outline-offset-0 outline-brand;
   }
   .input:disabled {
     @apply cursor-not-allowed bg-sunken text-muted;
   }
   .input::placeholder {
-    @apply text-muted/80;
+    @apply text-muted;
   }
   input[type="file"].input {
-    @apply h-auto border-dashed py-3 text-sm file:mr-3 file:cursor-pointer file:rounded-[10px] file:border-0 file:bg-brand-strong file:px-4 file:py-2 file:text-sm file:font-semibold file:text-surface;
+    @apply h-auto border-dashed py-3 text-sm file:mr-3 file:cursor-pointer file:rounded-[6px] file:border-0 file:bg-brand file:px-4 file:py-2 file:text-sm file:font-bold file:text-white;
   }
 
   .btn {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-[14px] px-5 py-2.5 text-[0.9375rem] font-semibold disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-[8px] px-5 py-2.5 text-[0.9375rem] font-bold whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40;
     transition:
-      background-color 140ms ease-out,
-      border-color 140ms ease-out,
-      box-shadow 140ms ease-out,
-      transform 90ms ease-out;
+      background-color 120ms ease-out,
+      color 120ms ease-out,
+      transform 80ms ease-out;
   }
   .btn:not(:disabled):active {
-    transform: scale(0.97);
+    transform: translateY(1px);
   }
-  /* 주 버튼: 꽉 찬 진한 민트 */
   .btn-primary {
-    @apply bg-brand-strong text-surface hover:bg-brand-deep;
-    box-shadow: 0 6px 16px rgba(59, 119, 101, 0.28);
+    @apply bg-brand text-white hover:bg-brand-deep;
   }
-  /* 보조 버튼: 진한 테두리 + 그림자로 '눌리는 것'임을 보이게 */
   .btn-secondary {
-    @apply border-[1.5px] border-line-strong bg-field text-foreground hover:border-foreground hover:bg-sunken;
-    box-shadow: 0 1px 2px rgba(58, 55, 51, 0.08);
+    @apply border-[1.5px] border-brand bg-white text-brand hover:bg-brand-soft;
   }
   .btn-danger {
-    @apply border-[1.5px] border-danger bg-field text-danger hover:bg-danger-soft;
+    @apply border-[1.5px] border-danger bg-white text-danger hover:bg-danger-soft;
   }
   .btn-sm {
-    @apply min-h-9 rounded-[10px] px-3 py-1.5 text-sm;
+    @apply min-h-9 rounded-[6px] px-3 py-1.5 text-sm;
   }
 
-  /* 선택하는 알약 버튼(도구 고르기 등). 표시용 라벨에는 쓰지 않는다. */
+  /* 선택 버튼(도구, 좋아요 등): 눌리면 초록으로 채워진다 */
   .chip {
-    @apply inline-flex min-h-10 items-center gap-1.5 rounded-full border-[1.5px] border-line-strong bg-field px-4 py-2 text-sm font-semibold text-foreground hover:border-foreground hover:bg-sunken;
+    @apply inline-flex min-h-10 items-center gap-1.5 rounded-[6px] border-[1.5px] border-line-strong bg-white px-3.5 py-2 text-sm font-bold text-foreground hover:border-brand;
     transition:
-      background-color 140ms ease-out,
-      border-color 140ms ease-out,
-      color 140ms ease-out,
-      transform 140ms var(--ease-snap);
+      background-color 120ms ease-out,
+      color 120ms ease-out;
   }
   .chip[aria-pressed="true"] {
-    @apply border-brand-strong bg-brand-strong text-surface hover:bg-brand-deep;
-    transform: scale(1.04);
+    @apply border-brand bg-brand text-white;
   }
 
-  /* 상태 배지 (누를 수 없음): 테두리 없이 옅은 면 */
+  /* 상태 표시 (누를 수 없음) */
   .badge {
-    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    @apply inline-flex items-center gap-1 rounded-[4px] px-2 py-0.5 text-xs font-bold;
   }
   .badge-brand {
-    @apply bg-brand-soft text-brand-strong;
+    @apply bg-brand text-white;
   }
+  /* 보조 상태: 채우지 않고 테두리만 */
   .badge-accent {
-    @apply bg-accent-soft text-accent-strong;
-  }
-  .badge-accent::before {
-    content: "";
-    @apply size-1.5 rounded-full bg-accent;
+    @apply border border-brand bg-white text-brand;
   }
 
-  /* 글자 링크: 항상 밑줄 */
   .text-link {
-    @apply font-semibold text-brand-strong underline decoration-brand/60 decoration-2 underline-offset-4 hover:decoration-brand-strong;
+    @apply font-bold text-brand underline decoration-2 underline-offset-4 hover:text-brand-deep;
   }
 
-  /* 접었다 펴는 영역의 머리: 버튼처럼 보이는 행 + 펼침 화살표 */
+  /* 알림 상자: 왼쪽 초록 막대 */
+  .notice {
+    @apply border-l-4 border-brand bg-sunken px-4 py-3 text-sm;
+  }
+  .notice-danger {
+    @apply border-danger bg-danger-soft text-danger;
+  }
+
+  /* 접었다 펴는 영역 */
   .disclosure > summary {
-    @apply flex list-none items-center justify-between gap-2 rounded-[12px] px-1 py-1 text-sm font-semibold hover:text-brand-strong;
+    @apply flex list-none items-center justify-between gap-2 py-1 text-sm font-bold hover:text-brand;
   }
   .disclosure > summary::-webkit-details-marker {
     display: none;
   }
   .disclosure > summary::after {
     content: "";
-    @apply size-[18px] shrink-0;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233a3733' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
+    @apply size-4 shrink-0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23036635' stroke-width='2.5' stroke-linecap='square'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
       center / contain no-repeat;
     transition: transform 160ms ease-out;
   }
   .disclosure[open] > summary::after {
     transform: rotate(180deg);
   }
+
+  /* 시간표 칸 상태 */
+  .slot-class {
+    @apply bg-brand;
+  }
+  .slot-manual {
+    background: var(--hatch);
+  }
+  .slot-free {
+    @apply bg-white;
+  }
+}
+
+/* 첫 화면 격자: 수업 블록이 한 번 채워지고, 모두가 비는 칸이 마지막에 드러난다 */
+@keyframes slot-fill {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes gap-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.hero-slot {
+  transform-origin: top;
+  animation: slot-fill 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.hero-gap {
+  animation: gap-reveal 360ms ease-out both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card-link,
   .btn,
   .chip,
-  .input {
+  .row-link,
+  .hero-slot,
+  .hero-gap {
     transition: none;
-  }
-  .card-link:hover,
-  .btn:not(:disabled):active,
-  .chip[aria-pressed="true"] {
-    transform: none;
+    animation: none;
   }
 }
