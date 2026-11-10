@@ -28,12 +28,12 @@ export default function AppHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-background/85 backdrop-blur-md">
-      <div className="mx-auto flex min-h-[72px] w-full max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 py-3">
-        <Link href="/meetings" aria-label="틈 홈">
+    <header className="sticky top-0 z-20 border-b border-line bg-white">
+      <div className="mx-auto flex w-full max-w-[720px] flex-wrap items-end justify-between gap-x-4 px-5 pt-4">
+        <Link href="/meetings" aria-label="틈 홈" className="pb-3">
           <Logo />
         </Link>
-        <nav className="flex flex-wrap items-center gap-1 text-sm font-semibold">
+        <nav className="flex flex-wrap items-end text-sm font-bold">
           {links.map((link) => {
             const active = isActive(pathname, link.href);
             return (
@@ -41,11 +41,11 @@ export default function AppHeader() {
                 key={link.href}
                 href={link.href}
                 aria-current={active ? "page" : undefined}
-                className={
+                className={`-mb-px border-b-4 px-3 pt-2 pb-3 whitespace-nowrap transition-colors ${
                   active
-                    ? "whitespace-nowrap rounded-full bg-surface px-3.5 py-2 text-brand-strong shadow-[var(--shadow-soft)]"
-                    : "whitespace-nowrap rounded-full px-3.5 py-2 text-muted transition-colors hover:bg-surface/70 hover:text-foreground"
-                }
+                    ? "border-brand text-brand"
+                    : "border-transparent text-muted hover:border-line hover:text-foreground"
+                }`}
               >
                 {link.label}
               </Link>
@@ -54,7 +54,7 @@ export default function AppHeader() {
           <button
             type="button"
             onClick={logout}
-            className="whitespace-nowrap rounded-full px-3.5 py-2 text-muted transition-colors hover:bg-surface/70 hover:text-foreground"
+            className="-mb-px border-b-4 border-transparent px-3 pt-2 pb-3 whitespace-nowrap text-muted transition-colors hover:text-foreground"
           >
             로그아웃
           </button>

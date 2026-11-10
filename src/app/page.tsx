@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import GapGrid from "@/components/landing/GapGrid";
 import Logo from "@/components/layout/Logo";
 import { ApiError } from "@/lib/api";
 import {
@@ -76,48 +77,32 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-5 py-16 text-center">
-      <div className="flex w-full max-w-xl flex-col items-center gap-6">
-        <Logo size="lg" />
-        <span className="badge badge-accent px-3 py-1">
-          팀 회의 시간 찾기
-        </span>
-        <h1 className="text-[clamp(2rem,6vw,3.25rem)] font-bold leading-[1.15] tracking-[-0.02em]">
-          시간표만 넣으면
-          <br />
-          함께 비는 틈을 찾아요
-        </h1>
-        <p className="text-[1.0625rem] leading-[1.65] text-muted">
-          팀원 시간표로 공강을 찾아 회의 시간을 정해요.
-        </p>
-        <div className="card mt-2 flex w-full flex-col gap-3 sm:flex-row">
-          <Link href="/login" className="btn btn-primary flex-1">
-            로그인
-          </Link>
-          <Link href="/signup" className="btn btn-secondary flex-1">
-            회원가입
-          </Link>
+    <main className="mx-auto flex min-h-screen w-full max-w-[960px] flex-col px-5 py-6">
+      <header>
+        <Logo />
+      </header>
+      <div className="grid flex-1 items-center gap-12 py-12 md:grid-cols-[1fr_minmax(0,22rem)] md:gap-16">
+        <div className="flex max-w-[30rem] flex-col gap-6">
+          <h1 className="text-[clamp(2rem,4.4vw,2.75rem)] leading-[1.22] font-bold tracking-[-0.025em]">
+            팀원 시간표를 겹쳐
+            <br />
+            모두가 비는 시간을 찾아요
+          </h1>
+          <p className="text-[1.0625rem] text-muted">
+            에브리타임 시간표 이미지를 올리거나 칸을 칠해 등록하면, 모임에 들어온 팀원
+            모두의 빈 시간에서 회의 시간을 골라 투표할 수 있어요.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/signup" className="btn btn-primary">
+              시간표로 시작하기
+            </Link>
+            <Link href="/login" className="btn btn-secondary">
+              로그인
+            </Link>
+          </div>
+          {error && <p className="notice notice-danger">{error}</p>}
         </div>
-        <ul className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted">
-          {["이미지로 시간표 등록", "드래그로 바로 수정", "이메일로 팀원 추가"].map((label) => (
-            <li key={label} className="flex items-center gap-1.5">
-              <svg
-                aria-hidden
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="size-4 text-brand-strong"
-              >
-                <path d="m5 12 5 5 9-10" />
-              </svg>
-              {label}
-            </li>
-          ))}
-        </ul>
-        {error && <p className="text-sm text-danger">{error}</p>}
+        <GapGrid />
       </div>
     </main>
   );

@@ -89,7 +89,7 @@ export default function MeetingForm({
       className="card flex flex-col gap-5"
     >
       <div className="flex flex-col gap-1">
-        <label htmlFor="meeting-name" className="text-sm font-semibold">
+        <label htmlFor="meeting-name" className="text-sm font-bold">
           모임 이름
         </label>
         <input
@@ -101,7 +101,7 @@ export default function MeetingForm({
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="meeting-description" className="text-sm font-semibold">
+        <label htmlFor="meeting-description" className="text-sm font-bold">
           설명 <span className="font-normal text-muted">(선택)</span>
         </label>
         <textarea
@@ -115,7 +115,7 @@ export default function MeetingForm({
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="meeting-duration" className="text-sm font-semibold">
+        <label htmlFor="meeting-duration" className="text-sm font-bold">
           최소 회의시간
         </label>
         <select
@@ -132,15 +132,15 @@ export default function MeetingForm({
         </select>
       </div>
 
-      <details className="disclosure rounded-[14px] border-[1.5px] border-line-strong bg-field px-4 py-3">
+      <details className="disclosure rounded-[8px] border-[1.5px] border-line-strong px-4 py-3">
         <summary>
           <span>
-            세부 조건 <span className="font-normal text-muted">(선택 · 눌러서 펼치기)</span>
+            세부 조건 <span className="font-normal text-muted">(선택, 눌러서 펼치기)</span>
           </span>
         </summary>
         <div className="mt-3 flex flex-col gap-4 pb-1">
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-semibold">탐색 시간대</span>
+            <span className="text-sm font-bold">탐색 시간대</span>
             <div className="flex items-center gap-2">
               <select
                 aria-label="탐색 시작 시각"
@@ -171,7 +171,7 @@ export default function MeetingForm({
             <p className="text-xs text-muted">이 시간대 안에서만 회의 후보를 찾아요.</p>
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="meeting-buffer" className="text-sm font-semibold">
+            <label htmlFor="meeting-buffer" className="text-sm font-bold">
               이동 여유시간
             </label>
             <select

@@ -39,18 +39,20 @@ function SharedSchedule() {
   return (
     <>
       {error ? (
-        <p className="text-sm text-danger">{error}</p>
+        <p className="notice notice-danger">{error}</p>
       ) : !schedule ? (
         <p className="text-sm text-muted">불러오는 중...</p>
       ) : (
-        <>
-          <span className="badge bg-brand-strong text-surface">확정된 모임 시간</span>
+        <div className="flex flex-col gap-4">
           <h1 className="page-title">{schedule.meeting_name}</h1>
-          <p className="text-2xl font-bold tracking-[-0.01em] tabular-nums text-brand-strong">
-            매주 {formatSlot(schedule.day_of_week, schedule.start_time, schedule.end_time)}
-          </p>
+          <div className="flex flex-col gap-1 rounded-[8px] bg-brand p-5 text-white">
+            <span className="text-sm text-white/85">확정된 모임 시간</span>
+            <span className="text-[1.75rem] leading-tight font-bold tracking-[-0.015em] tabular-nums">
+              매주 {formatSlot(schedule.day_of_week, schedule.start_time, schedule.end_time)}
+            </span>
+          </div>
           <p className="text-xs text-muted">{formatConfirmedAt(schedule.confirmed_at)} 확정</p>
-        </>
+        </div>
       )}
     </>
   );
@@ -59,16 +61,16 @@ function SharedSchedule() {
 // 로그인 없이 확정 일정을 보는 공개 페이지 (VOTE-04)
 export default function SharedSchedulePage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-5 py-12">
-      <Link href="/" aria-label="틈 처음 화면">
+    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center gap-8 px-5 py-12">
+      <Link href="/" aria-label="틈 처음 화면" className="self-start">
         <Logo />
       </Link>
-      <div className="card flex w-full max-w-md flex-col items-center gap-3 text-center">
+      <div className="card">
         <Suspense fallback={<p className="text-sm text-muted">불러오는 중...</p>}>
           <SharedSchedule />
         </Suspense>
       </div>
-      <Link href="/" className="text-sm text-muted underline underline-offset-4 hover:text-foreground">
+      <Link href="/" className="text-link self-start text-sm">
         틈으로 우리 팀 시간도 찾아보기
       </Link>
     </main>

@@ -132,7 +132,7 @@ export default function MePage() {
       </form>
 
       <div className="card flex items-center justify-between gap-4">
-        <p className="text-sm font-semibold">내 시간표</p>
+        <p className="text-sm font-bold">내 시간표</p>
         <Link
           href="/me/timetable"
           className="btn btn-secondary"

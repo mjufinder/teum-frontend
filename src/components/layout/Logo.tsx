@@ -2,32 +2,22 @@ interface LogoProps {
   size?: "md" | "lg";
 }
 
-// 시간표 두 칸 사이의 '틈'을 표시한 로고 마크
+// 시간표의 두 수업 블록 사이에 난 흰 틈
 export default function Logo({ size = "md" }: LogoProps) {
   const large = size === "lg";
   return (
     <span className="inline-flex items-center gap-2">
-      <span
+      <svg
         aria-hidden
-        className={`grid place-items-center rounded-[10px] bg-brand-strong text-surface ${
-          large ? "size-11 rounded-[14px]" : "size-8"
-        }`}
+        viewBox="0 0 20 24"
+        className={large ? "h-10 w-[34px]" : "h-7 w-6"}
       >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          className={large ? "size-6" : "size-[18px]"}
-        >
-          <path d="M5 6h14M5 10h14M5 18h14" />
-          <path d="M8 14h8" strokeDasharray="2 3" />
-        </svg>
-      </span>
+        <rect x="0" y="0" width="20" height="10" fill="#036635" />
+        <rect x="0" y="14" width="20" height="10" fill="#036635" />
+      </svg>
       <span
-        className={`font-bold tracking-[-0.02em] text-foreground ${
-          large ? "text-4xl" : "text-lg"
+        className={`font-bold tracking-[-0.03em] text-brand ${
+          large ? "text-[2.5rem] leading-none" : "text-[1.375rem] leading-none"
         }`}
       >
         틈

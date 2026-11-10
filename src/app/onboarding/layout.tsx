@@ -46,15 +46,15 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
 
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-line bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex min-h-[72px] w-full max-w-3xl items-center gap-4 px-5 py-3">
+      <header className="sticky top-0 z-20 border-b border-line bg-white">
+        <div className="mx-auto flex min-h-16 w-full max-w-[720px] flex-wrap items-center gap-x-5 gap-y-2 px-5 py-3">
           <Logo />
           <ol className="flex items-center gap-2 text-sm" aria-label="가입 단계">
             {steps.map((step, index) => {
               const current = pathname === step.href;
               return (
                 <li key={step.href} className="flex items-center gap-2">
-                  {index > 0 && <span aria-hidden className="h-px w-5 bg-line-strong" />}
+                  {index > 0 && <span aria-hidden className="h-0.5 w-5 bg-line" />}
                   <span
                     aria-current={current ? "step" : undefined}
                     className={`flex items-center gap-1.5 ${
@@ -63,9 +63,9 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
                   >
                     <span
                       aria-hidden
-                      className={`grid size-6 place-items-center rounded-full text-xs font-bold ${
+                      className={`grid size-6 place-items-center rounded-[4px] text-xs font-bold ${
                         current
-                          ? "bg-brand-strong text-surface"
+                          ? "bg-brand text-white"
                           : "border-[1.5px] border-line-strong text-muted"
                       }`}
                     >
@@ -80,13 +80,13 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
           <button
             type="button"
             onClick={handleLogout}
-            className="ml-auto whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold text-muted transition-colors hover:bg-surface/70 hover:text-foreground"
+            className="ml-auto whitespace-nowrap px-1 py-2 text-sm font-bold text-muted underline-offset-4 hover:text-foreground hover:underline"
           >
             로그아웃
           </button>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-3xl px-5 py-10">
+      <main className="mx-auto w-full max-w-[720px] px-5 py-10">
         {ready ? children : <p className="text-sm text-muted">불러오는 중...</p>}
       </main>
     </>

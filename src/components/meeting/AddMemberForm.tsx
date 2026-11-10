@@ -60,7 +60,7 @@ export default function AddMemberForm({
 
   return (
     <form onSubmit={handleSubmit} className="card flex flex-col gap-3">
-      <label htmlFor="member-email" className="text-sm font-semibold">
+      <label htmlFor="member-email" className="text-sm font-bold">
         팀원 추가
       </label>
       <div className="flex gap-2">
