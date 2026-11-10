@@ -165,15 +165,15 @@ export default function MemoBoard({
       )}
 
       {memos && memos.length > 0 && (
-        <ul className="flex flex-col gap-3">
+        <ul className="border-t border-line">
           {memos.map((memo) => {
             const canEdit = memo.author_user_id === myUserId || isAdmin;
             const editing = editingId === memo.memo_id;
             const busy = busyId === memo.memo_id;
             return (
-              <li key={memo.memo_id} className="card flex flex-col gap-2 !p-5">
+              <li key={memo.memo_id} className="flex flex-col gap-2 border-b border-line py-4">
                 <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="font-semibold">{authorLabel(memo.author_user_id)}</span>
+                  <span className="font-bold">{authorLabel(memo.author_user_id)}</span>
                   <span className="text-xs text-muted">{formatCreatedAt(memo.created_at)}</span>
                   {canEdit && !editing && (
                     <span className="ml-auto flex gap-2">

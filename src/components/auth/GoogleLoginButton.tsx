@@ -26,11 +26,11 @@ export default function GoogleLoginButton() {
   }
 
   return (
-    <div className="flex w-full max-w-sm flex-col gap-3">
+    <div className="flex w-full flex-col gap-3">
       <div className="flex items-center gap-3 text-xs text-muted" aria-hidden>
-        <span className="h-px flex-1 bg-line-strong/40" />
+        <span className="h-px flex-1 bg-line" />
         또는
-        <span className="h-px flex-1 bg-line-strong/40" />
+        <span className="h-px flex-1 bg-line" />
       </div>
       <button
         type="button"
@@ -41,11 +41,11 @@ export default function GoogleLoginButton() {
         {redirecting ? "구글로 이동 중..." : "Google 계정으로 계속하기"}
       </button>
       {!enabled && (
-        <p className="text-center text-xs text-muted">
+        <p className="text-xs text-muted">
           지금은 구글 로그인을 쓸 수 없어요. 이메일로 로그인해 주세요.
         </p>
       )}
-      {error && <p className="text-center text-sm text-danger">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
     </div>
   );
 }

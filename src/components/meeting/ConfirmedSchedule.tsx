@@ -53,14 +53,14 @@ export default function ConfirmedSchedule({ meetingId, slotLabel, isAdmin }: Con
   }
 
   return (
-    <div className="card flex flex-col gap-3 !border-brand-strong !p-5">
+    <div className="flex flex-col gap-3 rounded-[8px] bg-brand p-5 text-white">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="badge bg-brand-strong text-surface">확정</span>
-        <span className="text-lg font-bold tracking-[-0.01em] tabular-nums">
+        <span className="badge border border-white text-white">확정</span>
+        <span className="text-[1.25rem] font-bold tracking-[-0.01em] tabular-nums">
           {slotLabel ?? "이미 확정된 일정이 있어요"}
         </span>
       </div>
-      <p className="text-sm text-muted">
+      <p className="text-sm text-white/85">
         모임 시간이 정해졌어요. 링크로 팀원이 아닌 사람에게도 일정을 알려 줄 수 있어요.
       </p>
 
@@ -78,7 +78,7 @@ export default function ConfirmedSchedule({ meetingId, slotLabel, isAdmin }: Con
                 onFocus={(e) => e.currentTarget.select()}
                 className="input text-sm"
               />
-              <button type="button" onClick={handleCopy} className="btn btn-primary shrink-0">
+              <button type="button" onClick={handleCopy} className="btn btn-secondary shrink-0">
                 {copied ? "복사됨" : "복사"}
               </button>
             </div>
@@ -87,13 +87,13 @@ export default function ConfirmedSchedule({ meetingId, slotLabel, isAdmin }: Con
             type="button"
             onClick={handleIssue}
             disabled={issuing}
-            className="btn btn-secondary btn-sm self-start"
+            className="btn btn-sm self-start border-[1.5px] border-white text-white hover:bg-white/10"
           >
             {issuing ? "만드는 중..." : link ? "새 링크 만들기" : "공유 링크 만들기"}
           </button>
         </div>
       )}
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p className="notice notice-danger">{error}</p>}
     </div>
   );
 }

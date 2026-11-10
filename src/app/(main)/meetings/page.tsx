@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { ApiError } from "@/lib/api";
-import { getMeetings } from "@/lib/meetings";
+import { getMeetings, toHHMM } from "@/lib/meetings";
 import type { Meeting } from "@/types/meeting";
 
 export default function MeetingsPage() {
@@ -52,20 +52,20 @@ export default function MeetingsPage() {
         </div>
       )}
       {meetings && meetings.length > 0 && (
-        <ul className="flex flex-col gap-3">
+        <ul className="border-t-2 border-brand">
           {meetings.map((m) => (
             <li key={m.meeting_id}>
               <Link
                 href={`/meetings/${m.meeting_id}`}
-                className="card-link flex items-center justify-between gap-4"
+                className="row-link flex items-center justify-between gap-4"
               >
                 <div className="flex min-w-0 flex-col gap-1">
-                  <span className="text-base font-semibold">{m.name}</span>
+                  <span className="text-[1.0625rem] font-bold">{m.name}</span>
                   {m.description && (
                     <span className="truncate text-sm text-muted">{m.description}</span>
                   )}
                   <span className="text-sm text-muted">
-                    최소 {m.min_duration_min}분
+                    {m.min_duration_min}분 이상, {toHHMM(m.search_start_time)}~{toHHMM(m.search_end_time)} 사이
                   </span>
                 </div>
                 {m.needs_recalc && (

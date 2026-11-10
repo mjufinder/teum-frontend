@@ -50,13 +50,7 @@ function Notice({
   children: React.ReactNode;
 }) {
   return (
-    <div
-      className={`rounded-[14px] px-4 py-3 text-sm ${
-        tone === "warning"
-          ? "border-[1.5px] border-accent/60 bg-accent-soft text-accent-strong"
-          : "border border-line bg-sunken text-muted"
-      }`}
-    >
+    <div className={`notice ${tone === "warning" ? "font-bold" : "border-line text-muted"}`}>
       {children}
     </div>
   );
@@ -81,7 +75,7 @@ export default function CandidateList(props: CandidateListProps) {
     return (
       <section className="flex flex-col gap-3">
         {header}
-        <div className="card flex flex-col items-start gap-3">
+        <div className="flex flex-col items-start gap-3 border-t-2 border-brand pt-4">
           <p className="text-sm text-danger">{error}</p>
           <button type="button" onClick={onRetry} className="btn btn-secondary btn-sm">
             다시 불러오기
@@ -121,7 +115,7 @@ export default function CandidateList(props: CandidateListProps) {
     <section className="flex flex-col gap-3">
       {header}
       {empty ? (
-        <div className="card flex flex-col items-start gap-3">
+        <div className="flex flex-col items-start gap-3 border-t-2 border-brand pt-4">
           <p className="text-sm">
             지금 조건으로는 함께 비는 시간이 없어요.
             <br />
@@ -198,7 +192,6 @@ function CandidateBoard({
   const anyVotes = (tally?.total_ballots ?? 0) > 0;
   const winnerId = anyVotes ? tally?.winner_candidate_id ?? null : null;
   const winner = candidateSet.candidates.find((c) => c.candidate_id === winnerId);
-  const memberById = new Map(members.map((m) => [m.member_id, m]));
   const total = members.length;
 
   function toggle(candidateId: number) {
@@ -309,120 +302,103 @@ function CandidateBoard({
         </Notice>
       )}
 
-      <ol className={`flex flex-col gap-3 ${stale ? "opacity-60" : ""}`}>
+      <ol className={`border-t-2 border-brand ${stale ? "opacity-55" : ""}`}>
         {candidateSet.candidates.map((c) => {
           const allAvailable = c.available_count >= total;
           const available = new Set(c.available_member_ids);
           const missing = members.filter((m) => !available.has(m.member_id));
-          const ratio = total > 0 ? Math.min(c.available_count / total, 1) : 0;
           const picked = selected.includes(c.candidate_id);
           const isWinner = c.candidate_id === winnerId;
           return (
             <li
               key={c.candidate_id}
-              className={`card flex flex-col gap-3 !p-5 ${
-                picked ? "!border-brand-strong ring-2 ring-brand/30" : ""
+              className={`grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 border-b border-line py-4 pr-1 transition-colors ${
+                picked ? "bg-brand-soft" : ""
               }`}
             >
-              <div className="flex flex-wrap items-center gap-3">
-                <span
-                  className={`grid size-9 shrink-0 place-items-center rounded-full text-sm font-bold ${
-                    c.rank_no === 1
-                      ? "bg-brand-strong text-surface"
-                      : "bg-brand-soft text-brand-strong"
-                  }`}
-                  aria-label={`${c.rank_no}순위`}
-                >
-                  {c.rank_no}
-                </span>
-                <span className="text-lg font-bold tracking-[-0.01em] tabular-nums">
-                  {formatSlot(c.day_of_week, c.start_time, c.end_time)}
-                </span>
-                <span className="ml-auto flex flex-wrap items-center gap-1.5">
+              <span
+                className="pl-1 text-[1.625rem] leading-none font-bold text-brand"
+                aria-label={`${c.rank_no}순위`}
+              >
+                {c.rank_no}
+              </span>
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span className="text-[1.25rem] leading-tight font-bold tracking-[-0.01em]">
+                    {formatSlot(c.day_of_week, c.start_time, c.end_time)}
+                  </span>
                   {isWinner && (
-                    <span className="badge bg-brand-strong text-surface">
+                    <span className="badge badge-brand">
                       {voteStatus === "CLOSED" ? "최종 1위" : "현재 1위"}
                     </span>
                   )}
-                  <span className={`badge ${allAvailable ? "badge-brand" : "badge-accent"}`}>
-                    {allAvailable ? "전원 가능" : "차선책"}
-                  </span>
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted">참석 가능</span>
-                  <span className="font-semibold tabular-nums">
-                    {total}명 중 {c.available_count}명
-                  </span>
+                  {!allAvailable && <span className="badge badge-accent">차선책</span>}
                 </div>
-                <div
-                  className="h-2 overflow-hidden rounded-full bg-sunken"
-                  role="progressbar"
-                  aria-valuemin={0}
-                  aria-valuemax={total}
-                  aria-valuenow={c.available_count}
-                >
-                  <div className="h-full rounded-full bg-brand" style={{ width: `${ratio * 100}%` }} />
-                </div>
-              </div>
 
-              <p className="text-sm text-muted">
-                가능:{" "}
-                {c.available_member_ids
-                  .map((id) => {
-                    const m = memberById.get(id);
-                    return m ? memberLabel(m, myUserId, emails) : "이전 구성원";
-                  })
-                  .join(", ")}
-                {missing.length > 0 && (
-                  <>
-                    {" · "}
-                    <span className="text-accent-strong">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                  <span className="flex gap-1" aria-hidden>
+                    {members.map((m) => (
+                      <span
+                        key={m.member_id}
+                        title={memberLabel(m, myUserId, emails)}
+                        className={`size-3.5 ${
+                          available.has(m.member_id)
+                            ? "bg-brand"
+                            : "border-[1.5px] border-line-strong bg-white"
+                        }`}
+                      />
+                    ))}
+                  </span>
+                  <span className="font-bold">
+                    {allAvailable
+                      ? `${total}명 모두 가능`
+                      : `${total}명 중 ${c.available_count}명 가능`}
+                  </span>
+                  {missing.length > 0 && (
+                    <span className="text-muted">
                       어려움: {missing.map((m) => memberLabel(m, myUserId, emails)).join(", ")}
                     </span>
-                  </>
-                )}
-              </p>
+                  )}
+                </div>
 
-              <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
-                <span className="text-sm font-semibold tabular-nums">
-                  {tally ? `${votesById.get(c.candidate_id) ?? 0}표` : "-표"}
-                </span>
-                {canConfirm && (
-                  <button
-                    type="button"
-                    onClick={() => handleConfirm(c)}
-                    disabled={confirmingId !== null}
-                    className="btn btn-secondary btn-sm ml-auto"
-                  >
-                    {confirmingId === c.candidate_id ? "확정 중..." : "이 시간으로 확정"}
-                  </button>
-                )}
-                {canVote && (
-                  <button
-                    type="button"
-                    aria-pressed={picked}
-                    onClick={() => toggle(c.candidate_id)}
-                    disabled={submitting}
-                    className={`chip min-h-9 py-1.5 ${canConfirm ? "" : "ml-auto"}`}
-                  >
-                    {picked ? "✓ 이 시간 좋아요" : "이 시간 좋아요"}
-                  </button>
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm text-muted">
+                    {tally ? `${votesById.get(c.candidate_id) ?? 0}표` : "집계 중"}
+                  </span>
+                  {canConfirm && (
+                    <button
+                      type="button"
+                      onClick={() => handleConfirm(c)}
+                      disabled={confirmingId !== null}
+                      className="btn btn-secondary btn-sm ml-auto"
+                    >
+                      {confirmingId === c.candidate_id ? "확정 중..." : "이 시간으로 확정"}
+                    </button>
+                  )}
+                  {canVote && (
+                    <button
+                      type="button"
+                      aria-pressed={picked}
+                      onClick={() => toggle(c.candidate_id)}
+                      disabled={submitting}
+                      className={`chip min-h-9 py-1.5 ${canConfirm ? "" : "ml-auto"}`}
+                    >
+                      이 시간 좋아요
+                    </button>
+                  )}
+                </div>
               </div>
             </li>
           );
         })}
       </ol>
 
-      <div className="card flex flex-col gap-3 !p-5">
+      <div className="flex flex-col gap-3 pt-1">
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-          <span className="font-semibold">투표 현황</span>
+          <span className="font-bold">투표 현황</span>
           <span className="text-muted tabular-nums">
             {tally
-              ? `${tally.total_ballots}명 투표 · 가능한 시간 없음 ${tally.no_available_count}명`
+              ? `${tally.total_ballots}명 투표, 가능한 시간 없음 ${tally.no_available_count}명`
               : tallyError ?? "불러오는 중..."}
           </span>
         </div>
@@ -452,7 +428,7 @@ function CandidateBoard({
               </button>
             </div>
             {voted && (
-              <p className="text-sm font-semibold text-brand-strong">
+              <p className="text-sm font-bold text-brand-strong">
                 투표했어요. 다시 고르고 투표하면 바뀌어요.
               </p>
             )}

@@ -72,7 +72,7 @@ export default function TimetableUpload({
       </p>
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-sm font-semibold">시간표 이미지 <span className="font-normal text-muted">(PNG, JPEG / 10MB 이하)</span></span>
+        <span className="text-sm font-bold">시간표 이미지 <span className="font-normal text-muted">(PNG, JPEG / 10MB 이하)</span></span>
         <input
           type="file"
           accept="image/png,image/jpeg"
@@ -83,7 +83,7 @@ export default function TimetableUpload({
       </label>
 
       {preview && (
-        <div className="relative h-40 w-full overflow-hidden rounded-[14px] bg-sunken">
+        <div className="relative h-40 w-full overflow-hidden rounded-[8px] border border-line bg-sunken">
           <Image
             src={preview}
             alt="고른 시간표 이미지"

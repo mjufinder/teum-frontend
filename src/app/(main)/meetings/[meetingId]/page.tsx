@@ -146,16 +146,24 @@ function MeetingDetail() {
   const hasOtherMembers = members.some((m) => m.user_id !== myUserId);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10">
       <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="page-title">{meeting.name}</h1>
             {meeting.needs_recalc && <span className="badge badge-accent">재계산 필요</span>}
           </div>
-          {meeting.description && (
-            <p className="text-sm text-muted">{meeting.description}</p>
-          )}
+          {meeting.description && <p className="text-muted">{meeting.description}</p>}
+          <p className="text-sm">
+            <span className="font-bold">{meeting.min_duration_min}분</span> 이상 회의,{" "}
+            <span className="font-bold">
+              {toHHMM(meeting.search_start_time)}~{toHHMM(meeting.search_end_time)}
+            </span>{" "}
+            사이에서 찾아요.
+            {meeting.travel_buffer_min > 0 && (
+              <> 수업 앞뒤로 {meeting.travel_buffer_min}분은 비워 둬요.</>
+            )}
+          </p>
         </div>
         {isAdmin && (
           <Link
@@ -167,24 +175,6 @@ function MeetingDetail() {
         )}
       </div>
 
-      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {[
-          { label: "최소 회의시간", value: `${meeting.min_duration_min}분` },
-          {
-            label: "탐색 시간대",
-            value: `${toHHMM(meeting.search_start_time)} ~ ${toHHMM(meeting.search_end_time)}`,
-          },
-          {
-            label: "이동 여유시간",
-            value: meeting.travel_buffer_min === 0 ? "없음" : `${meeting.travel_buffer_min}분`,
-          },
-        ].map((item) => (
-          <div key={item.label} className="card flex flex-col gap-1 !p-5">
-            <dt className="text-xs font-semibold text-muted">{item.label}</dt>
-            <dd className="text-lg font-bold tabular-nums tracking-[-0.01em]">{item.value}</dd>
-          </div>
-        ))}
-      </dl>
 
       <CandidateList
         meetingId={meetingId}

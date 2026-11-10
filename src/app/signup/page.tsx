@@ -47,17 +47,17 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-5 py-12">
-      <Link href="/" aria-label="틈 처음 화면">
+    <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col justify-center gap-6 px-5 py-12">
+      <Link href="/" aria-label="틈 처음 화면" className="self-start">
         <Logo />
       </Link>
-      <div className="flex flex-col items-center gap-1 text-center">
+      <div className="flex flex-col gap-1">
         <h1 className="page-title">회원가입</h1>
         <p className="text-sm text-muted">이메일로 1분 만에 시작해요.</p>
       </div>
       <form
         onSubmit={handleSubmit}
-        className="card flex w-full max-w-sm flex-col gap-5"
+        className="card flex w-full flex-col gap-5"
       >
         <label className="field-label">
           이메일
@@ -91,10 +91,10 @@ export default function SignupPage() {
         >
           {loading ? "처리 중..." : "가입하기"}
         </button>
-        {error && <p className="text-sm text-danger">{error}</p>}
+        {error && <p className="notice notice-danger">{error}</p>}
       </form>
       <GoogleLoginButton />
-      <Link href="/login" className="text-sm text-muted underline underline-offset-4 hover:text-foreground">
+      <Link href="/login" className="text-link self-start text-sm">
         이미 계정이 있으신가요? 로그인
       </Link>
     </main>

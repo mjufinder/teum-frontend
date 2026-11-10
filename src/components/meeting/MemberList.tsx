@@ -26,23 +26,23 @@ export default function MemberList({
   busy = false,
 }: MemberListProps) {
   return (
-    <ul className="card divide-y divide-line !p-0">
+    <ul className="border-t-2 border-brand">
       {members.map((m) => (
         <li
           key={m.member_id}
-          className="flex items-center gap-3 px-5 py-3.5 text-sm"
+          className="flex items-center gap-3 border-b border-line py-3 text-sm"
         >
           <span
             aria-hidden
-            className={`grid size-9 shrink-0 place-items-center rounded-full text-xs font-bold ${
+            className={`grid size-8 shrink-0 place-items-center text-xs font-bold ${
               m.user_id === myUserId
-                ? "bg-brand-strong text-surface"
-                : "bg-brand-soft text-brand-strong"
+                ? "bg-brand text-white"
+                : "border-[1.5px] border-brand text-brand"
             }`}
           >
             {m.user_id === myUserId ? "나" : m.user_id}
           </span>
-          <span className="font-semibold">
+          <span className="font-bold">
             {m.user_id === myUserId ? "나" : `팀원 ${m.user_id}`}
           </span>
           {emails[m.user_id] && (
