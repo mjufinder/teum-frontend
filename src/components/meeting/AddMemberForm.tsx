@@ -2,6 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { TextInput } from "@astryxdesign/core/TextInput";
+import { VStack } from "@astryxdesign/core/VStack";
+import { UserPlusIcon } from "@heroicons/react/20/solid";
 
 import { ApiError } from "@/lib/api";
 import { isMemberAddedButNotMatched } from "@/lib/candidates";
@@ -59,42 +64,41 @@ export default function AddMemberForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="card flex flex-col gap-3">
-      <label htmlFor="member-email" className="text-sm font-bold">
-        팀원 추가
-      </label>
-      <div className="flex gap-2">
-        <input
-          id="member-email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="teammate@example.com"
-          disabled={submitting}
-          className="input"
-        />
-        <button type="submit" disabled={submitting} className="btn btn-primary shrink-0">
-          {submitting ? "추가 중..." : "추가"}
-        </button>
-      </div>
-      <p className="text-sm text-muted">
-        상대가 먼저 틈에 로그인해야 추가할 수 있어요. 추가하면 추천 시간을 다시 계산해요.
-      </p>
-      {error && (
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm text-danger">{error}</p>
-          {retryEmail && (
-            <button
-              type="button"
-              onClick={() => submit(retryEmail)}
-              disabled={submitting}
-              className="btn btn-secondary btn-sm"
-            >
-              추천 다시 계산하기
-            </button>
-          )}
+    <form onSubmit={handleSubmit}>
+      <VStack gap={3}>
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="min-w-[220px] flex-1">
+            <TextInput
+              type="email"
+              label="팀원 추가"
+              description="상대가 먼저 틈에 로그인해야 추가할 수 있어요. 추가하면 추천 시간을 다시 계산해요."
+              placeholder="teammate@example.com"
+              value={email}
+              onChange={setEmail}
+              isDisabled={submitting}
+              startIcon={UserPlusIcon}
+            />
+          </div>
+          <Button type="submit" label="추가" variant="primary" isLoading={submitting} isDisabled={!email.trim()} />
         </div>
-      )}
+        {error && (
+          <Banner
+            status="error"
+            title={error}
+            endContent={
+              retryEmail ? (
+                <Button
+                  label="추천 다시 계산하기"
+                  variant="secondary"
+                  size="sm"
+                  isDisabled={submitting}
+                  onClick={() => submit(retryEmail)}
+                />
+              ) : undefined
+            }
+          />
+        )}
+      </VStack>
     </form>
   );
 }

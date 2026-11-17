@@ -1,3 +1,10 @@
+import { Avatar } from "@astryxdesign/core/Avatar";
+import { Badge } from "@astryxdesign/core/Badge";
+import { Button } from "@astryxdesign/core/Button";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
+
 import type { Member } from "@/types/meeting";
 
 interface MemberListProps {
@@ -26,43 +33,43 @@ export default function MemberList({
   busy = false,
 }: MemberListProps) {
   return (
-    <ul className="border-t-2 border-brand">
-      {members.map((m) => (
-        <li
-          key={m.member_id}
-          className="flex items-center gap-3 border-b border-line py-3 text-sm"
-        >
-          <span
-            aria-hidden
-            className={`grid size-8 shrink-0 place-items-center text-xs font-bold ${
-              m.user_id === myUserId
-                ? "bg-brand text-white"
-                : "border-[1.5px] border-brand text-brand"
-            }`}
+    <ul className="m-0 flex list-none flex-col p-0">
+      {members.map((m) => {
+        const mine = m.user_id === myUserId;
+        const name = mine ? "나" : `팀원 ${m.user_id}`;
+        return (
+          <li
+            key={m.member_id}
+            className="border-0 border-b border-solid border-[var(--color-border)] py-3 last:border-b-0"
           >
-            {m.user_id === myUserId ? "나" : m.user_id}
-          </span>
-          <span className="font-bold">
-            {m.user_id === myUserId ? "나" : `팀원 ${m.user_id}`}
-          </span>
-          {emails[m.user_id] && (
-            <span className="min-w-0 truncate text-muted">{emails[m.user_id]}</span>
-          )}
-          {m.role === "ADMIN" && (
-            <span className="badge badge-brand">관리자</span>
-          )}
-          {onTransfer && m.role !== "ADMIN" && m.user_id !== myUserId && (
-            <button
-              type="button"
-              onClick={() => onTransfer(m)}
-              disabled={busy}
-              className="btn btn-secondary btn-sm ml-auto"
-            >
-              관리자 넘기기
-            </button>
-          )}
-        </li>
-      ))}
+            <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
+              <HStack gap={3} vAlign="center">
+                <Avatar name={name} size="md" tooltip={false} />
+                <VStack gap={0}>
+                  <HStack gap={2} vAlign="center">
+                    <Text weight="semibold">{name}</Text>
+                    {m.role === "ADMIN" && <Badge variant="green" label="관리자" />}
+                  </HStack>
+                  {emails[m.user_id] && (
+                    <Text type="supporting" maxLines={1}>
+                      {emails[m.user_id]}
+                    </Text>
+                  )}
+                </VStack>
+              </HStack>
+              {onTransfer && m.role !== "ADMIN" && !mine && (
+                <Button
+                  label="관리자 넘기기"
+                  variant="secondary"
+                  size="sm"
+                  isDisabled={busy}
+                  onClick={() => onTransfer(m)}
+                />
+              )}
+            </HStack>
+          </li>
+        );
+      })}
     </ul>
   );
 }

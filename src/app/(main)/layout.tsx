@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import AppHeader from "@/components/layout/AppHeader";
+import AppFrame from "@/components/layout/AppFrame";
+import { ErrorNote, PageLoading } from "@/components/layout/PageState";
 import { ApiError } from "@/lib/api";
 import { getNextPath } from "@/lib/auth-flow";
 
@@ -45,20 +46,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   if (!ready) {
     return (
-      <main className="mx-auto w-full max-w-[720px] px-5 py-10">
-        {error ? (
-          <p className="text-sm text-danger">{error}</p>
-        ) : (
-          <p className="text-sm text-muted">불러오는 중...</p>
-        )}
+      <main className="mx-auto w-full max-w-[1040px] px-5 py-10">
+        {error ? <ErrorNote message={error} /> : <PageLoading />}
       </main>
     );
   }
 
-  return (
-    <>
-      <AppHeader />
-      <main className="mx-auto w-full max-w-[720px] px-5 py-10">{children}</main>
-    </>
-  );
+  return <AppFrame>{children}</AppFrame>;
 }

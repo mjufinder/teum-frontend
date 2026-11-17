@@ -1,50 +1,84 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { HStack } from "@astryxdesign/core/HStack";
+import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
+import { Heading, Text } from "@astryxdesign/core/Text";
+import { useToast } from "@astryxdesign/core/Toast";
+import { VStack } from "@astryxdesign/core/VStack";
 
 import TimetableGrid from "@/components/timetable/TimetableGrid";
 import { ApiError } from "@/lib/api";
-import { paintCells } from "@/lib/timetable";
+import { TOTAL_SLOTS, paintCells, slotState } from "@/lib/timetable";
 import { saveMyTimetable } from "@/lib/timetable-api";
 import type { SlotState, TimetableBits } from "@/types/timetable";
 
-const tools: { state: SlotState; label: string; swatch: string }[] = [
-  { state: "class", label: "수업", swatch: "slot-class" },
-  { state: "manual", label: "개인 일정", swatch: "slot-manual" },
-  { state: "free", label: "지우기", swatch: "slot-free" },
+const tools: { state: SlotState; label: string }[] = [
+  { state: "class", label: "수업" },
+  { state: "manual", label: "개인 일정" },
+  { state: "free", label: "지우개" },
 ];
+
+const swatch: Record<SlotState, string> = {
+  class: "teum-slot-class",
+  manual: "teum-slot-manual",
+  free: "teum-slot-free ring-1 ring-inset ring-[var(--color-border)]",
+};
+
+function hours(slotCount: number) {
+  return `${slotCount / 2}시간`;
+}
 
 interface TimetableEditorProps {
   initial: TimetableBits;
   warnings?: string[];
+  saveLabel?: string;
   onSaved?: () => void;
 }
 
 export default function TimetableEditor({
   initial,
   warnings = [],
+  saveLabel = "시간표 저장",
   onSaved,
 }: TimetableEditorProps) {
   const router = useRouter();
+  const toast = useToast();
   const [bits, setBits] = useState(initial);
+  // 마지막으로 저장한 상태. 바뀐 칸 수를 세는 기준이다.
+  const [savedBits, setSavedBits] = useState(initial);
   const [tool, setTool] = useState<SlotState>("class");
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const summary = useMemo(() => {
+    let classCount = 0;
+    let manualCount = 0;
+    let changed = 0;
+    for (let cell = 0; cell < TOTAL_SLOTS; cell++) {
+      const state = slotState(bits, cell);
+      if (state === "class") classCount++;
+      else if (state === "manual") manualCount++;
+      if (state !== slotState(savedBits, cell)) changed++;
+    }
+    return { classCount, manualCount, freeCount: TOTAL_SLOTS - classCount - manualCount, changed };
+  }, [bits, savedBits]);
 
   function handlePaint(cells: number[]) {
     setBits((prev) => paintCells(prev, cells, tool));
-    setSaved(false);
   }
 
   async function handleSave() {
     setError(null);
-    setSaved(false);
     setSaving(true);
     try {
       await saveMyTimetable(bits.class_bits, bits.manual_bits);
-      setSaved(true);
+      setSavedBits(bits);
+      toast({ body: "시간표를 저장했어요", uniqueID: "timetable-saved" });
       onSaved?.();
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
@@ -57,67 +91,96 @@ export default function TimetableEditor({
     }
   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      <p className="text-sm text-muted">
-        이미지 인식은 월~금만 돼요. 저장 전에 토·일 칸을 확인해 주세요.
-      </p>
+  const rows: { state: SlotState; label: string; count: number }[] = [
+    { state: "class", label: "수업", count: summary.classCount },
+    { state: "manual", label: "개인 일정", count: summary.manualCount },
+    { state: "free", label: "회의 가능", count: summary.freeCount },
+  ];
 
+  return (
+    <VStack gap={4}>
       {warnings.map((warning, i) => (
-        <p key={i} className="notice">
-          {warning}
-        </p>
+        <Banner key={i} status="warning" title={warning} />
       ))}
 
-      <div className="flex flex-col gap-2">
-        <p className="text-sm">
-          칠할 종류를 고른 뒤, 칸을 누르거나 끌어서 칠해 주세요.
-        </p>
-        <div
-          className="inline-flex self-start overflow-hidden rounded-[8px] border-[1.5px] border-brand"
-          role="group"
-          aria-label="칠하기 도구"
-        >
-          {tools.map((item, i) => {
-            const active = tool === item.state;
-            return (
-              <button
-                key={item.state}
-                type="button"
-                aria-pressed={active}
-                onClick={() => setTool(item.state)}
-                className={`flex min-h-10 items-center gap-2 px-4 text-sm font-bold transition-colors ${
-                  i > 0 ? "border-l-[1.5px] border-brand" : ""
-                } ${active ? "bg-brand text-white" : "bg-white text-brand hover:bg-brand-soft"}`}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <Card padding={5}>
+          <VStack gap={4}>
+            <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
+              <SegmentedControl
+                label="칠하기 도구"
+                value={tool}
+                onChange={(value) => setTool(value as SlotState)}
               >
-                <span
-                  aria-hidden
-                  className={`size-3.5 border border-current ${
-                    active && item.state === "class" ? "bg-white" : item.swatch
-                  }`}
-                />
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
+                {tools.map((item) => (
+                  <SegmentedControlItem key={item.state} value={item.state} label={item.label} />
+                ))}
+              </SegmentedControl>
+              <Button
+                label="바꾼 내용 되돌리기"
+                variant="ghost"
+                size="sm"
+                isDisabled={summary.changed === 0 || saving}
+                onClick={() => setBits(savedBits)}
+              />
+            </HStack>
+            <TimetableGrid bits={bits} onPaint={handlePaint} />
+            <Text type="supporting" as="p" display="block">
+              도구를 고른 뒤 칸을 누르거나 끌어서 칠해요. 이미지 인식은 월~금만 되니 토·일 칸은
+              직접 확인해 주세요.
+            </Text>
+          </VStack>
+        </Card>
+
+        <VStack gap={4}>
+          <Card padding={5}>
+            <VStack gap={4}>
+              <Heading level={3}>
+                한 주 요약
+              </Heading>
+              <VStack gap={3}>
+                {rows.map((row) => (
+                  <HStack key={row.state} hAlign="between" vAlign="center">
+                    <HStack gap={2} vAlign="center">
+                      <i aria-hidden="true" className={`block size-3.5 rounded-[4px] ${swatch[row.state]}`} />
+                      <Text>{row.label}</Text>
+                    </HStack>
+                    <Text
+                      weight="semibold"
+                      color={row.state === "free" ? "accent" : "primary"}
+                      hasTabularNumbers
+                    >
+                      {hours(row.count)}
+                    </Text>
+                  </HStack>
+                ))}
+              </VStack>
+            </VStack>
+          </Card>
+
+          <Card padding={5} variant={summary.changed > 0 ? "green" : "muted"}>
+            <VStack gap={3}>
+              <Text weight="semibold" hasTabularNumbers>
+                {summary.changed > 0
+                  ? `저장하지 않은 변경 ${summary.changed}칸`
+                  : "바뀐 내용이 없어요"}
+              </Text>
+              <Text type="supporting" as="p" display="block">
+                비워 둔 칸이 회의 가능한 시간이 돼요. 저장해야 모임 추천에 반영됩니다.
+              </Text>
+              {error && <Banner status="error" title={error} />}
+              <Button
+                label={saveLabel}
+                variant="primary"
+                width="100%"
+                isLoading={saving}
+                isDisabled={summary.changed === 0 && !onSaved}
+                onClick={handleSave}
+              />
+            </VStack>
+          </Card>
+        </VStack>
       </div>
-
-      <TimetableGrid bits={bits} onPaint={handlePaint} />
-
-      {error && <p className="text-sm text-danger">{error}</p>}
-      {saved && <p className="text-sm font-bold text-brand-strong">저장했어요.</p>}
-
-      <div>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={handleSave}
-          className="btn btn-primary"
-        >
-          {saving ? "저장 중..." : "저장"}
-        </button>
-      </div>
-    </div>
+    </VStack>
   );
 }

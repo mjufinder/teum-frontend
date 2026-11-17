@@ -2,7 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Button } from "@astryxdesign/core/Button";
+import { Heading, Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
 
+import ProfileFields from "@/components/auth/ProfileFields";
+import { ErrorNote, PageLoading } from "@/components/layout/PageState";
 import { ApiError, authFetch } from "@/lib/api";
 import type { UserOut } from "@/types/user";
 
@@ -63,40 +68,33 @@ export default function OnboardingProfilePage() {
   }
 
   if (loading) {
-    return <p className="text-sm text-muted">불러오는 중...</p>;
+    return <PageLoading />;
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="page-title">프로필을 입력해 주세요</h1>
-      <form onSubmit={handleSubmit} className="card flex flex-col gap-5">
-        <label className="field-label">
-          이름
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="input"
-          />
-        </label>
-        <label className="field-label">
-          전공
-          <input
-            value={major}
-            onChange={(e) => setMajor(e.target.value)}
-            className="input"
-          />
-        </label>
-        <div>
-          <button
-            type="submit"
-            disabled={saving || !name.trim() || !major.trim()}
-            className="btn btn-primary"
-          >
-            {saving ? "저장 중..." : "다음"}
-          </button>
-        </div>
-        {error && <p className="text-sm text-danger">{error}</p>}
-      </form>
+    <div className="max-w-[480px]">
+      <VStack gap={6}>
+        <VStack gap={1}>
+          <Heading level={1}>프로필을 입력해 주세요</Heading>
+          <Text color="secondary">모임에서 팀원이 나를 알아볼 수 있게 해 줘요.</Text>
+        </VStack>
+        <form onSubmit={handleSubmit}>
+          <VStack gap={5}>
+            <ProfileFields name={name} major={major} onNameChange={setName} onMajorChange={setMajor} />
+            {error && <ErrorNote message={error} />}
+            <div>
+              <Button
+                type="submit"
+                label="다음"
+                variant="primary"
+                size="lg"
+                isLoading={saving}
+                isDisabled={!name.trim() || !major.trim()}
+              />
+            </div>
+          </VStack>
+        </form>
+      </VStack>
     </div>
   );
 }

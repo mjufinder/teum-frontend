@@ -1,13 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Link } from "@astryxdesign/core/Link";
+import { Text } from "@astryxdesign/core/Text";
+import { TextInput } from "@astryxdesign/core/TextInput";
+import { VStack } from "@astryxdesign/core/VStack";
 
 import { ApiError } from "@/lib/api";
 import { getNextPath } from "@/lib/auth-flow";
 import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
-import Logo from "@/components/layout/Logo";
+import AuthFrame from "@/components/layout/AuthFrame";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
@@ -49,55 +54,40 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col justify-center gap-6 px-5 py-12">
-      <Link href="/" aria-label="틈 처음 화면" className="self-start">
-        <Logo />
-      </Link>
-      <div className="flex flex-col gap-1">
-        <h1 className="page-title">로그인</h1>
-        <p className="text-sm text-muted">다시 만나서 반가워요.</p>
-      </div>
-      <form
-        onSubmit={handleSubmit}
-        className="card flex w-full flex-col gap-5"
-      >
-        <label className="field-label">
-          이메일
-          <input
+    <AuthFrame
+      title="로그인"
+      description="다시 만나서 반가워요."
+      footer={
+        <Text type="supporting">
+          계정이 없으신가요? <Link href="/signup" type="inherit">회원가입</Link>
+        </Text>
+      }
+    >
+      <form onSubmit={handleSubmit}>
+        <VStack gap={4}>
+          <TextInput
             type="email"
-            autoComplete="email"
+            label="이메일"
+            size="lg"
             placeholder="name@example.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="input"
+            onChange={setEmail}
+            autoComplete="email"
           />
-        </label>
-        <label className="field-label">
-          비밀번호
-          <input
+          <TextInput
             type="password"
-            autoComplete="current-password"
+            label="비밀번호"
+            size="lg"
             placeholder="비밀번호"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="input"
+            onChange={setPassword}
+            autoComplete="current-password"
           />
-        </label>
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn btn-primary"
-        >
-          {loading ? "처리 중..." : "로그인"}
-        </button>
-        {error && <p className="notice notice-danger">{error}</p>}
+          {error && <Banner status="error" title={error} />}
+          <Button type="submit" label="로그인" variant="primary" size="lg" width="100%" isLoading={loading} />
+        </VStack>
       </form>
       <GoogleLoginButton />
-      <Link href="/signup" className="text-link self-start text-sm">
-        계정이 없으신가요? 회원가입
-      </Link>
-    </main>
+    </AuthFrame>
   );
 }

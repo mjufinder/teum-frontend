@@ -1,29 +1,24 @@
 "use client";
 
-import { Fragment, useRef } from "react";
+import { useRef } from "react";
 
-import {
-  DAY_LABELS,
-  SLOT_COUNT,
-  index,
-  slotLabel,
-  slotState,
-} from "@/lib/timetable";
+import { DAY_LABELS, SLOT_COUNT, index, slotLabel, slotState } from "@/lib/timetable";
 import type { SlotState, TimetableBits } from "@/types/timetable";
 
+const ROW_HEIGHT = 22;
 const slots = Array.from({ length: SLOT_COUNT }, (_, slot) => slot);
 
-const cellColors: Record<SlotState, string> = {
-  class: "slot-class",
-  manual: "slot-manual",
-  free: "slot-free",
+const cellClass: Record<SlotState, string> = {
+  class: "teum-slot-class",
+  manual: "teum-slot-manual",
+  free: "teum-slot-free",
 };
 
-const legend: { state: SlotState; label: string }[] = [
-  { state: "class", label: "수업" },
-  { state: "manual", label: "개인 일정" },
-  { state: "free", label: "가능" },
-];
+const stateLabel: Record<SlotState, string> = {
+  class: "수업",
+  manual: "개인 일정",
+  free: "빈 시간",
+};
 
 function cellAt(x: number, y: number) {
   const el = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-cell]");
@@ -50,6 +45,7 @@ interface TimetableGridProps {
   onPaint?: (cells: number[]) => void;
 }
 
+// 요일별 세로 띠로 그린 주간 시간표. onPaint 를 넘기면 누르거나 끌어서 칠할 수 있다.
 export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
   const lastCell = useRef<number | null>(null);
 
@@ -75,58 +71,72 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
     lastCell.current = null;
   }
 
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-        {legend.map((item) => (
-          <span key={item.state} className="flex items-center gap-1.5">
-            <span
-              className={`size-3.5 border border-brand ${cellColors[item.state]}`}
-            />
-            {item.label}
-          </span>
-        ))}
-      </div>
+  // 키보드로는 칸에 초점을 두고 Enter·Space 로 칠한다.
+  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (!onPaint || (e.key !== "Enter" && e.key !== " ")) return;
+    const cell = (e.target as HTMLElement).dataset.cell;
+    if (cell === undefined) return;
+    e.preventDefault();
+    onPaint([Number(cell)]);
+  }
 
-      <div className="overflow-x-auto border-t-2 border-brand pt-1">
+  return (
+    <div className="overflow-x-auto">
+      <div className="min-w-[420px] select-none">
+        <div className="grid grid-cols-[44px_repeat(7,minmax(0,1fr))] gap-x-1.5">
+          <span />
+          {DAY_LABELS.map((label) => (
+            <span
+              key={label}
+              className="pb-2 text-center text-[13px] font-medium text-[var(--color-text-secondary)]"
+            >
+              {label}
+            </span>
+          ))}
+        </div>
         <div
-          className="grid select-none grid-cols-[3rem_repeat(7,minmax(2.5rem,1fr))]"
+          className="grid grid-cols-[44px_repeat(7,minmax(0,1fr))] gap-x-1.5"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={stopPainting}
           onPointerCancel={stopPainting}
+          onKeyDown={handleKeyDown}
         >
-          <div />
-          {DAY_LABELS.map((label) => (
-            <div key={label} className="py-1.5 text-center text-xs font-bold">
-              {label}
-            </div>
-          ))}
-
-          {slots.map((slot) => (
-            <Fragment key={slot}>
-              <div className="h-6 pr-2 text-right text-[11px] leading-none tabular-nums text-muted">
-                {slot % 2 === 0 && slotLabel(slot)}
-              </div>
-              {DAY_LABELS.map((_, day) => {
+          <div className="flex flex-col">
+            {slots.map((slot) => (
+              <span
+                key={slot}
+                style={{ height: ROW_HEIGHT }}
+                className="-translate-y-[7px] pr-2 text-right text-[11px] tabular-nums text-[var(--color-text-secondary)]"
+              >
+                {slot % 2 === 0 ? slotLabel(slot) : ""}
+              </span>
+            ))}
+          </div>
+          {DAY_LABELS.map((dayLabel, day) => (
+            <div key={dayLabel} className="flex flex-col overflow-hidden rounded-[10px]">
+              {slots.map((slot) => {
                 const cell = index(day, slot);
+                const state = slotState(bits, cell);
                 return (
                   <div
                     key={cell}
                     data-cell={cell}
-                    className={`h-6 border-t border-l border-line ${
-                      slot % 2 === 1 ? "border-t-line/40" : ""
-                    } ${day === DAY_LABELS.length - 1 ? "border-r" : ""} ${
-                      slot === SLOT_COUNT - 1 ? "border-b" : ""
-                    } ${cellColors[slotState(bits, cell)]} ${
+                    role={onPaint ? "button" : "img"}
+                    tabIndex={onPaint ? 0 : undefined}
+                    aria-label={`${dayLabel}요일 ${slotLabel(slot)} ${stateLabel[state]}`}
+                    style={{ height: ROW_HEIGHT }}
+                    className={`${cellClass[state]} transition-colors duration-150 ${
+                      slot % 2 === 1 ? "border-b border-solid border-white" : ""
+                    } ${
                       onPaint
-                        ? "cursor-pointer touch-none hover:outline-2 hover:-outline-offset-2 hover:outline-foreground"
+                        ? "cursor-crosshair touch-none hover:brightness-95 focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--focus-outline-color)]"
                         : ""
                     }`}
                   />
                 );
               })}
-            </Fragment>
+            </div>
           ))}
         </div>
       </div>

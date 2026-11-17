@@ -1,277 +1,46 @@
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
+
 @import "tailwindcss";
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
 
 /*
- * 틈 디자인 시스템: 시간표 격자
- * 화면의 구조는 대학 시간표의 구조를 따른다. 선과 칸이 곧 정보이고,
- * 초록(#036635)은 '차 있는 시간'과 '누를 수 있는 것'에만 쓴다. 바탕과 빈 시간은 흰색이다.
- * 두 번째 강조색은 두지 않고, 구분이 필요하면 초록의 농도와 빗금으로 나눈다.
+ * 틈 화면은 Astryx 컴포넌트와 teum 테마(src/themes/teum)로 그린다.
+ * 색·간격·모서리는 테마 토큰(--color-accent 등)을 쓰고, 여기에는
+ * 시간표 격자처럼 컴포넌트에 없는 것만 둔다.
  */
 :root {
-  --background: #ffffff;
-  --foreground: #1e4d35;
-  /* 개인 일정 칸 등 '부분적으로 찬' 상태를 표시하는 초록 빗금 */
-  --hatch: repeating-linear-gradient(
+  /* 시간표의 빈 칸 */
+  --teum-slot-free: #f1f4f2;
+  /* 개인 일정: 초록 빗금 */
+  --teum-hatch: repeating-linear-gradient(
     135deg,
-    #036635 0 2px,
-    #ffffff 2px 6px
+    var(--color-accent) 0 2px,
+    #dfece4 2px 7px
   );
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  /* 캠퍼스 그린: 수업 블록, 주 버튼, 선택 상태 */
-  --color-brand: #036635;
-  --color-brand-strong: #036635;
-  --color-brand-deep: #024d28;
-  /* 아주 옅은 초록: 선택된 행, 비어 있는 강조 영역 */
-  --color-brand-soft: #e6f0ea;
-  /* 강조색을 따로 두지 않으므로 '보조 표시'도 초록 계열로 맞춘다 */
-  --color-accent: #036635;
-  --color-accent-strong: #1e4d35;
-  --color-accent-soft: #f2f7f4;
-  /* 격자선·구분선 */
-  --color-line: #cfe0d6;
-  /* 입력창·보조 버튼 테두리 (흰 바탕 대비 3:1 이상) */
-  --color-line-strong: #6e8f7c;
-  /* 보조 글자 (흰 바탕 대비 4.5:1 이상) */
-  --color-muted: #557563;
-  --color-danger: #b42318;
-  --color-danger-soft: #fdecea;
-  --color-surface: #ffffff;
-  --color-sunken: #f4f8f5;
-  --color-field: #ffffff;
-  --font-sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui,
-    sans-serif;
+html,
+body {
+  min-height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  font-size: 0.9375rem;
-  line-height: 1.65;
   word-break: keep-all;
-  font-variant-numeric: tabular-nums;
 }
 
-@layer base {
-  /* Tailwind v4 는 버튼 커서를 기본값으로 두므로, 누를 수 있는 요소는 손가락 커서로 구분한다 */
-  button:not(:disabled),
-  [role="button"],
-  summary,
-  select:not(:disabled),
-  input[type="file"]:not(:disabled) {
-    cursor: pointer;
-  }
-
-  /* 키보드로 이동할 때 지금 위치가 분명히 보이게 한다 */
-  a:focus-visible,
-  button:focus-visible,
-  summary:focus-visible,
-  [tabindex]:focus-visible {
-    outline: 2px solid var(--color-brand);
-    outline-offset: 2px;
-  }
-
-  h1,
-  h2,
-  h3 {
-    color: var(--color-foreground);
-  }
+/* 켜진 토글(고른 후보, 선택한 팀원)은 초록으로 구분한다 */
+.teum-toggle button[aria-pressed="true"] {
+  background: var(--color-accent-muted);
+  color: var(--color-text-accent);
 }
 
-/* 사용: className="btn btn-primary" 처럼 기본 클래스와 함께 쓴다. */
-@layer components {
-  .page-title {
-    @apply text-[1.75rem] leading-[1.25] font-bold tracking-[-0.015em];
-  }
-
-  .section-title {
-    @apply text-[1.0625rem] font-bold;
-  }
-
-  /* 구획: 상자 대신 시간표 머리처럼 위에 초록 굵은 선을 긋는다 */
-  .card {
-    @apply border-t-2 border-brand pt-5;
-  }
-
-  /* 목록의 한 행: 아래 격자선으로만 구분한다 */
-  .row {
-    @apply border-b border-line py-4;
-  }
-
-  /* 눌러서 이동하는 행: 호버 시 왼쪽에 수업 블록 같은 초록 막대가 생긴다 */
-  .row-link {
-    @apply relative block border-b border-line py-4 pr-8 pl-4 transition-colors hover:bg-brand-soft;
-  }
-  .row-link::before {
-    content: "";
-    @apply absolute top-0 bottom-0 left-0 w-1 bg-transparent transition-colors;
-  }
-  .row-link:hover::before {
-    @apply bg-brand;
-  }
-  .row-link::after {
-    content: "";
-    @apply absolute top-1/2 right-3 size-2 -translate-y-1/2 rotate-45 border-t-2 border-r-2 border-muted;
-  }
-
-  .field-label {
-    @apply flex flex-col gap-1.5 text-sm font-bold text-foreground;
-  }
-  .field-hint {
-    @apply text-xs font-normal text-muted;
-  }
-
-  .input {
-    @apply h-12 w-full rounded-[8px] border-[1.5px] border-line-strong bg-field px-3.5 text-[0.9375rem] font-normal text-foreground hover:border-foreground;
-  }
-  textarea.input {
-    @apply h-auto py-3;
-  }
-  select.input {
-    @apply appearance-none pr-10;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23036635' stroke-width='2.5' stroke-linecap='square'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 16px;
-  }
-  .input:focus {
-    @apply border-brand outline-2 outline-offset-0 outline-brand;
-  }
-  .input:disabled {
-    @apply cursor-not-allowed bg-sunken text-muted;
-  }
-  .input::placeholder {
-    @apply text-muted;
-  }
-  input[type="file"].input {
-    @apply h-auto border-dashed py-3 text-sm file:mr-3 file:cursor-pointer file:rounded-[6px] file:border-0 file:bg-brand file:px-4 file:py-2 file:text-sm file:font-bold file:text-white;
-  }
-
-  .btn {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-[8px] px-5 py-2.5 text-[0.9375rem] font-bold whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40;
-    transition:
-      background-color 120ms ease-out,
-      color 120ms ease-out,
-      transform 80ms ease-out;
-  }
-  .btn:not(:disabled):active {
-    transform: translateY(1px);
-  }
-  .btn-primary {
-    @apply bg-brand text-white hover:bg-brand-deep;
-  }
-  .btn-secondary {
-    @apply border-[1.5px] border-brand bg-white text-brand hover:bg-brand-soft;
-  }
-  .btn-danger {
-    @apply border-[1.5px] border-danger bg-white text-danger hover:bg-danger-soft;
-  }
-  .btn-sm {
-    @apply min-h-9 rounded-[6px] px-3 py-1.5 text-sm;
-  }
-
-  /* 선택 버튼(도구, 좋아요 등): 눌리면 초록으로 채워진다 */
-  .chip {
-    @apply inline-flex min-h-10 items-center gap-1.5 rounded-[6px] border-[1.5px] border-line-strong bg-white px-3.5 py-2 text-sm font-bold text-foreground hover:border-brand;
-    transition:
-      background-color 120ms ease-out,
-      color 120ms ease-out;
-  }
-  .chip[aria-pressed="true"] {
-    @apply border-brand bg-brand text-white;
-  }
-
-  /* 상태 표시 (누를 수 없음) */
-  .badge {
-    @apply inline-flex items-center gap-1 rounded-[4px] px-2 py-0.5 text-xs font-bold;
-  }
-  .badge-brand {
-    @apply bg-brand text-white;
-  }
-  /* 보조 상태: 채우지 않고 테두리만 */
-  .badge-accent {
-    @apply border border-brand bg-white text-brand;
-  }
-
-  .text-link {
-    @apply font-bold text-brand underline decoration-2 underline-offset-4 hover:text-brand-deep;
-  }
-
-  /* 알림 상자: 왼쪽 초록 막대 */
-  .notice {
-    @apply border-l-4 border-brand bg-sunken px-4 py-3 text-sm;
-  }
-  .notice-danger {
-    @apply border-danger bg-danger-soft text-danger;
-  }
-
-  /* 접었다 펴는 영역 */
-  .disclosure > summary {
-    @apply flex list-none items-center justify-between gap-2 py-1 text-sm font-bold hover:text-brand;
-  }
-  .disclosure > summary::-webkit-details-marker {
-    display: none;
-  }
-  .disclosure > summary::after {
-    content: "";
-    @apply size-4 shrink-0;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23036635' stroke-width='2.5' stroke-linecap='square'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
-      center / contain no-repeat;
-    transition: transform 160ms ease-out;
-  }
-  .disclosure[open] > summary::after {
-    transform: rotate(180deg);
-  }
-
-  /* 시간표 칸 상태 */
-  .slot-class {
-    @apply bg-brand;
-  }
-  .slot-manual {
-    background: var(--hatch);
-  }
-  .slot-free {
-    @apply bg-white;
-  }
+.teum-slot-class {
+  background: var(--color-accent);
 }
-
-/* 첫 화면 격자: 수업 블록이 한 번 채워지고, 모두가 비는 칸이 마지막에 드러난다 */
-@keyframes slot-fill {
-  from {
-    transform: scaleY(0);
-  }
-  to {
-    transform: scaleY(1);
-  }
+.teum-slot-manual {
+  background: var(--teum-hatch);
 }
-@keyframes gap-reveal {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-.hero-slot {
-  transform-origin: top;
-  animation: slot-fill 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-.hero-gap {
-  animation: gap-reveal 360ms ease-out both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .btn,
-  .chip,
-  .row-link,
-  .hero-slot,
-  .hero-gap {
-    transition: none;
-    animation: none;
-  }
+.teum-slot-free {
+  background: var(--teum-slot-free);
 }

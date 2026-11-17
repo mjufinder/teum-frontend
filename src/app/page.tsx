@@ -1,11 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Heading, Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
 
-import GapGrid from "@/components/landing/GapGrid";
+import OverlapDemo from "@/components/landing/OverlapDemo";
 import Logo from "@/components/layout/Logo";
+import { PageLoading } from "@/components/layout/PageState";
 import { ApiError } from "@/lib/api";
 import {
   clearOAuthParams,
@@ -69,41 +74,41 @@ export default function Home() {
   }, [router]);
 
   if (checking) {
-    return (
-      <main className="flex min-h-screen items-center justify-center p-8">
-        <p className="text-sm text-muted">불러오는 중...</p>
-      </main>
-    );
+    return <PageLoading />;
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[960px] flex-col px-5 py-6">
-      <header>
+    <div className="flex min-h-dvh flex-col">
+      <header className="mx-auto flex w-full max-w-[1120px] items-center justify-between px-5 py-4 sm:px-6">
         <Logo />
+        <HStack gap={2}>
+          <Button label="로그인" variant="ghost" href="/login" />
+          <Button label="시작하기" variant="primary" href="/signup" />
+        </HStack>
       </header>
-      <div className="grid flex-1 items-center gap-12 py-12 md:grid-cols-[1fr_minmax(0,22rem)] md:gap-16">
-        <div className="flex max-w-[30rem] flex-col gap-6">
-          <h1 className="text-[clamp(2rem,4.4vw,2.75rem)] leading-[1.22] font-bold tracking-[-0.025em]">
-            팀원 시간표를 겹쳐
-            <br />
-            모두가 비는 시간을 찾아요
-          </h1>
-          <p className="text-[1.0625rem] text-muted">
-            에브리타임 시간표 이미지를 올리거나 칸을 칠해 등록하면, 모임에 들어온 팀원
-            모두의 빈 시간에서 회의 시간을 골라 투표할 수 있어요.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/signup" className="btn btn-primary">
-              시간표로 시작하기
-            </Link>
-            <Link href="/login" className="btn btn-secondary">
-              로그인
-            </Link>
-          </div>
-          {error && <p className="notice notice-danger">{error}</p>}
-        </div>
-        <GapGrid />
-      </div>
-    </main>
+      <main className="mx-auto grid w-full max-w-[1120px] flex-1 items-center gap-10 px-5 py-8 sm:px-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-12 lg:py-14">
+        <VStack gap={6}>
+          <VStack gap={4}>
+            <Heading level={1} type="display-2" textWrap="balance">
+              팀원 시간표를 겹치면 모두가 비는 시간이 보여요
+            </Heading>
+            <Text type="large" color="secondary" as="p" display="block">
+              에브리타임 시간표 이미지를 올리거나 칸을 칠해 등록하면, 모임에 들어온 팀원 모두의
+              빈 시간에서 회의 시간을 골라 투표할 수 있어요.
+            </Text>
+          </VStack>
+          <HStack gap={3} wrap="wrap">
+            <Button label="시간표로 시작하기" variant="primary" size="lg" href="/signup" />
+            <Button label="로그인" variant="secondary" size="lg" href="/login" />
+          </HStack>
+          {error && <Banner status="error" title={error} />}
+          <Text type="supporting" as="p" display="block">
+            옆의 시간표는 직접 눌러 볼 수 있는 예시예요. 팀원을 빼거나 칸을 눌러 내 일정을 바꿔
+            보세요.
+          </Text>
+        </VStack>
+        <OverlapDemo />
+      </main>
+    </div>
   );
 }

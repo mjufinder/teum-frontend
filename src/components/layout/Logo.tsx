@@ -1,23 +1,25 @@
-interface LogoProps {
-  size?: "md" | "lg";
+interface LogoMarkProps {
+  size?: number;
 }
 
-// 시간표의 두 수업 블록 사이에 난 흰 틈
-export default function Logo({ size = "md" }: LogoProps) {
+// 나란한 두 수업 블록과 그 사이에 난 틈
+export function LogoMark({ size = 22 }: LogoMarkProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 22 22" aria-hidden="true">
+      <rect x="1" y="1" width="8" height="20" rx="2.5" fill="#036635" />
+      <rect x="13" y="1" width="8" height="20" rx="2.5" fill="#036635" />
+    </svg>
+  );
+}
+
+export default function Logo({ size = "md" }: { size?: "md" | "lg" }) {
   const large = size === "lg";
   return (
     <span className="inline-flex items-center gap-2">
-      <svg
-        aria-hidden
-        viewBox="0 0 20 24"
-        className={large ? "h-10 w-[34px]" : "h-7 w-6"}
-      >
-        <rect x="0" y="0" width="20" height="10" fill="#036635" />
-        <rect x="0" y="14" width="20" height="10" fill="#036635" />
-      </svg>
+      <LogoMark size={large ? 30 : 22} />
       <span
-        className={`font-bold tracking-[-0.03em] text-brand ${
-          large ? "text-[2.5rem] leading-none" : "text-[1.375rem] leading-none"
+        className={`font-bold tracking-[-0.03em] text-[var(--color-text-primary)] ${
+          large ? "text-[1.75rem] leading-none" : "text-[1.25rem] leading-none"
         }`}
       >
         틈
