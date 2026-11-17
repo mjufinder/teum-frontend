@@ -40,3 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# astryx 테마 편집기 미리보기 (다시 만들 수 있음)
+themes/*/preview.html
+themes/*/sheet.html
+themes/*/*.png
