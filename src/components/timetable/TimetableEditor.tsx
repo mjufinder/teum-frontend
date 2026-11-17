@@ -9,10 +9,10 @@ import { paintCells } from "@/lib/timetable";
 import { saveMyTimetable } from "@/lib/timetable-api";
 import type { SlotState, TimetableBits } from "@/types/timetable";
 
-const tools: { state: SlotState; label: string }[] = [
-  { state: "class", label: "수업" },
-  { state: "manual", label: "개인 일정" },
-  { state: "free", label: "지우기" },
+const tools: { state: SlotState; label: string; swatch: string }[] = [
+  { state: "class", label: "수업", swatch: "slot-class" },
+  { state: "manual", label: "개인 일정", swatch: "slot-manual" },
+  { state: "free", label: "지우기", swatch: "slot-free" },
 ];
 
 interface TimetableEditorProps {
@@ -64,40 +64,56 @@ export default function TimetableEditor({
       </p>
 
       {warnings.map((warning, i) => (
-        <p key={i} className="text-sm text-muted">
+        <p key={i} className="notice">
           {warning}
         </p>
       ))}
 
-      <div className="flex gap-2">
-        {tools.map((item) => (
-          <button
-            key={item.state}
-            type="button"
-            aria-pressed={tool === item.state}
-            onClick={() => setTool(item.state)}
-            className={`rounded-md border px-4 py-2 text-sm ${
-              tool === item.state
-                ? "border-brand bg-brand-soft text-brand"
-                : "border-line bg-surface hover:bg-zinc-50"
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
+      <div className="flex flex-col gap-2">
+        <p className="text-sm">
+          칠할 종류를 고른 뒤, 칸을 누르거나 끌어서 칠해 주세요.
+        </p>
+        <div
+          className="inline-flex self-start overflow-hidden rounded-[8px] border-[1.5px] border-brand"
+          role="group"
+          aria-label="칠하기 도구"
+        >
+          {tools.map((item, i) => {
+            const active = tool === item.state;
+            return (
+              <button
+                key={item.state}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setTool(item.state)}
+                className={`flex min-h-10 items-center gap-2 px-4 text-sm font-bold transition-colors ${
+                  i > 0 ? "border-l-[1.5px] border-brand" : ""
+                } ${active ? "bg-brand text-white" : "bg-white text-brand hover:bg-brand-soft"}`}
+              >
+                <span
+                  aria-hidden
+                  className={`size-3.5 border border-current ${
+                    active && item.state === "class" ? "bg-white" : item.swatch
+                  }`}
+                />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <TimetableGrid bits={bits} onPaint={handlePaint} />
 
       {error && <p className="text-sm text-danger">{error}</p>}
-      {saved && <p className="text-sm text-muted">저장했어요.</p>}
+      {saved && <p className="text-sm font-bold text-brand-strong">저장했어요.</p>}
 
       <div>
         <button
           type="button"
           disabled={saving}
           onClick={handleSave}
-          className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-strong disabled:opacity-50"
+          className="btn btn-primary"
         >
           {saving ? "저장 중..." : "저장"}
         </button>

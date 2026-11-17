@@ -4,10 +4,48 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
-import MeetingForm from "@/components/meeting/MeetingForm";
+import MeetingForm, { type MeetingFormValues } from "@/components/meeting/MeetingForm";
 import { ApiError, authFetch } from "@/lib/api";
-import { getMeeting, getMembers, updateMeeting } from "@/lib/meetings";
+import {
+  type MeetingUpdateBody,
+  getMeeting,
+  getMembers,
+  toHHMM,
+  updateMeeting,
+} from "@/lib/meetings";
 import type { Meeting } from "@/types/meeting";
+
+function toFormValues(meeting: Meeting): MeetingFormValues {
+  return {
+    name: meeting.name,
+    description: meeting.description ?? "",
+    minDuration: meeting.min_duration_min,
+    searchStartTime: toHHMM(meeting.search_start_time),
+    searchEndTime: toHHMM(meeting.search_end_time),
+    travelBufferMin: meeting.travel_buffer_min,
+  };
+}
+
+// 바뀐 값만 보낸다. 조건이 하나라도 바뀌면 서버가 재계산 필요 상태로 바꾸고 진행 중인 투표를 폐기한다.
+function diff(before: MeetingFormValues, after: MeetingFormValues) {
+  const info: MeetingUpdateBody = {};
+  const conditions: MeetingUpdateBody = {};
+  if (after.name !== before.name) info.name = after.name;
+  if (after.description !== before.description) info.description = after.description;
+  if (after.minDuration !== before.minDuration) {
+    conditions.min_duration_min = after.minDuration;
+  }
+  if (after.searchStartTime !== before.searchStartTime) {
+    conditions.search_start_time = after.searchStartTime;
+  }
+  if (after.searchEndTime !== before.searchEndTime) {
+    conditions.search_end_time = after.searchEndTime;
+  }
+  if (after.travelBufferMin !== before.travelBufferMin) {
+    conditions.travel_buffer_min = after.travelBufferMin;
+  }
+  return { info, conditions };
+}
 
 function EditMeeting() {
   const router = useRouter();
@@ -44,17 +82,16 @@ function EditMeeting() {
       });
   }, [meetingId, router]);
 
-  async function handleSubmit(name: string, minDuration: number) {
+  async function handleSubmit(values: MeetingFormValues) {
     if (!meeting) return;
-    const body: { name?: string; minDuration?: number } = {};
-    if (name !== meeting.name) body.name = name;
-    if (minDuration !== meeting.min_duration_min) {
+    const { info, conditions } = diff(toFormValues(meeting), values);
+    if (Object.keys(conditions).length > 0) {
       const ok = confirm(
-        "최소 회의시간을 바꾸면 진행 중인 투표가 있을 경우 폐기돼요."
+        "조건을 바꾸면 공강을 다시 계산해야 하고, 진행 중인 투표가 있으면 폐기돼요. 계속할까요?"
       );
       if (!ok) return false;
-      body.minDuration = minDuration;
     }
+    const body = { ...info, ...conditions };
     if (Object.keys(body).length > 0) {
       await updateMeeting(meetingId, body);
     }
@@ -67,7 +104,7 @@ function EditMeeting() {
         <p className="text-sm text-danger">{error}</p>
         <Link
           href="/meetings"
-          className="rounded-md border border-line bg-surface px-4 py-2 text-sm hover:bg-zinc-50"
+          className="btn btn-secondary"
         >
           내 모임으로
         </Link>
@@ -81,10 +118,9 @@ function EditMeeting() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-semibold">모임 수정</h1>
+      <h1 className="page-title">모임 수정</h1>
       <MeetingForm
-        initialName={meeting.name}
-        initialMinDuration={meeting.min_duration_min}
+        initial={toFormValues(meeting)}
         submitLabel="저장"
         onSubmit={handleSubmit}
       />

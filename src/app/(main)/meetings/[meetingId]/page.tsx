@@ -2,12 +2,17 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 
 import AddMemberForm from "@/components/meeting/AddMemberForm";
-import MemberList from "@/components/meeting/MemberList";
+import CandidateList from "@/components/meeting/CandidateList";
+import MeetingActions from "@/components/meeting/MeetingActions";
+import MemoBoard from "@/components/meeting/MemoBoard";
+import MemberList, { memberLabel } from "@/components/meeting/MemberList";
 import { ApiError, authFetch } from "@/lib/api";
-import { getMeeting, getMembers } from "@/lib/meetings";
+import { getCandidates } from "@/lib/candidates";
+import { getMeeting, getMembers, toHHMM, transferAdmin } from "@/lib/meetings";
+import type { CandidateSet } from "@/types/candidate";
 import type { Meeting, Member } from "@/types/meeting";
 
 function MeetingDetail() {
@@ -18,6 +23,46 @@ function MeetingDetail() {
   const [myUserId, setMyUserId] = useState<number | null>(null);
   const [emails, setEmails] = useState<Record<number, string>>({});
   const [error, setError] = useState<string | null>(null);
+  const [transferring, setTransferring] = useState(false);
+  const [transferError, setTransferError] = useState<string | null>(null);
+  // undefined: 불러오는 중, null: 아직 계산된 후보 없음
+  const [candidateSet, setCandidateSet] = useState<CandidateSet | null | undefined>(undefined);
+  const [candidateError, setCandidateError] = useState<string | null>(null);
+
+  const handleCandidateError = useCallback(
+    (e: unknown) => {
+      if (e instanceof ApiError && e.status === 401) {
+        router.replace("/login");
+        return;
+      }
+      setCandidateError(e instanceof ApiError ? e.message : "추천 시간을 불러오지 못했어요.");
+    },
+    [router]
+  );
+
+  const loadCandidates = useCallback(async () => {
+    setCandidateError(null);
+    try {
+      setCandidateSet(await getCandidates(meetingId));
+    } catch (e) {
+      handleCandidateError(e);
+    }
+  }, [meetingId, handleCandidateError]);
+
+  // 팀원 추가 뒤 구성원·재계산 상태·추천 시간을 함께 새로 고친다.
+  const refreshAfterMemberChange = useCallback(async () => {
+    const [meetingResult, membersResult] = await Promise.allSettled([
+      getMeeting(meetingId),
+      getMembers(meetingId),
+    ]);
+    if (meetingResult.status === "fulfilled") setMeeting(meetingResult.value);
+    if (membersResult.status === "fulfilled") setMembers(membersResult.value);
+    await loadCandidates();
+  }, [meetingId, loadCandidates]);
+
+  useEffect(() => {
+    getCandidates(meetingId).then(setCandidateSet).catch(handleCandidateError);
+  }, [meetingId, handleCandidateError]);
 
   useEffect(() => {
     Promise.all([
@@ -45,7 +90,36 @@ function MeetingDetail() {
 
   async function handleAdded(member: Member, email: string) {
     setEmails((prev) => ({ ...prev, [member.user_id]: email }));
-    setMembers(await getMembers(meetingId));
+    // 추가는 이미 성공했으므로 목록 갱신이 실패해도 응답 값으로 보완한다.
+    setMembers((prev) =>
+      prev.some((m) => m.member_id === member.member_id) ? prev : [...prev, member]
+    );
+    await refreshAfterMemberChange();
+  }
+
+  async function handleTransfer(target: Member) {
+    if (myUserId === null) return;
+    const label = memberLabel(target, myUserId, emails);
+    if (
+      !confirm(
+        `${label}에게 관리자를 넘길까요? 넘기면 나는 일반 구성원이 되고 모임 수정·팀원 추가를 할 수 없어요.`
+      )
+    ) {
+      return;
+    }
+    setTransferError(null);
+    setTransferring(true);
+    try {
+      setMembers(await transferAdmin(meetingId, target.user_id));
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        router.replace("/login");
+        return;
+      }
+      setTransferError(e instanceof ApiError ? e.message : "관리자를 넘기지 못했어요.");
+    } finally {
+      setTransferring(false);
+    }
   }
 
   if (error) {
@@ -54,7 +128,7 @@ function MeetingDetail() {
         <p className="text-sm text-danger">{error}</p>
         <Link
           href="/meetings"
-          className="rounded-md border border-line bg-surface px-4 py-2 text-sm hover:bg-zinc-50"
+          className="btn btn-secondary"
         >
           내 모임으로
         </Link>
@@ -69,34 +143,87 @@ function MeetingDetail() {
   const isAdmin = members.some(
     (m) => m.user_id === myUserId && m.role === "ADMIN"
   );
+  const hasOtherMembers = members.some((m) => m.user_id !== myUserId);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">{meeting.name}</h1>
+    <div className="flex flex-col gap-10">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="page-title">{meeting.name}</h1>
+            {meeting.needs_recalc && <span className="badge badge-accent">재계산 필요</span>}
+          </div>
+          {meeting.description && <p className="text-muted">{meeting.description}</p>}
+          <p className="text-sm">
+            <span className="font-bold">{meeting.min_duration_min}분</span> 이상 회의,{" "}
+            <span className="font-bold">
+              {toHHMM(meeting.search_start_time)}~{toHHMM(meeting.search_end_time)}
+            </span>{" "}
+            사이에서 찾아요.
+            {meeting.travel_buffer_min > 0 && (
+              <> 수업 앞뒤로 {meeting.travel_buffer_min}분은 비워 둬요.</>
+            )}
+          </p>
+        </div>
         {isAdmin && (
           <Link
             href={`/meetings/${meetingId}/edit`}
-            className="rounded-md border border-line bg-surface px-4 py-2 text-sm hover:bg-zinc-50"
+            className="btn btn-secondary shrink-0"
           >
             수정
           </Link>
         )}
       </div>
-      <div className="flex items-center gap-2 rounded-lg border border-line bg-surface p-5 text-sm">
-        <span className="text-muted">최소 회의시간</span>
-        <span>{meeting.min_duration_min}분</span>
-        {meeting.needs_recalc && (
-          <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs text-brand">
-            재계산 필요
-          </span>
-        )}
-      </div>
+
+
+      <CandidateList
+        meetingId={meetingId}
+        candidateSet={candidateSet}
+        error={candidateError}
+        onRetry={loadCandidates}
+        needsRecalc={meeting.needs_recalc}
+        isAdmin={isAdmin}
+        members={members}
+        myUserId={myUserId}
+        emails={emails}
+      />
+
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold">구성원</h2>
-        <MemberList members={members} myUserId={myUserId} emails={emails} />
+        <h2 className="section-title">
+          구성원 <span className="text-muted">{members.length}</span>
+        </h2>
+        <MemberList
+          members={members}
+          myUserId={myUserId}
+          emails={emails}
+          onTransfer={isAdmin ? handleTransfer : undefined}
+          busy={transferring}
+        />
+        {transferError && <p className="text-sm text-danger">{transferError}</p>}
       </section>
-      {isAdmin && <AddMemberForm meetingId={meetingId} onAdded={handleAdded} />}
+
+      {isAdmin && (
+        <AddMemberForm
+          meetingId={meetingId}
+          onAdded={handleAdded}
+          onPartiallyAdded={refreshAfterMemberChange}
+        />
+      )}
+
+      <MemoBoard
+        meetingId={meetingId}
+        myUserId={myUserId}
+        isAdmin={isAdmin}
+        members={members}
+        emails={emails}
+      />
+
+      <MeetingActions
+        meetingId={meetingId}
+        meetingName={meeting.name}
+        isAdmin={isAdmin}
+        hasOtherMembers={hasOtherMembers}
+      />
     </div>
   );
 }

@@ -14,9 +14,9 @@ import type { SlotState, TimetableBits } from "@/types/timetable";
 const slots = Array.from({ length: SLOT_COUNT }, (_, slot) => slot);
 
 const cellColors: Record<SlotState, string> = {
-  class: "bg-brand",
-  manual: "bg-amber-300",
-  free: "bg-surface",
+  class: "slot-class",
+  manual: "slot-manual",
+  free: "slot-free",
 };
 
 const legend: { state: SlotState; label: string }[] = [
@@ -77,18 +77,18 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex gap-4 text-xs text-muted">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
         {legend.map((item) => (
           <span key={item.state} className="flex items-center gap-1.5">
             <span
-              className={`h-3 w-3 rounded-sm border border-line ${cellColors[item.state]}`}
+              className={`size-3.5 border border-brand ${cellColors[item.state]}`}
             />
             {item.label}
           </span>
         ))}
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-line bg-surface">
+      <div className="overflow-x-auto border-t-2 border-brand pt-1">
         <div
           className="grid select-none grid-cols-[3rem_repeat(7,minmax(2.5rem,1fr))]"
           onPointerDown={handlePointerDown}
@@ -98,14 +98,14 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
         >
           <div />
           {DAY_LABELS.map((label) => (
-            <div key={label} className="py-1.5 text-center text-xs font-medium">
+            <div key={label} className="py-1.5 text-center text-xs font-bold">
               {label}
             </div>
           ))}
 
           {slots.map((slot) => (
             <Fragment key={slot}>
-              <div className="h-6 pr-1.5 text-right text-xs leading-6 text-muted">
+              <div className="h-6 pr-2 text-right text-[11px] leading-none tabular-nums text-muted">
                 {slot % 2 === 0 && slotLabel(slot)}
               </div>
               {DAY_LABELS.map((_, day) => {
@@ -114,10 +114,14 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
                   <div
                     key={cell}
                     data-cell={cell}
-                    className={`h-6 border-l border-t border-line ${
-                      slot % 2 === 1 ? "border-t-zinc-100" : ""
+                    className={`h-6 border-t border-l border-line ${
+                      slot % 2 === 1 ? "border-t-line/40" : ""
+                    } ${day === DAY_LABELS.length - 1 ? "border-r" : ""} ${
+                      slot === SLOT_COUNT - 1 ? "border-b" : ""
                     } ${cellColors[slotState(bits, cell)]} ${
-                      onPaint ? "cursor-pointer touch-none" : ""
+                      onPaint
+                        ? "cursor-pointer touch-none hover:outline-2 hover:-outline-offset-2 hover:outline-foreground"
+                        : ""
                     }`}
                   />
                 );
