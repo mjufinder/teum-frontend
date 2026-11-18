@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Astryx 테마 편집기가 만드는 파일 (직접 고치지 않는다)
+    "themes/**",
+    "src/themes/**",
+    "src/astryx-themes.ts",
   ]),
 ]);
 

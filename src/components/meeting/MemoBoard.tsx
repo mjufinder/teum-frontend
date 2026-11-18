@@ -2,7 +2,21 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Avatar } from "@astryxdesign/core/Avatar";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { EmptyState } from "@astryxdesign/core/EmptyState";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Icon } from "@astryxdesign/core/Icon";
+import { IconButton } from "@astryxdesign/core/IconButton";
+import { Spinner } from "@astryxdesign/core/Spinner";
+import { Text } from "@astryxdesign/core/Text";
+import { TextArea } from "@astryxdesign/core/TextArea";
+import { VStack } from "@astryxdesign/core/VStack";
+import { PencilIcon, TrashIcon } from "@heroicons/react/20/solid";
 
+import { useConfirm } from "@/components/layout/useConfirm";
 import { memberLabel } from "@/components/meeting/MemberList";
 import { ApiError } from "@/lib/api";
 import { MEMO_MAX_LENGTH, createMemo, deleteMemo, getMemos, updateMemo } from "@/lib/memos";
@@ -37,6 +51,7 @@ export default function MemoBoard({
   emails,
 }: MemoBoardProps) {
   const router = useRouter();
+  const [confirm, dialog] = useConfirm();
   const [memos, setMemos] = useState<Memo[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -114,7 +129,13 @@ export default function MemoBoard({
   }
 
   async function handleDelete(memo: Memo) {
-    if (!confirm("이 메모를 삭제할까요?")) return;
+    const ok = await confirm({
+      title: "이 메모를 삭제할까요?",
+      description: "삭제한 메모는 되돌릴 수 없어요.",
+      actionLabel: "삭제",
+      tone: "destructive",
+    });
+    if (!ok) return;
     setActionError(null);
     setBusyId(memo.memo_id);
     try {
@@ -128,118 +149,125 @@ export default function MemoBoard({
   }
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="section-title">
-        메모 {memos && <span className="text-muted">{memos.length}</span>}
-      </h2>
-
-      <form onSubmit={handlePost} className="card flex flex-col gap-3">
-        <label htmlFor="memo-draft" className="sr-only">
-          새 메모
-        </label>
-        <textarea
-          id="memo-draft"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          maxLength={MEMO_MAX_LENGTH}
-          rows={3}
-          placeholder="팀원에게 남길 공지나 할 일을 적어 주세요."
-          disabled={posting}
-          className="input resize-none"
-        />
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-xs tabular-nums text-muted">
-            {draft.length} / {MEMO_MAX_LENGTH}
-          </span>
-          <button type="submit" disabled={posting || !draft.trim()} className="btn btn-primary">
-            {posting ? "남기는 중..." : "메모 남기기"}
-          </button>
-        </div>
+    <VStack gap={5}>
+      <form onSubmit={handlePost}>
+        <VStack gap={3}>
+          <TextArea
+            label="새 메모"
+            isLabelHidden
+            placeholder="팀원에게 남길 공지나 할 일을 적어 주세요."
+            value={draft}
+            onChange={setDraft}
+            rows={3}
+            maxLength={MEMO_MAX_LENGTH}
+            htmlMaxLength={MEMO_MAX_LENGTH}
+            isDisabled={posting}
+          />
+          <HStack hAlign="end">
+            <Button
+              type="submit"
+              label="메모 남기기"
+              variant="primary"
+              isLoading={posting}
+              isDisabled={!draft.trim()}
+            />
+          </HStack>
+        </VStack>
       </form>
 
-      {actionError && <p className="text-sm text-danger">{actionError}</p>}
-      {loadError && <p className="text-sm text-danger">{loadError}</p>}
-      {!loadError && !memos && <p className="text-sm text-muted">메모를 불러오는 중...</p>}
+      {actionError && <Banner status="error" title={actionError} />}
+      {loadError && <Banner status="error" title={loadError} />}
+      {!loadError && !memos && <Spinner label="메모를 불러오는 중" />}
       {memos && memos.length === 0 && (
-        <p className="text-sm text-muted">아직 남긴 메모가 없어요.</p>
+        <EmptyState
+          isCompact
+          title="아직 남긴 메모가 없어요"
+          description="회의 장소나 준비물처럼 팀원이 알아야 할 것을 적어 두세요."
+        />
       )}
 
       {memos && memos.length > 0 && (
-        <ul className="border-t border-line">
+        <ul className="m-0 flex list-none flex-col gap-3 p-0">
           {memos.map((memo) => {
             const canEdit = memo.author_user_id === myUserId || isAdmin;
             const editing = editingId === memo.memo_id;
             const busy = busyId === memo.memo_id;
+            const author = authorLabel(memo.author_user_id);
             return (
-              <li key={memo.memo_id} className="flex flex-col gap-2 border-b border-line py-4">
-                <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="font-bold">{authorLabel(memo.author_user_id)}</span>
-                  <span className="text-xs text-muted">{formatCreatedAt(memo.created_at)}</span>
-                  {canEdit && !editing && (
-                    <span className="ml-auto flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => startEdit(memo)}
-                        disabled={busy}
-                        className="btn btn-secondary btn-sm"
-                      >
-                        수정
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(memo)}
-                        disabled={busy}
-                        className="btn btn-danger btn-sm"
-                      >
-                        {busy ? "삭제 중..." : "삭제"}
-                      </button>
-                    </span>
-                  )}
-                </div>
+              <li key={memo.memo_id}>
+                <Card padding={4} variant="muted">
+                  <VStack gap={3}>
+                    <HStack hAlign="between" vAlign="center" gap={2} wrap="wrap">
+                      <HStack gap={2} vAlign="center">
+                        <Avatar name={author} size="sm" tooltip={false} />
+                        <Text weight="semibold">{author}</Text>
+                        <Text type="supporting">{formatCreatedAt(memo.created_at)}</Text>
+                      </HStack>
+                      {canEdit && !editing && (
+                        <HStack gap={1}>
+                          <IconButton
+                            label="메모 수정"
+                            tooltip="수정"
+                            variant="ghost"
+                            size="sm"
+                            icon={<Icon icon={PencilIcon} />}
+                            isDisabled={busy}
+                            onClick={() => startEdit(memo)}
+                          />
+                          <IconButton
+                            label="메모 삭제"
+                            tooltip="삭제"
+                            variant="ghost"
+                            size="sm"
+                            icon={<Icon icon={TrashIcon} />}
+                            isLoading={busy}
+                            onClick={() => handleDelete(memo)}
+                          />
+                        </HStack>
+                      )}
+                    </HStack>
 
-                {editing ? (
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor={`memo-edit-${memo.memo_id}`} className="sr-only">
-                      메모 수정
-                    </label>
-                    <textarea
-                      id={`memo-edit-${memo.memo_id}`}
-                      value={editDraft}
-                      onChange={(e) => setEditDraft(e.target.value)}
-                      maxLength={MEMO_MAX_LENGTH}
-                      rows={3}
-                      disabled={busy}
-                      className="input resize-none"
-                    />
-                    <div className="flex justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setEditingId(null)}
-                        disabled={busy}
-                        className="btn btn-secondary btn-sm"
-                      >
-                        취소
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdate(memo)}
-                        disabled={busy || !editDraft.trim()}
-                        className="btn btn-primary btn-sm"
-                      >
-                        {busy ? "저장 중..." : "저장"}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="whitespace-pre-wrap break-words text-[0.9375rem]">
-                    {memo.content}
-                  </p>
-                )}
+                    {editing ? (
+                      <VStack gap={2}>
+                        <TextArea
+                          label="메모 수정"
+                          isLabelHidden
+                          value={editDraft}
+                          onChange={setEditDraft}
+                          rows={3}
+                          maxLength={MEMO_MAX_LENGTH}
+                          htmlMaxLength={MEMO_MAX_LENGTH}
+                          isDisabled={busy}
+                        />
+                        <HStack hAlign="end" gap={2}>
+                          <Button
+                            label="취소"
+                            variant="ghost"
+                            size="sm"
+                            isDisabled={busy}
+                            onClick={() => setEditingId(null)}
+                          />
+                          <Button
+                            label="저장"
+                            variant="primary"
+                            size="sm"
+                            isLoading={busy}
+                            isDisabled={!editDraft.trim()}
+                            onClick={() => handleUpdate(memo)}
+                          />
+                        </HStack>
+                      </VStack>
+                    ) : (
+                      <p className="m-0 whitespace-pre-wrap break-words">{memo.content}</p>
+                    )}
+                  </VStack>
+                </Card>
               </li>
             );
           })}
         </ul>
       )}
-    </section>
+      {dialog}
+    </VStack>
   );
 }

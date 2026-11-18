@@ -1,9 +1,17 @@
 "use client";
 
-import Link from "next/link";
+import NextLink from "next/link";
 import { useParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { Card } from "@astryxdesign/core/Card";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Icon } from "@astryxdesign/core/Icon";
+import { Link } from "@astryxdesign/core/Link";
+import { Heading, Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
+import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 
+import { ErrorNote, PageLoading } from "@/components/layout/PageState";
 import Logo from "@/components/layout/Logo";
 import { formatSlot } from "@/components/meeting/CandidateList";
 import { ApiError } from "@/lib/api";
@@ -36,43 +44,43 @@ function SharedSchedule() {
       );
   }, [token]);
 
+  if (error) return <ErrorNote message={error} />;
+  if (!schedule) return <PageLoading />;
+
   return (
-    <>
-      {error ? (
-        <p className="notice notice-danger">{error}</p>
-      ) : !schedule ? (
-        <p className="text-sm text-muted">불러오는 중...</p>
-      ) : (
-        <div className="flex flex-col gap-4">
-          <h1 className="page-title">{schedule.meeting_name}</h1>
-          <div className="flex flex-col gap-1 rounded-[8px] bg-brand p-5 text-white">
-            <span className="text-sm text-white/85">확정된 모임 시간</span>
-            <span className="text-[1.75rem] leading-tight font-bold tracking-[-0.015em] tabular-nums">
+    <Card padding={6} elevation="med">
+      <VStack gap={5}>
+        <VStack gap={1}>
+          <Text type="supporting">확정된 모임 시간</Text>
+          <Heading level={1}>{schedule.meeting_name}</Heading>
+        </VStack>
+        <Card variant="green" padding={5}>
+          <HStack gap={3} vAlign="center">
+            <Icon icon={CalendarDaysIcon} size="lg" color="accent" />
+            <Text type="display-3" weight="bold" hasTabularNumbers>
               매주 {formatSlot(schedule.day_of_week, schedule.start_time, schedule.end_time)}
-            </span>
-          </div>
-          <p className="text-xs text-muted">{formatConfirmedAt(schedule.confirmed_at)} 확정</p>
-        </div>
-      )}
-    </>
+            </Text>
+          </HStack>
+        </Card>
+        <Text type="supporting">{formatConfirmedAt(schedule.confirmed_at)} 확정</Text>
+      </VStack>
+    </Card>
   );
 }
 
 // 로그인 없이 확정 일정을 보는 공개 페이지 (VOTE-04)
 export default function SharedSchedulePage() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center gap-8 px-5 py-12">
-      <Link href="/" aria-label="틈 처음 화면" className="self-start">
+    <main className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col justify-center gap-6 px-5 py-12">
+      <NextLink href="/" aria-label="틈 처음 화면" className="self-start">
         <Logo />
-      </Link>
-      <div className="card">
-        <Suspense fallback={<p className="text-sm text-muted">불러오는 중...</p>}>
-          <SharedSchedule />
-        </Suspense>
-      </div>
-      <Link href="/" className="text-link self-start text-sm">
-        틈으로 우리 팀 시간도 찾아보기
-      </Link>
+      </NextLink>
+      <Suspense fallback={<PageLoading />}>
+        <SharedSchedule />
+      </Suspense>
+      <Text type="supporting">
+        <Link href="/" type="inherit">틈으로 우리 팀 시간도 찾아보기</Link>
+      </Text>
     </main>
   );
 }

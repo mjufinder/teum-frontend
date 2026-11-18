@@ -2,7 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ClickableCard } from "@astryxdesign/core/ClickableCard";
+import { Icon } from "@astryxdesign/core/Icon";
+import { Heading, Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
+import { PencilSquareIcon, PhotoIcon } from "@heroicons/react/24/outline";
 
+import { ErrorNote, PageLoading } from "@/components/layout/PageState";
 import TimetableEditor from "@/components/timetable/TimetableEditor";
 import TimetableUpload from "@/components/timetable/TimetableUpload";
 import { ApiError } from "@/lib/api";
@@ -44,50 +50,56 @@ export default function OnboardingTimetablePage() {
   }
 
   function renderContent() {
-    if (loading) return <p className="text-sm text-muted">불러오는 중...</p>;
-    if (error) return <p className="text-sm text-danger">{error}</p>;
+    if (loading) return <PageLoading />;
+    if (error) return <ErrorNote message={error} />;
     if (bits) {
       return (
         <TimetableEditor
           initial={bits}
           warnings={warnings}
+          saveLabel="저장하고 시작하기"
           onSaved={() => router.push("/meetings")}
         />
       );
     }
     if (uploading) {
       return (
-        <TimetableUpload
-          onRecognized={handleRecognized}
-          onManual={startManual}
-          onCancel={() => setUploading(false)}
-        />
+        <div className="max-w-[560px]">
+          <TimetableUpload
+            onRecognized={handleRecognized}
+            onManual={startManual}
+            onCancel={() => setUploading(false)}
+          />
+        </div>
       );
     }
     return (
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setUploading(true)}
-          className="btn btn-primary"
-        >
-          이미지로 등록
-        </button>
-        <button
-          type="button"
-          onClick={startManual}
-          className="btn btn-secondary"
-        >
-          직접 입력
-        </button>
+      <div className="grid max-w-[640px] gap-4 sm:grid-cols-2">
+        <ClickableCard label="이미지로 등록" onClick={() => setUploading(true)} padding={5} elevation="low">
+          <VStack gap={2}>
+            <Icon icon={PhotoIcon} size="lg" color="accent" />
+            <Text type="large" weight="bold">이미지로 등록</Text>
+            <Text type="supporting">에브리타임 시간표 이미지를 올리면 수업 시간을 읽어 와요.</Text>
+          </VStack>
+        </ClickableCard>
+        <ClickableCard label="직접 입력" onClick={startManual} padding={5}>
+          <VStack gap={2}>
+            <Icon icon={PencilSquareIcon} size="lg" color="accent" />
+            <Text type="large" weight="bold">직접 입력</Text>
+            <Text type="supporting">빈 시간표에서 칸을 눌러 수업과 일정을 칠해요.</Text>
+          </VStack>
+        </ClickableCard>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="page-title">시간표 등록</h1>
+    <VStack gap={6}>
+      <VStack gap={1}>
+        <Heading level={1}>시간표 등록</Heading>
+        <Text color="secondary">수업이 있는 시간을 알려 주면 빈 시간에서 회의 시간을 찾아요.</Text>
+      </VStack>
       {renderContent()}
-    </div>
+    </VStack>
   );
 }

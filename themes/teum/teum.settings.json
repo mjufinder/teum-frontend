@@ -1,0 +1,25 @@
+{
+  "name": "teum",
+  "like": "neutral",
+  "mode": "both",
+  "settings": [
+    {
+      "thing": "accent",
+      "value": "#036635",
+      "source": "dial"
+    },
+    {
+      "thing": "font",
+      "value": "\"IBM Plex Sans KR\", \"Apple SD Gothic Neo\", \"Malgun Gothic\", system-ui, sans-serif",
+      "source": "dial"
+    },
+    {
+      "thing": "background",
+      "value": "#ffffff",
+      "source": "property",
+      "on": "top-nav"
+    }
+  ],
+  "lifted": [],
+  "palette": "028f9ded68ed7f028d9a2ba35365ab8b6dae9a02c76eead565a5d172b7dbf3fe"
+}

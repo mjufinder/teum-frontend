@@ -1,8 +1,12 @@
-import type { Metadata } from "next";
+// globals.css 가 캐스케이드 레이어 순서를 정하므로 다른 스타일보다 먼저 불러온다.
+import "./globals.css";
 import "@fontsource/ibm-plex-sans-kr/400.css";
 import "@fontsource/ibm-plex-sans-kr/500.css";
 import "@fontsource/ibm-plex-sans-kr/700.css";
-import "./globals.css";
+
+import type { Metadata } from "next";
+
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "틈",
@@ -11,8 +15,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="ko">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

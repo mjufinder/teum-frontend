@@ -1,9 +1,20 @@
 "use client";
 
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
+import { Avatar } from "@astryxdesign/core/Avatar";
+import { AvatarGroup, AvatarGroupOverflow } from "@astryxdesign/core/AvatarGroup";
+import { Badge } from "@astryxdesign/core/Badge";
+import { Button } from "@astryxdesign/core/Button";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Icon } from "@astryxdesign/core/Icon";
+import { Tab, TabList } from "@astryxdesign/core/TabList";
+import { Heading, Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
+import { AdjustmentsHorizontalIcon } from "@heroicons/react/20/solid";
 
+import { ErrorNote, PageLoading } from "@/components/layout/PageState";
+import { useConfirm } from "@/components/layout/useConfirm";
 import AddMemberForm from "@/components/meeting/AddMemberForm";
 import CandidateList from "@/components/meeting/CandidateList";
 import MeetingActions from "@/components/meeting/MeetingActions";
@@ -28,6 +39,8 @@ function MeetingDetail() {
   // undefined: 불러오는 중, null: 아직 계산된 후보 없음
   const [candidateSet, setCandidateSet] = useState<CandidateSet | null | undefined>(undefined);
   const [candidateError, setCandidateError] = useState<string | null>(null);
+  const [tab, setTab] = useState("candidates");
+  const [confirm, dialog] = useConfirm();
 
   const handleCandidateError = useCallback(
     (e: unknown) => {
@@ -100,13 +113,12 @@ function MeetingDetail() {
   async function handleTransfer(target: Member) {
     if (myUserId === null) return;
     const label = memberLabel(target, myUserId, emails);
-    if (
-      !confirm(
-        `${label}에게 관리자를 넘길까요? 넘기면 나는 일반 구성원이 되고 모임 수정·팀원 추가를 할 수 없어요.`
-      )
-    ) {
-      return;
-    }
+    const ok = await confirm({
+      title: `${label}에게 관리자를 넘길까요?`,
+      description: "넘기면 나는 일반 구성원이 되고 모임 수정·팀원 추가를 할 수 없어요.",
+      actionLabel: "관리자 넘기기",
+    });
+    if (!ok) return;
     setTransferError(null);
     setTransferring(true);
     try {
@@ -124,20 +136,15 @@ function MeetingDetail() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-start gap-3">
-        <p className="text-sm text-danger">{error}</p>
-        <Link
-          href="/meetings"
-          className="btn btn-secondary"
-        >
-          내 모임으로
-        </Link>
-      </div>
+      <ErrorNote
+        message={error}
+        action={<Button label="내 모임으로" variant="secondary" size="sm" href="/meetings" />}
+      />
     );
   }
 
   if (!meeting || myUserId === null) {
-    return <p className="text-sm text-muted">불러오는 중...</p>;
+    return <PageLoading />;
   }
 
   const isAdmin = members.some(
@@ -146,91 +153,121 @@ function MeetingDetail() {
   const hasOtherMembers = members.some((m) => m.user_id !== myUserId);
 
   return (
-    <div className="flex flex-col gap-10">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="page-title">{meeting.name}</h1>
-            {meeting.needs_recalc && <span className="badge badge-accent">재계산 필요</span>}
-          </div>
-          {meeting.description && <p className="text-muted">{meeting.description}</p>}
-          <p className="text-sm">
-            <span className="font-bold">{meeting.min_duration_min}분</span> 이상 회의,{" "}
-            <span className="font-bold">
-              {toHHMM(meeting.search_start_time)}~{toHHMM(meeting.search_end_time)}
-            </span>{" "}
-            사이에서 찾아요.
-            {meeting.travel_buffer_min > 0 && (
-              <> 수업 앞뒤로 {meeting.travel_buffer_min}분은 비워 둬요.</>
-            )}
-          </p>
-        </div>
-        {isAdmin && (
-          <Link
-            href={`/meetings/${meetingId}/edit`}
-            className="btn btn-secondary shrink-0"
-          >
-            수정
-          </Link>
-        )}
-      </div>
+    <VStack gap={6}>
+      <HStack hAlign="between" vAlign="end" gap={4} wrap="wrap">
+        <VStack gap={2}>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={1}>{meeting.name}</Heading>
+            {meeting.needs_recalc && <Badge variant="warning" label="재계산 필요" />}
+          </HStack>
+          {meeting.description && <Text color="secondary">{meeting.description}</Text>}
+          <Text color="secondary" hasTabularNumbers>
+            {meeting.min_duration_min}분 이상, {toHHMM(meeting.search_start_time)}~
+            {toHHMM(meeting.search_end_time)} 사이에서 찾아요.
+            {meeting.travel_buffer_min > 0 &&
+              ` 수업 앞뒤로 ${meeting.travel_buffer_min}분은 비워 둬요.`}
+          </Text>
+        </VStack>
+        <HStack gap={3} vAlign="center">
+          <AvatarGroup size="sm">
+            {members.slice(0, 5).map((m) => (
+              <Avatar key={m.member_id} name={memberLabel(m, myUserId, emails)} />
+            ))}
+            {members.length > 5 && <AvatarGroupOverflow count={members.length - 5} />}
+          </AvatarGroup>
+          {isAdmin && (
+            <Button
+              label="조건 수정"
+              variant="secondary"
+              icon={<Icon icon={AdjustmentsHorizontalIcon} />}
+              href={`/meetings/${meetingId}/edit`}
+            />
+          )}
+        </HStack>
+      </HStack>
 
+      <TabList value={tab} onChange={setTab} hasDivider role="tablist">
+        <Tab value="candidates" label="추천 시간" panelId="panel-candidates" />
+        <Tab
+          value="members"
+          label="팀원"
+          panelId="panel-members"
+          endContent={<Badge label={String(members.length)} />}
+        />
+        <Tab value="memos" label="메모" panelId="panel-memos" />
+        <Tab value="manage" label="모임 관리" panelId="panel-manage" />
+      </TabList>
 
-      <CandidateList
-        meetingId={meetingId}
-        candidateSet={candidateSet}
-        error={candidateError}
-        onRetry={loadCandidates}
-        needsRecalc={meeting.needs_recalc}
-        isAdmin={isAdmin}
-        members={members}
-        myUserId={myUserId}
-        emails={emails}
-      />
-
-      <section className="flex flex-col gap-3">
-        <h2 className="section-title">
-          구성원 <span className="text-muted">{members.length}</span>
-        </h2>
-        <MemberList
+      {/* 탭을 옮겨도 쓰던 메모나 고른 투표가 사라지지 않도록 숨기기만 한다 */}
+      <div id="panel-candidates" role="tabpanel" hidden={tab !== "candidates"}>
+        <CandidateList
+          meetingId={meetingId}
+          candidateSet={candidateSet}
+          error={candidateError}
+          onRetry={loadCandidates}
+          needsRecalc={meeting.needs_recalc}
+          isAdmin={isAdmin}
           members={members}
           myUserId={myUserId}
           emails={emails}
-          onTransfer={isAdmin ? handleTransfer : undefined}
-          busy={transferring}
+          searchStart={meeting.search_start_time}
+          searchEnd={meeting.search_end_time}
+          onGoToMembers={() => setTab("members")}
         />
-        {transferError && <p className="text-sm text-danger">{transferError}</p>}
-      </section>
+      </div>
 
-      {isAdmin && (
-        <AddMemberForm
-          meetingId={meetingId}
-          onAdded={handleAdded}
-          onPartiallyAdded={refreshAfterMemberChange}
-        />
-      )}
+      <div id="panel-members" role="tabpanel" hidden={tab !== "members"}>
+        <div className="max-w-[640px]">
+          <VStack gap={6}>
+            {isAdmin && (
+              <AddMemberForm
+                meetingId={meetingId}
+                onAdded={handleAdded}
+                onPartiallyAdded={refreshAfterMemberChange}
+              />
+            )}
+            <MemberList
+              members={members}
+              myUserId={myUserId}
+              emails={emails}
+              onTransfer={isAdmin ? handleTransfer : undefined}
+              busy={transferring}
+            />
+            {transferError && <ErrorNote message={transferError} />}
+          </VStack>
+        </div>
+      </div>
 
-      <MemoBoard
-        meetingId={meetingId}
-        myUserId={myUserId}
-        isAdmin={isAdmin}
-        members={members}
-        emails={emails}
-      />
+      <div id="panel-memos" role="tabpanel" hidden={tab !== "memos"}>
+        <div className="max-w-[640px]">
+          <MemoBoard
+            meetingId={meetingId}
+            myUserId={myUserId}
+            isAdmin={isAdmin}
+            members={members}
+            emails={emails}
+          />
+        </div>
+      </div>
 
-      <MeetingActions
-        meetingId={meetingId}
-        meetingName={meeting.name}
-        isAdmin={isAdmin}
-        hasOtherMembers={hasOtherMembers}
-      />
-    </div>
+      <div id="panel-manage" role="tabpanel" hidden={tab !== "manage"}>
+        <div className="max-w-[640px]">
+          <MeetingActions
+            meetingId={meetingId}
+            meetingName={meeting.name}
+            isAdmin={isAdmin}
+            hasOtherMembers={hasOtherMembers}
+          />
+        </div>
+      </div>
+      {dialog}
+    </VStack>
   );
 }
 
 export default function MeetingDetailPage() {
   return (
-    <Suspense fallback={<p className="text-sm text-muted">불러오는 중...</p>}>
+    <Suspense fallback={<PageLoading />}>
       <MeetingDetail />
     </Suspense>
   );

@@ -1,11 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Link } from "@astryxdesign/core/Link";
+import { Text } from "@astryxdesign/core/Text";
+import { TextInput } from "@astryxdesign/core/TextInput";
+import { VStack } from "@astryxdesign/core/VStack";
 
 import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
-import Logo from "@/components/layout/Logo";
+import AuthFrame from "@/components/layout/AuthFrame";
 import { supabase } from "@/lib/supabase";
 
 function getSignupError(code: string | undefined) {
@@ -28,6 +33,10 @@ export default function SignupPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (password.length < 6) {
+      setError(getSignupError("weak_password"));
+      return;
+    }
     setLoading(true);
 
     const { data, error } = await supabase.auth.signUp({ email, password });
@@ -47,56 +56,41 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col justify-center gap-6 px-5 py-12">
-      <Link href="/" aria-label="틈 처음 화면" className="self-start">
-        <Logo />
-      </Link>
-      <div className="flex flex-col gap-1">
-        <h1 className="page-title">회원가입</h1>
-        <p className="text-sm text-muted">이메일로 1분 만에 시작해요.</p>
-      </div>
-      <form
-        onSubmit={handleSubmit}
-        className="card flex w-full flex-col gap-5"
-      >
-        <label className="field-label">
-          이메일
-          <input
+    <AuthFrame
+      title="회원가입"
+      description="이메일로 1분 만에 시작해요."
+      footer={
+        <Text type="supporting">
+          이미 계정이 있으신가요? <Link href="/login" type="inherit">로그인</Link>
+        </Text>
+      }
+    >
+      <form onSubmit={handleSubmit}>
+        <VStack gap={4}>
+          <TextInput
             type="email"
-            autoComplete="email"
+            label="이메일"
+            size="lg"
             placeholder="name@example.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="input"
+            onChange={setEmail}
+            autoComplete="email"
           />
-        </label>
-        <label className="field-label">
-          비밀번호
-          <input
+          <TextInput
             type="password"
-            autoComplete="new-password"
+            label="비밀번호"
+            size="lg"
             placeholder="6자 이상"
+            description="6자 이상으로 정해 주세요."
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            className="input"
+            onChange={setPassword}
+            autoComplete="new-password"
           />
-        </label>
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn btn-primary"
-        >
-          {loading ? "처리 중..." : "가입하기"}
-        </button>
-        {error && <p className="notice notice-danger">{error}</p>}
+          {error && <Banner status="error" title={error} />}
+          <Button type="submit" label="가입하기" variant="primary" size="lg" width="100%" isLoading={loading} />
+        </VStack>
       </form>
       <GoogleLoginButton />
-      <Link href="/login" className="text-link self-start text-sm">
-        이미 계정이 있으신가요? 로그인
-      </Link>
-    </main>
+    </AuthFrame>
   );
 }

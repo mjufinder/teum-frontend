@@ -2,7 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
 
+import { useConfirm } from "@/components/layout/useConfirm";
 import { ApiError } from "@/lib/api";
 import { deleteMeeting, leaveMeeting } from "@/lib/meetings";
 
@@ -21,6 +27,7 @@ export default function MeetingActions({
   hasOtherMembers,
 }: MeetingActionsProps) {
   const router = useRouter();
+  const [confirm, dialog] = useConfirm();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,51 +47,48 @@ export default function MeetingActions({
     }
   }
 
-  function handleLeave() {
-    if (!confirm(`'${meetingName}' 모임에서 나갈까요?`)) return;
-    run(() => leaveMeeting(meetingId), "모임에서 나가지 못했어요.");
+  async function handleLeave() {
+    const ok = await confirm({
+      title: `'${meetingName}' 모임에서 나갈까요?`,
+      description: "나가면 이 모임의 추천 시간과 메모를 더 이상 볼 수 없어요.",
+      actionLabel: "모임 나가기",
+      tone: "destructive",
+    });
+    if (ok) run(() => leaveMeeting(meetingId), "모임에서 나가지 못했어요.");
   }
 
-  function handleDelete() {
-    if (
-      !confirm(
-        `'${meetingName}' 모임을 삭제할까요? 모든 구성원이 이 모임을 더 이상 볼 수 없어요.`
-      )
-    ) {
-      return;
-    }
-    run(() => deleteMeeting(meetingId), "모임을 삭제하지 못했어요.");
+  async function handleDelete() {
+    const ok = await confirm({
+      title: `'${meetingName}' 모임을 삭제할까요?`,
+      description: "모든 구성원이 이 모임을 더 이상 볼 수 없어요.",
+      actionLabel: "모임 삭제",
+      tone: "destructive",
+    });
+    if (ok) run(() => deleteMeeting(meetingId), "모임을 삭제하지 못했어요.");
   }
 
   return (
-    <section className="card flex flex-col items-start gap-3">
-      {isAdmin ? (
-        <>
-          <p className="text-sm text-muted">
-            {hasOtherMembers
-              ? "관리자는 구성원에게 관리자를 넘긴 뒤 모임에서 나갈 수 있어요."
-              : "다른 구성원이 없어서 모임을 나가려면 삭제해야 해요."}
-          </p>
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={busy}
-            className="btn btn-danger"
-          >
-            {busy ? "처리 중..." : "모임 삭제"}
-          </button>
-        </>
-      ) : (
-        <button
-          type="button"
-          onClick={handleLeave}
-          disabled={busy}
-          className="btn btn-danger"
-        >
-          {busy ? "처리 중..." : "모임 나가기"}
-        </button>
-      )}
-      {error && <p className="text-sm text-danger">{error}</p>}
-    </section>
+    <VStack gap={3}>
+      <HStack hAlign="between" vAlign="center" gap={4} wrap="wrap">
+        <VStack gap={0.5}>
+          <Text weight="semibold">{isAdmin ? "모임 삭제" : "모임 나가기"}</Text>
+          <Text type="supporting">
+            {isAdmin
+              ? hasOtherMembers
+                ? "관리자는 구성원에게 관리자를 넘긴 뒤 모임에서 나갈 수 있어요."
+                : "다른 구성원이 없어서 모임을 나가려면 삭제해야 해요."
+              : "나가면 이 모임의 추천 시간과 메모를 더 이상 볼 수 없어요."}
+          </Text>
+        </VStack>
+        <Button
+          label={isAdmin ? "모임 삭제" : "모임 나가기"}
+          variant="destructive"
+          isLoading={busy}
+          onClick={isAdmin ? handleDelete : handleLeave}
+        />
+      </HStack>
+      {error && <Banner status="error" title={error} />}
+      {dialog}
+    </VStack>
   );
 }

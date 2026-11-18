@@ -1,9 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { Button } from "@astryxdesign/core/Button";
+import { Heading, Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
 
+import { ErrorNote, PageLoading } from "@/components/layout/PageState";
+import { useConfirm } from "@/components/layout/useConfirm";
 import MeetingForm, { type MeetingFormValues } from "@/components/meeting/MeetingForm";
 import { ApiError, authFetch } from "@/lib/api";
 import {
@@ -49,6 +53,7 @@ function diff(before: MeetingFormValues, after: MeetingFormValues) {
 
 function EditMeeting() {
   const router = useRouter();
+  const [confirm, dialog] = useConfirm();
   const { meetingId } = useParams<{ meetingId: string }>();
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -86,9 +91,11 @@ function EditMeeting() {
     if (!meeting) return;
     const { info, conditions } = diff(toFormValues(meeting), values);
     if (Object.keys(conditions).length > 0) {
-      const ok = confirm(
-        "조건을 바꾸면 공강을 다시 계산해야 하고, 진행 중인 투표가 있으면 폐기돼요. 계속할까요?"
-      );
+      const ok = await confirm({
+        title: "조건을 바꿀까요?",
+        description: "조건을 바꾸면 공강을 다시 계산해야 하고, 진행 중인 투표가 있으면 폐기돼요.",
+        actionLabel: "바꾸기",
+      });
       if (!ok) return false;
     }
     const body = { ...info, ...conditions };
@@ -100,37 +107,34 @@ function EditMeeting() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-start gap-3">
-        <p className="text-sm text-danger">{error}</p>
-        <Link
-          href="/meetings"
-          className="btn btn-secondary"
-        >
-          내 모임으로
-        </Link>
-      </div>
+      <ErrorNote
+        message={error}
+        action={<Button label="내 모임으로" variant="secondary" size="sm" href="/meetings" />}
+      />
     );
   }
 
   if (!meeting) {
-    return <p className="text-sm text-muted">불러오는 중...</p>;
+    return <PageLoading />;
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="page-title">모임 수정</h1>
-      <MeetingForm
-        initial={toFormValues(meeting)}
-        submitLabel="저장"
-        onSubmit={handleSubmit}
-      />
+    <div className="max-w-[560px]">
+      <VStack gap={6}>
+        <VStack gap={1}>
+          <Heading level={1}>모임 수정</Heading>
+          <Text color="secondary">{meeting.name}</Text>
+        </VStack>
+        <MeetingForm initial={toFormValues(meeting)} submitLabel="저장" onSubmit={handleSubmit} />
+        {dialog}
+      </VStack>
     </div>
   );
 }
 
 export default function EditMeetingPage() {
   return (
-    <Suspense fallback={<p className="text-sm text-muted">불러오는 중...</p>}>
+    <Suspense fallback={<PageLoading />}>
       <EditMeeting />
     </Suspense>
   );

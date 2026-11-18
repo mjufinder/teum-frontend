@@ -2,6 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Collapsible } from "@astryxdesign/core/Collapsible";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Selector } from "@astryxdesign/core/Selector";
+import { Text } from "@astryxdesign/core/Text";
+import { TextArea } from "@astryxdesign/core/TextArea";
+import { TextInput } from "@astryxdesign/core/TextInput";
+import { VStack } from "@astryxdesign/core/VStack";
 
 import { ApiError } from "@/lib/api";
 import {
@@ -26,8 +35,6 @@ interface MeetingFormProps {
   // false 를 돌려주면 제출을 취소한 것으로 보고 버튼을 다시 연다
   onSubmit: (values: MeetingFormValues) => Promise<boolean | void>;
 }
-
-const inputClass = "input";
 
 function validate(values: MeetingFormValues) {
   if (!values.name.trim()) return "모임 이름을 입력해 주세요.";
@@ -84,125 +91,68 @@ export default function MeetingForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="card flex flex-col gap-5"
-    >
-      <div className="flex flex-col gap-1">
-        <label htmlFor="meeting-name" className="text-sm font-bold">
-          모임 이름
-        </label>
-        <input
-          id="meeting-name"
+    <form onSubmit={handleSubmit}>
+      <VStack gap={5}>
+        <TextInput
+          label="모임 이름"
+          size="lg"
+          placeholder="예: 캡스톤 주간 회의"
           value={values.name}
-          onChange={(e) => update("name", e.target.value)}
-          maxLength={30}
-          className={inputClass}
+          onChange={(value) => update("name", value.slice(0, 30))}
         />
-      </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="meeting-description" className="text-sm font-bold">
-          설명 <span className="font-normal text-muted">(선택)</span>
-        </label>
-        <textarea
-          id="meeting-description"
-          value={values.description}
-          onChange={(e) => update("description", e.target.value)}
-          maxLength={200}
-          rows={2}
+        <TextArea
+          label="설명 (선택)"
           placeholder="예: 주간 진행 상황 공유"
-          className={`${inputClass} resize-none`}
+          value={values.description}
+          onChange={(value) => update("description", value)}
+          rows={2}
+          maxLength={200}
+          htmlMaxLength={200}
         />
-      </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="meeting-duration" className="text-sm font-bold">
-          최소 회의시간
-        </label>
-        <select
-          id="meeting-duration"
-          value={values.minDuration}
-          onChange={(e) => update("minDuration", Number(e.target.value))}
-          className={inputClass}
-        >
-          {MIN_DURATIONS.map((m) => (
-            <option key={m} value={m}>
-              {m}분
-            </option>
-          ))}
-        </select>
-      </div>
+        <Selector
+          label="최소 회의시간"
+          description="이 시간 이상 이어서 비는 구간만 추천해요."
+          options={MIN_DURATIONS.map((m) => ({ value: String(m), label: `${m}분` }))}
+          value={String(values.minDuration)}
+          onChange={(value) => update("minDuration", Number(value))}
+        />
 
-      <details className="disclosure rounded-[8px] border-[1.5px] border-line-strong px-4 py-3">
-        <summary>
-          <span>
-            세부 조건 <span className="font-normal text-muted">(선택, 눌러서 펼치기)</span>
-          </span>
-        </summary>
-        <div className="mt-3 flex flex-col gap-4 pb-1">
-          <div className="flex flex-col gap-1">
-            <span className="text-sm font-bold">탐색 시간대</span>
-            <div className="flex items-center gap-2">
-              <select
-                aria-label="탐색 시작 시각"
+        <Collapsible trigger={<Text weight="semibold">세부 조건 (선택)</Text>} defaultIsOpen={false}>
+          <VStack gap={4} paddingBlockStart={3}>
+            <div className="grid grid-cols-2 gap-3">
+              <Selector
+                label="탐색 시작 시각"
+                options={SEARCH_TIMES.slice(0, -1)}
                 value={values.searchStartTime}
-                onChange={(e) => update("searchStartTime", e.target.value)}
-                className={inputClass}
-              >
-                {SEARCH_TIMES.slice(0, -1).map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-              <span className="text-sm text-muted">~</span>
-              <select
-                aria-label="탐색 종료 시각"
+                onChange={(value) => update("searchStartTime", value)}
+              />
+              <Selector
+                label="탐색 종료 시각"
+                options={SEARCH_TIMES.slice(1)}
                 value={values.searchEndTime}
-                onChange={(e) => update("searchEndTime", e.target.value)}
-                className={inputClass}
-              >
-                {SEARCH_TIMES.slice(1).map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => update("searchEndTime", value)}
+              />
             </div>
-            <p className="text-xs text-muted">이 시간대 안에서만 회의 후보를 찾아요.</p>
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="meeting-buffer" className="text-sm font-bold">
-              이동 여유시간
-            </label>
-            <select
-              id="meeting-buffer"
-              value={values.travelBufferMin}
-              onChange={(e) => update("travelBufferMin", Number(e.target.value))}
-              className={inputClass}
-            >
-              {TRAVEL_BUFFERS.map((m) => (
-                <option key={m} value={m}>
-                  {m === 0 ? "없음" : `${m}분`}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-muted">
-              수업 앞뒤로 이만큼 비워 두고 후보를 찾아요.
-            </p>
-          </div>
-        </div>
-      </details>
+            <Text type="supporting">이 시간대 안에서만 회의 후보를 찾아요.</Text>
+            <Selector
+              label="이동 여유시간"
+              description="수업 앞뒤로 이만큼 비워 두고 후보를 찾아요."
+              options={TRAVEL_BUFFERS.map((m) => ({
+                value: String(m),
+                label: m === 0 ? "없음" : `${m}분`,
+              }))}
+              value={String(values.travelBufferMin)}
+              onChange={(value) => update("travelBufferMin", Number(value))}
+            />
+          </VStack>
+        </Collapsible>
 
-      {error && <p className="text-sm text-danger">{error}</p>}
-      <div>
-        <button
-          type="submit"
-          disabled={submitting}
-          className="btn btn-primary"
-        >
-          {submitLabel}
-        </button>
-      </div>
+        {error && <Banner status="error" title={error} />}
+        <HStack gap={2}>
+          <Button type="submit" label={submitLabel} variant="primary" size="lg" isLoading={submitting} />
+          <Button label="취소" variant="ghost" size="lg" isDisabled={submitting} onClick={() => router.back()} />
+        </HStack>
+      </VStack>
     </form>
   );
 }

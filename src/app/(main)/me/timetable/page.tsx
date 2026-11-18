@@ -1,9 +1,17 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Button } from "@astryxdesign/core/Button";
+import { EmptyState } from "@astryxdesign/core/EmptyState";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Icon } from "@astryxdesign/core/Icon";
+import { Heading, Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
+import { PhotoIcon } from "@heroicons/react/20/solid";
 
+import { ErrorNote, PageLoading } from "@/components/layout/PageState";
+import { useConfirm } from "@/components/layout/useConfirm";
 import TimetableEditor from "@/components/timetable/TimetableEditor";
 import TimetableUpload from "@/components/timetable/TimetableUpload";
 import { ApiError } from "@/lib/api";
@@ -12,6 +20,7 @@ import type { RecognizedTimetable, TimetableBits } from "@/types/timetable";
 
 export default function MyTimetablePage() {
   const router = useRouter();
+  const [confirm, dialog] = useConfirm();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -36,10 +45,13 @@ export default function MyTimetablePage() {
       });
   }, [router]);
 
-  function handleReupload() {
-    const ok = confirm(
-      "수업 시간만 인식 결과로 바꾸고 개인 일정은 그대로 둬요. 저장해야 반영돼요. 계속할까요?"
-    );
+  async function handleReupload() {
+    const ok = await confirm({
+      title: "이미지로 다시 등록할까요?",
+      description:
+        "수업 시간만 인식 결과로 바꾸고 개인 일정은 그대로 둬요. 저장해야 반영돼요.",
+      actionLabel: "계속",
+    });
     if (ok) setUploading(true);
   }
 
@@ -53,35 +65,26 @@ export default function MyTimetablePage() {
   }
 
   function renderContent() {
-    if (loading) return <p className="text-sm text-muted">불러오는 중...</p>;
-    if (error) return <p className="text-sm text-danger">{error}</p>;
+    if (loading) return <PageLoading />;
+    if (error) return <ErrorNote message={error} />;
     if (!bits) {
       return (
-        <p className="text-sm text-muted">
-          아직 등록한 시간표가 없어요.{" "}
-          <Link href="/onboarding/timetable" className="text-link">
-            시간표 등록하기
-          </Link>
-        </p>
+        <EmptyState
+          title="아직 등록한 시간표가 없어요"
+          description="시간표를 등록하면 모임에서 함께 비는 시간을 찾을 수 있어요."
+          actions={<Button label="시간표 등록하기" variant="primary" href="/onboarding/timetable" />}
+        />
       );
     }
     return (
       <>
-        {uploading ? (
-          <TimetableUpload
-            onRecognized={handleRecognized}
-            onManual={() => setUploading(false)}
-            onCancel={() => setUploading(false)}
-          />
-        ) : (
-          <div>
-            <button
-              type="button"
-              onClick={handleReupload}
-              className="btn btn-secondary"
-            >
-              이미지로 다시 등록
-            </button>
+        {uploading && (
+          <div className="max-w-[560px]">
+            <TimetableUpload
+              onRecognized={handleRecognized}
+              onManual={() => setUploading(false)}
+              onCancel={() => setUploading(false)}
+            />
           </div>
         )}
         <TimetableEditor key={editorKey} initial={bits} warnings={warnings} />
@@ -90,9 +93,23 @@ export default function MyTimetablePage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="page-title">내 시간표</h1>
+    <VStack gap={6}>
+      <HStack hAlign="between" vAlign="end" wrap="wrap" gap={4}>
+        <VStack gap={1}>
+          <Heading level={1}>내 시간표</Heading>
+          <Text color="secondary">수업과 개인 일정을 칠해 두면 나머지가 회의 가능한 시간이 돼요.</Text>
+        </VStack>
+        {bits && !uploading && (
+          <Button
+            label="이미지로 다시 등록"
+            variant="secondary"
+            icon={<Icon icon={PhotoIcon} />}
+            onClick={handleReupload}
+          />
+        )}
+      </HStack>
       {renderContent()}
-    </div>
+      {dialog}
+    </VStack>
   );
 }

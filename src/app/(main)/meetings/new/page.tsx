@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Heading, Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
 
 import MeetingForm, { type MeetingFormValues } from "@/components/meeting/MeetingForm";
 import {
@@ -32,9 +34,14 @@ export default function NewMeetingPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="page-title">새 모임</h1>
-      <MeetingForm initial={initial} submitLabel="만들기" onSubmit={handleSubmit} />
+    <div className="max-w-[560px]">
+      <VStack gap={6}>
+        <VStack gap={1}>
+          <Heading level={1}>새 모임</Heading>
+          <Text color="secondary">조건을 정하면 그 안에서 함께 비는 시간을 찾아요.</Text>
+        </VStack>
+        <MeetingForm initial={initial} submitLabel="만들기" onSubmit={handleSubmit} />
+      </VStack>
     </div>
   );
 }

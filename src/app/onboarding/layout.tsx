@@ -3,7 +3,11 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import Logo from "@/components/layout/Logo";
+import { Step, Stepper } from "@astryxdesign/core/Stepper";
+import { VStack } from "@astryxdesign/core/VStack";
+
+import AppFrame from "@/components/layout/AppFrame";
+import { PageLoading } from "@/components/layout/PageState";
 import { supabase } from "@/lib/supabase";
 
 const steps = [
@@ -39,56 +43,23 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
     };
   }, [router]);
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.replace("/login");
-  }
+  const activeStep = Math.max(
+    0,
+    steps.findIndex((step) => step.href === pathname)
+  );
 
   return (
-    <>
-      <header className="sticky top-0 z-20 border-b border-line bg-white">
-        <div className="mx-auto flex min-h-16 w-full max-w-[720px] flex-wrap items-center gap-x-5 gap-y-2 px-5 py-3">
-          <Logo />
-          <ol className="flex items-center gap-2 text-sm" aria-label="가입 단계">
-            {steps.map((step, index) => {
-              const current = pathname === step.href;
-              return (
-                <li key={step.href} className="flex items-center gap-2">
-                  {index > 0 && <span aria-hidden className="h-0.5 w-5 bg-line" />}
-                  <span
-                    aria-current={current ? "step" : undefined}
-                    className={`flex items-center gap-1.5 ${
-                      current ? "font-bold text-foreground" : "text-muted"
-                    }`}
-                  >
-                    <span
-                      aria-hidden
-                      className={`grid size-6 place-items-center rounded-[4px] text-xs font-bold ${
-                        current
-                          ? "bg-brand text-white"
-                          : "border-[1.5px] border-line-strong text-muted"
-                      }`}
-                    >
-                      {index + 1}
-                    </span>
-                    {step.label}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="ml-auto whitespace-nowrap px-1 py-2 text-sm font-bold text-muted underline-offset-4 hover:text-foreground hover:underline"
-          >
-            로그아웃
-          </button>
+    <AppFrame hasNav={false} homeHref="/onboarding/profile">
+      <VStack gap={8}>
+        <div className="max-w-[420px]">
+          <Stepper activeStep={activeStep} label="가입 단계">
+            {steps.map((step, index) => (
+              <Step key={step.href} step={index} label={step.label} />
+            ))}
+          </Stepper>
         </div>
-      </header>
-      <main className="mx-auto w-full max-w-[720px] px-5 py-10">
-        {ready ? children : <p className="text-sm text-muted">불러오는 중...</p>}
-      </main>
-    </>
+        {ready ? children : <PageLoading />}
+      </VStack>
+    </AppFrame>
   );
 }
