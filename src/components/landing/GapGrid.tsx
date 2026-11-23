@@ -49,7 +49,7 @@ export default function GapGrid() {
                   )}
                   {isGap && (
                     <span
-                      className="hero-gap absolute -inset-px z-10 grid place-items-center border-[3px] border-foreground bg-white text-[11px] font-bold"
+                      className="hero-gap absolute -inset-px z-10 grid place-items-center border-[3px] border-brand bg-lime-bright text-[11px] font-bold text-brand"
                       style={{ animationDelay: "1050ms" }}
                     >
                       14:00
@@ -69,7 +69,7 @@ export default function GapGrid() {
             누군가 수업
           </span>
           <span className="flex items-center gap-1.5">
-            <span aria-hidden className="size-3 border border-line-strong bg-white" />
+            <span aria-hidden className="size-3 border border-brand bg-lime-bright" />
             모두 빈 시간
           </span>
         </span>
