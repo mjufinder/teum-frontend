@@ -72,6 +72,22 @@
   --c-mesh-glow: rgba(0, 255, 163, 0.1);
 }
 
+.dark .input {
+  background-color: var(--c-ink-1);
+  border-color: var(--c-ink-line-2);
+  color: var(--c-ink-text);
+}
+.dark .input::placeholder {
+  color: var(--c-ink-text-weak);
+}
+.dark .input:focus {
+  border-color: var(--c-neon);
+  outline-color: var(--c-neon);
+}
+.dark .slot-free {
+  background-color: var(--c-ink-base);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

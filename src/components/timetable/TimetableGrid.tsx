@@ -1,29 +1,28 @@
 "use client";
 
-import { Fragment, useRef } from "react";
+import { useRef, useState } from "react";
 
-import {
-  DAY_LABELS,
-  SLOT_COUNT,
-  index,
-  slotLabel,
-  slotState,
-} from "@/lib/timetable";
+import WeeklySlotGrid from "@/components/timetable/WeeklySlotGrid";
+import { DAY_LABELS, SLOT_COUNT, slotLabel, slotState } from "@/lib/timetable";
 import type { SlotState, TimetableBits } from "@/types/timetable";
 
-const slots = Array.from({ length: SLOT_COUNT }, (_, slot) => slot);
-
-const cellColors: Record<SlotState, string> = {
-  class: "slot-class",
-  manual: "slot-manual",
-  free: "slot-free",
+const cellTones: Record<SlotState, string> = {
+  class: "bg-emerald-600/80 dark:bg-neon/65",
+  manual: "bg-emerald-500/35 dark:bg-emerald-400/30",
+  free: "bg-ink-base",
 };
 
-const legend: { state: SlotState; label: string }[] = [
-  { state: "class", label: "수업" },
-  { state: "manual", label: "개인 일정" },
-  { state: "free", label: "가능" },
+const legend: { state: SlotState; label: string; swatch: string }[] = [
+  { state: "class", label: "수업", swatch: "bg-emerald-600/80 dark:bg-neon/65" },
+  { state: "manual", label: "개인 일정", swatch: "bg-emerald-500/35 dark:bg-emerald-400/30" },
+  { state: "free", label: "공강(가능)", swatch: "border border-ink-line bg-ink-base" },
 ];
+
+const stateText: Record<SlotState, string> = {
+  class: "수업",
+  manual: "개인 일정",
+  free: "공강",
+};
 
 function cellAt(x: number, y: number) {
   const el = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-cell]");
@@ -38,10 +37,8 @@ function cellsBetween(from: number, to: number) {
   const slotGap = (to % SLOT_COUNT) - fromSlot;
   const steps = Math.max(Math.abs(dayGap), Math.abs(slotGap));
   return Array.from({ length: steps + 1 }, (_, i) =>
-    index(
-      fromDay + Math.round((dayGap * i) / steps),
-      fromSlot + Math.round((slotGap * i) / steps)
-    )
+    (fromDay + Math.round((dayGap * i) / steps)) * SLOT_COUNT +
+    (fromSlot + Math.round((slotGap * i) / steps))
   );
 }
 
@@ -52,6 +49,7 @@ interface TimetableGridProps {
 
 export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
   const lastCell = useRef<number | null>(null);
+  const [hoveredCell, setHoveredCell] = useState<number | null>(null);
 
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (!onPaint || e.button !== 0) return;
@@ -60,12 +58,14 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
     // 터치는 누른 칸에 포인터가 묶이므로 격자로 옮기고 좌표로 칸을 찾는다.
     e.currentTarget.setPointerCapture(e.pointerId);
     lastCell.current = cell;
+    setHoveredCell(cell);
     onPaint([cell]);
   }
 
   function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (!onPaint || lastCell.current === null) return;
     const cell = cellAt(e.clientX, e.clientY);
+    if (cell !== null) setHoveredCell(cell);
+    if (!onPaint || lastCell.current === null) return;
     if (cell === null || cell === lastCell.current) return;
     onPaint(cellsBetween(lastCell.current, cell));
     lastCell.current = cell;
@@ -75,61 +75,64 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
     lastCell.current = null;
   }
 
+  const hoveredInfo =
+    hoveredCell !== null
+      ? {
+          day: DAY_LABELS[Math.floor(hoveredCell / SLOT_COUNT)],
+          start: slotLabel(hoveredCell % SLOT_COUNT),
+          end: slotLabel((hoveredCell % SLOT_COUNT) + 1),
+          state: stateText[slotState(bits, hoveredCell)],
+        }
+      : null;
+
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-        {legend.map((item) => (
-          <span key={item.state} className="flex items-center gap-1.5">
-            <span
-              className={`size-3.5 border border-brand ${cellColors[item.state]}`}
-            />
-            {item.label}
-          </span>
-        ))}
-      </div>
-
-      <div className="overflow-x-auto border-t-2 border-brand pt-1">
-        <div
-          className="grid select-none grid-cols-[3rem_repeat(7,minmax(2.5rem,1fr))]"
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={stopPainting}
-          onPointerCancel={stopPainting}
-        >
-          <div />
-          {DAY_LABELS.map((label) => (
-            <div key={label} className="py-1.5 text-center text-xs font-bold">
-              {label}
-            </div>
-          ))}
-
-          {slots.map((slot) => (
-            <Fragment key={slot}>
-              <div className="h-6 pr-2 text-right text-[11px] leading-none tabular-nums text-muted">
-                {slot % 2 === 0 && slotLabel(slot)}
-              </div>
-              {DAY_LABELS.map((_, day) => {
-                const cell = index(day, slot);
-                return (
-                  <div
-                    key={cell}
-                    data-cell={cell}
-                    className={`h-6 border-t border-l border-line ${
-                      slot % 2 === 1 ? "border-t-line/40" : ""
-                    } ${day === DAY_LABELS.length - 1 ? "border-r" : ""} ${
-                      slot === SLOT_COUNT - 1 ? "border-b" : ""
-                    } ${cellColors[slotState(bits, cell)]} ${
-                      onPaint
-                        ? "cursor-pointer touch-none hover:outline-2 hover:-outline-offset-2 hover:outline-foreground"
-                        : ""
-                    }`}
-                  />
-                );
-              })}
-            </Fragment>
+      {/* 모임 히트맵과 동일한 범례 행 */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-3 text-[11px] text-ink-text-3">
+          {legend.map((item) => (
+            <span key={item.state} className="inline-flex items-center gap-1.5">
+              <span className={`size-3 rounded-[3px] ${item.swatch}`} />
+              {item.label}
+            </span>
           ))}
         </div>
       </div>
+
+      <WeeklySlotGrid
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={stopPainting}
+        onPointerCancel={stopPainting}
+        onMouseLeave={() => setHoveredCell(null)}
+        inspector={
+          hoveredInfo ? (
+            <>
+              <span className="font-bold text-ink-text tabular-nums">
+                {hoveredInfo.day}요일 {hoveredInfo.start} ~ {hoveredInfo.end}
+              </span>
+              <span className="font-semibold text-neon">{hoveredInfo.state}</span>
+            </>
+          ) : (
+            <span className="text-ink-text-3">
+              칸을 누르거나 드래그하면 수업·개인 일정을 바로 칠할 수 있어요.
+            </span>
+          )
+        }
+        renderCell={({ cell, baseCellClass }) => {
+          const state = slotState(bits, cell);
+          const isHovered = hoveredCell === cell;
+          return (
+            <div
+              key={cell}
+              data-cell={cell}
+              className={`${baseCellClass} ${cellTones[state]} transition-colors ${
+                onPaint ? "cursor-crosshair" : ""
+              } ${isHovered ? "z-10 ring-1 ring-ink-text" : ""}`}
+            />
+          );
+        }}
+      />
     </div>
   );
 }

@@ -1,9 +1,10 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
-import { Fragment, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { memberLabel } from "@/components/meeting/MemberList";
+import WeeklySlotGrid from "@/components/timetable/WeeklySlotGrid";
 import { toHHMM, toMinutes } from "@/lib/meetings";
 import { DAY_LABELS, SLOT_COUNT, index, slotLabel } from "@/lib/timetable";
 import type { Candidate, MeetingAvailability } from "@/types/candidate";
@@ -42,8 +43,6 @@ interface BubblePos {
   left: number;
   align: "left" | "center" | "right";
 }
-
-const SLOTS = Array.from({ length: SLOT_COUNT }, (_, s) => s);
 
 function slotTone(count: number, total: number): string {
   if (total <= 0 || count <= 0) return "bg-ink-base";
@@ -310,218 +309,187 @@ export default function AvailabilityHeatmap({
       )}
 
       {!error && availability && (
-        <div className="flex flex-col gap-3 rounded-[12px] border border-ink-line bg-ink-1 p-4">
-          {/* #4 드래그 실시간 요약 또는 호버 인스펙터 바 */}
-          <div className="flex min-h-[2.25rem] flex-wrap items-center justify-between gap-2 rounded-[8px] border border-ink-line bg-ink-base px-3 py-1.5 text-xs">
-            {selection && dragSummary ? (
-              <>
-                <span className="font-bold text-neon tabular-nums">
-                  선택: {DAY_LABELS[selection.day]}요일 {slotLabel(selection.startSlot)} ~{" "}
-                  {slotLabel(selection.endSlot + 1)}
-                </span>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-semibold text-ink-text tabular-nums">
-                    {dragSummary.available.length}/{members.length}명 가능
+        <div className="flex flex-col gap-2">
+          <WeeklySlotGrid
+            gridRef={gridRef}
+            scrollContainerClassName="pb-12"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={stopDragging}
+            onPointerCancel={stopDragging}
+            onMouseEnter={() => setGridHovered(true)}
+            onMouseLeave={() => {
+              setGridHovered(false);
+              setHoveredCell(null);
+            }}
+            inspector={
+              selection && dragSummary ? (
+                <>
+                  <span className="font-bold text-neon tabular-nums">
+                    선택: {DAY_LABELS[selection.day]}요일 {slotLabel(selection.startSlot)} ~{" "}
+                    {slotLabel(selection.endSlot + 1)}
                   </span>
-                  {dragSummary.unavailable.length > 0 && (
-                    <span className="text-ink-text-weak">
-                      · 어려움:{" "}
-                      {dragSummary.unavailable
-                        .map((m) => memberLabel(m, myUserId, emails))
-                        .join(", ")}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-semibold text-ink-text tabular-nums">
+                      {dragSummary.available.length}/{members.length}명 가능
                     </span>
-                  )}
-                </div>
-              </>
-            ) : hoveredInfo ? (
-              <>
-                <span className="font-bold text-ink-text tabular-nums">
-                  {DAY_LABELS[hoveredInfo.day]}요일 {formatSlotRange(hoveredInfo.slot)}
-                </span>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-semibold text-neon tabular-nums">
-                    {hoveredInfo.availableMembers.length}명 가능
+                    {dragSummary.unavailable.length > 0 && (
+                      <span className="text-ink-text-weak">
+                        · 어려움:{" "}
+                        {dragSummary.unavailable
+                          .map((m) => memberLabel(m, myUserId, emails))
+                          .join(", ")}
+                      </span>
+                    )}
+                  </div>
+                </>
+              ) : hoveredInfo ? (
+                <>
+                  <span className="font-bold text-ink-text tabular-nums">
+                    {DAY_LABELS[hoveredInfo.day]}요일 {formatSlotRange(hoveredInfo.slot)}
                   </span>
-                  {hoveredInfo.availableMembers.length > 0 && (
-                    <span className="text-ink-text-2">
-                      ({hoveredInfo.availableMembers
-                        .map((m) => memberLabel(m, myUserId, emails))
-                        .join(", ")})
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-semibold text-neon tabular-nums">
+                      {hoveredInfo.availableMembers.length}명 가능
                     </span>
-                  )}
-                  {hoveredInfo.unavailableMembers.length > 0 && (
-                    <span className="text-ink-text-weak">
-                      · 불가:{" "}
-                      {hoveredInfo.unavailableMembers
-                        .map((m) => memberLabel(m, myUserId, emails))
-                        .join(", ")}
-                    </span>
-                  )}
-                </div>
-              </>
-            ) : (
-              <span className="text-ink-text-3">
-                칸을 드래그하면 원하는 시간대를 직접 후보 시간으로 추가할 수 있어요.
-              </span>
-            )}
-          </div>
+                    {hoveredInfo.availableMembers.length > 0 && (
+                      <span className="text-ink-text-2">
+                        ({hoveredInfo.availableMembers
+                          .map((m) => memberLabel(m, myUserId, emails))
+                          .join(", ")})
+                      </span>
+                    )}
+                    {hoveredInfo.unavailableMembers.length > 0 && (
+                      <span className="text-ink-text-weak">
+                        · 불가:{" "}
+                        {hoveredInfo.unavailableMembers
+                          .map((m) => memberLabel(m, myUserId, emails))
+                          .join(", ")}
+                      </span>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <span className="text-ink-text-3">
+                  칸을 드래그하면 원하는 시간대를 직접 후보 시간으로 추가할 수 있어요.
+                </span>
+              )
+            }
+            renderCell={({ day, slot, cell, baseCellClass }) => {
+              const count = availability.slots[cell]?.length ?? 0;
+              const isHovered = hoveredCell === cell;
+              const isSelected =
+                selection !== null &&
+                selection.day === day &&
+                slot >= selection.startSlot &&
+                slot <= selection.endSlot;
+              const startingBlocks = candidateBlocks.filter(
+                (b) => b.day === day && b.startSlot === slot
+              );
+              const slotStartMin = 9 * 60 + slot * 30;
+              const inSearchWindow =
+                slotStartMin >= searchStartMin && slotStartMin + 30 <= searchEndMin;
+              const isTop = isSelected && slot === selection.startSlot;
+              const isBottom = isSelected && slot === selection.endSlot;
 
-          {/* 7×26 주간 히트맵 격자 */}
-          <div className="overflow-x-auto pb-12">
-            <div
-              ref={gridRef}
-              className="relative grid min-w-[26rem] touch-none select-none grid-cols-[2.75rem_repeat(7,minmax(0,1fr))]"
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={stopDragging}
-              onPointerCancel={stopDragging}
-              onMouseEnter={() => setGridHovered(true)}
-              onMouseLeave={() => {
-                setGridHovered(false);
-                setHoveredCell(null);
-              }}
-            >
-              <div />
-              {DAY_LABELS.map((label) => (
+              return (
                 <div
-                  key={label}
-                  className="pb-1.5 text-center text-xs font-bold text-ink-text-2"
+                  key={cell}
+                  data-hcell={cell}
+                  role="gridcell"
+                  aria-label={`${DAY_LABELS[day]}요일 ${formatSlotRange(slot)} ${count}명 가능`}
+                  style={
+                    isSelected
+                      ? { boxShadow: blockShadow(isTop, isBottom, "var(--c-neon)") }
+                      : undefined
+                  }
+                  className={`${baseCellClass} cursor-crosshair transition-opacity ${slotTone(
+                    count,
+                    availability.registered_member_count
+                  )} ${inSearchWindow ? "" : "opacity-35"} ${
+                    isSelected
+                      ? "z-20 border-transparent after:pointer-events-none after:absolute after:inset-0 after:bg-neon/20"
+                      : isHovered
+                        ? "z-10 ring-1 ring-ink-text"
+                        : ""
+                  }`}
                 >
-                  {label}
-                </div>
-              ))}
-
-              {SLOTS.map((slot) => {
-                const slotStartMin = 9 * 60 + slot * 30;
-                const inSearchWindow =
-                  slotStartMin >= searchStartMin && slotStartMin + 30 <= searchEndMin;
-
-                return (
-                  <Fragment key={slot}>
-                    <div className="h-5 pr-2 text-right text-[10px] leading-none text-ink-text-weak tabular-nums">
-                      {slot % 2 === 0 && slotLabel(slot)}
-                    </div>
-                    {DAY_LABELS.map((_, day) => {
-                      const cell = index(day, slot);
-                      const count = availability.slots[cell]?.length ?? 0;
-                      const isHovered = hoveredCell === cell;
-                      const isSelected =
-                        selection !== null &&
-                        selection.day === day &&
-                        slot >= selection.startSlot &&
-                        slot <= selection.endSlot;
-                      const startingBlocks = candidateBlocks.filter(
-                        (b) => b.day === day && b.startSlot === slot
-                      );
-
-                      const isTop = isSelected && slot === selection.startSlot;
-                      const isBottom = isSelected && slot === selection.endSlot;
-
-                      return (
-                        <div
-                          key={cell}
-                          data-hcell={cell}
-                          role="gridcell"
-                          aria-label={`${DAY_LABELS[day]}요일 ${formatSlotRange(slot)} ${count}명 가능`}
-                          style={
-                            isSelected
-                              ? { boxShadow: blockShadow(isTop, isBottom, "var(--c-neon)") }
-                              : undefined
-                          }
-                          className={`relative h-5 cursor-crosshair border-t border-l border-ink-line/70 transition-opacity ${
-                            slot % 2 === 1 ? "border-t-ink-line/30" : ""
-                          } ${day === DAY_LABELS.length - 1 ? "border-r" : ""} ${
-                            slot === SLOT_COUNT - 1 ? "border-b" : ""
-                          } ${slotTone(count, availability.registered_member_count)} ${
-                            inSearchWindow ? "" : "opacity-35"
-                          } ${
-                            isSelected
-                              ? "z-20 border-transparent after:pointer-events-none after:absolute after:inset-0 after:bg-neon/20"
-                              : isHovered
-                                ? "z-10 ring-1 ring-ink-text"
+                  {/* #2 & #1 기존 후보 블록 */}
+                  {startingBlocks.map((b) => {
+                    if (confirmedSlot?.candidate_id === b.candidate.candidate_id) return null;
+                    const span = b.endSlot - b.startSlot + 1;
+                    const isVoted = selectedSet.has(b.candidate.candidate_id);
+                    const emphasized =
+                      activeHighlightId === b.candidate.candidate_id || isVoted;
+                    return (
+                      <div
+                        key={b.candidate.candidate_id}
+                        aria-hidden
+                        style={{ height: `${span * 20}px` }}
+                        className={`pointer-events-none absolute top-0 left-0 w-full transition-opacity duration-200 ease-out ${
+                          showCandidateOverlays ? "opacity-100" : "opacity-0"
+                        } ${emphasized ? "z-25 text-neon" : "z-15 text-ink-text"}`}
+                      >
+                        <svg className="size-full">
+                          <rect
+                            x="1"
+                            y="1"
+                            width="calc(100% - 2px)"
+                            height="calc(100% - 2px)"
+                            rx="3"
+                            fill="currentColor"
+                            fillOpacity={emphasized ? 0.18 : 0.08}
+                            stroke="currentColor"
+                            strokeOpacity={emphasized ? 1 : 0.62}
+                            strokeWidth={emphasized ? 2 : 1.5}
+                            strokeDasharray="4 3"
+                            className={
+                              activeHighlightId === b.candidate.candidate_id
+                                ? "animate-dash-march"
                                 : ""
+                            }
+                          />
+                        </svg>
+                        <span
+                          className={`absolute top-1 right-1 grid min-w-3.5 place-items-center rounded-full px-1 text-[9px] leading-3.5 font-bold tabular-nums shadow-xs ${
+                            isVoted || activeHighlightId === b.candidate.candidate_id
+                              ? "bg-neon text-on-neon"
+                              : "border border-ink-line-2 bg-ink-base/90 text-ink-text"
                           }`}
                         >
-                          {/* #2 & #1 기존 후보 블록 */}
-                          {startingBlocks.map((b) => {
-                            if (confirmedSlot?.candidate_id === b.candidate.candidate_id) return null;
-                            const span = b.endSlot - b.startSlot + 1;
-                            const isVoted = selectedSet.has(b.candidate.candidate_id);
-                            const emphasized =
-                              activeHighlightId === b.candidate.candidate_id || isVoted;
-                            return (
-                              <div
-                                key={b.candidate.candidate_id}
-                                aria-hidden
-                                style={{ height: `${span * 20}px` }}
-                                className={`pointer-events-none absolute top-0 left-0 w-full transition-opacity duration-200 ease-out ${
-                                  showCandidateOverlays ? "opacity-100" : "opacity-0"
-                                } ${emphasized ? "z-25 text-neon" : "z-15 text-ink-text"}`}
-                              >
-                                <svg className="size-full">
-                                  <rect
-                                    x="1"
-                                    y="1"
-                                    width="calc(100% - 2px)"
-                                    height="calc(100% - 2px)"
-                                    rx="3"
-                                    fill="currentColor"
-                                    fillOpacity={emphasized ? 0.18 : 0.08}
-                                    stroke="currentColor"
-                                    strokeOpacity={emphasized ? 1 : 0.62}
-                                    strokeWidth={emphasized ? 2 : 1.5}
-                                    strokeDasharray="4 3"
-                                    className={
-                                      activeHighlightId === b.candidate.candidate_id
-                                        ? "animate-dash-march"
-                                        : ""
-                                    }
-                                  />
-                                </svg>
-                                <span
-                                  className={`absolute top-1 right-1 grid min-w-3.5 place-items-center rounded-full px-1 text-[9px] leading-3.5 font-bold tabular-nums shadow-xs ${
-                                    isVoted || activeHighlightId === b.candidate.candidate_id
-                                      ? "bg-neon text-on-neon"
-                                      : "border border-ink-line-2 bg-ink-base/90 text-ink-text"
-                                  }`}
-                                >
-                                  {b.candidate.available_count}
-                                </span>
-                              </div>
-                            );
-                          })}
+                          {b.candidate.available_count}
+                        </span>
+                      </div>
+                    );
+                  })}
 
-                          {/* 확정 일정 활성 시간 카드 */}
-                          {confirmedSlot &&
-                            confirmedRange &&
-                            confirmedRange.day === day &&
-                            confirmedRange.startSlot === slot && (
-                              <div
-                                aria-label={`확정 일정 ${DAY_LABELS[day]}요일 ${toHHMM(confirmedSlot.start_time)}~${toHHMM(confirmedSlot.end_time)}`}
-                                style={{
-                                  height: `${(confirmedRange.endSlot - confirmedRange.startSlot + 1) * 20}px`,
-                                }}
-                                className="pointer-events-none absolute top-0 left-0 z-30 flex w-full flex-col items-center justify-center gap-0.5 rounded-[6px] border-2 border-neon bg-neon/25 px-1 text-center shadow-[0_0_16px_rgba(0,255,163,0.28)] backdrop-blur-[1px]"
-                              >
-                                <span className="rounded bg-neon px-1.5 py-0.5 text-[9px] leading-none font-bold text-on-neon">
-                                  확정
-                                </span>
-                                {confirmedRange.endSlot - confirmedRange.startSlot >= 1 && (
-                                  <span className="text-[9px] leading-tight font-bold text-ink-text tabular-nums">
-                                    {toHHMM(confirmedSlot.start_time)}–{toHHMM(confirmedSlot.end_time)}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                        </div>
-                      );
-                    })}
-                  </Fragment>
-                );
-              })}
-
-              {/* 드래그 영역 하단에 뜨는 말풍선 툴팁 */}
-              {selection && !dragging && bubblePos && onAddCandidate && (
+                  {/* 확정 일정 활성 시간 카드 */}
+                  {confirmedSlot &&
+                    confirmedRange &&
+                    confirmedRange.day === day &&
+                    confirmedRange.startSlot === slot && (
+                      <div
+                        aria-label={`확정 일정 ${DAY_LABELS[day]}요일 ${toHHMM(confirmedSlot.start_time)}~${toHHMM(confirmedSlot.end_time)}`}
+                        style={{
+                          height: `${(confirmedRange.endSlot - confirmedRange.startSlot + 1) * 20}px`,
+                        }}
+                        className="pointer-events-none absolute top-0 left-0 z-30 flex w-full flex-col items-center justify-center gap-0.5 rounded-[6px] border-2 border-neon bg-neon/25 px-1 text-center shadow-[0_0_16px_rgba(0,255,163,0.28)] backdrop-blur-[1px]"
+                      >
+                        <span className="rounded bg-neon px-1.5 py-0.5 text-[9px] leading-none font-bold text-on-neon">
+                          확정
+                        </span>
+                        {confirmedRange.endSlot - confirmedRange.startSlot >= 1 && (
+                          <span className="text-[9px] leading-tight font-bold text-ink-text tabular-nums">
+                            {toHHMM(confirmedSlot.start_time)}–{toHHMM(confirmedSlot.end_time)}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                </div>
+              );
+            }}
+            overlay={
+              selection && !dragging && bubblePos && onAddCandidate ? (
                 <div
                   role="dialog"
                   aria-label="선택한 시간 후보 추가"
@@ -580,9 +548,9 @@ export default function AvailabilityHeatmap({
                     <X className="size-3.5" />
                   </button>
                 </div>
-              )}
-            </div>
-          </div>
+              ) : null
+            }
+          />
 
           {addError && (
             <p className="text-xs font-medium text-live">{addError}</p>
