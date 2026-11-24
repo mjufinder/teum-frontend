@@ -3,9 +3,7 @@
 import {
   CalendarCheck,
   Check,
-  Eye,
   Mail,
-  Palette,
   ShieldCheck,
   Sparkles,
   User as UserIcon,
@@ -15,8 +13,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import { authInput } from "@/components/auth/AuthShell";
 import {
-  AVATAR_TONES,
-  type AvatarToneId,
   MeAvatar,
   MeMeetingsPanel,
   MeSecurityPanel,
@@ -40,8 +36,6 @@ const ME_TABS: { id: MeTab; label: string; icon: typeof UserIcon }[] = [
   { id: "account", label: "계정 · 보안", icon: ShieldCheck },
 ];
 
-const AVATAR_STORAGE_KEY = "teum_avatar_tone";
-
 export default function MePage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<MeTab>("profile");
@@ -51,7 +45,6 @@ export default function MePage() {
   const [initialMajor, setInitialMajor] = useState("");
   const [email, setEmail] = useState<string | null>(null);
   const [provider, setProvider] = useState<string>("email");
-  const [avatarTone, setAvatarTone] = useState<AvatarToneId>("neon");
   const [timetable, setTimetable] = useState<TimetableBits | null>(null);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
 
@@ -76,14 +69,6 @@ export default function MePage() {
           getMeetings().catch(() => [] as Meeting[]),
         ]);
         if (cancelled) return;
-        try {
-          const savedTone = localStorage.getItem(AVATAR_STORAGE_KEY) as AvatarToneId | null;
-          if (savedTone && AVATAR_TONES.some((t) => t.id === savedTone)) {
-            setAvatarTone(savedTone);
-          }
-        } catch {
-          // ignore
-        }
         setName(user.name);
         setMajor(user.major ?? "");
         setInitialName(user.name);
@@ -143,15 +128,6 @@ export default function MePage() {
     window.addEventListener("beforeunload", onBeforeUnload);
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [isDirty]);
-
-  function handleSelectTone(tone: AvatarToneId) {
-    setAvatarTone(tone);
-    try {
-      localStorage.setItem(AVATAR_STORAGE_KEY, tone);
-    } catch {
-      // ignore
-    }
-  }
 
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -287,76 +263,23 @@ export default function MePage() {
         <section className="min-w-0">
           {activeTab === "profile" && (
             <div className="flex flex-col gap-5">
-              {/* 프로필 아이덴티티 & #3 연동 배지 & #4 아바타 컬러 */}
-              <div className="flex flex-col gap-4 rounded-[18px] border border-ink-line bg-ink-1 p-5">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <MeAvatar name={name} tone={avatarTone} />
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate text-lg font-bold text-ink-text">{name || "—"}</p>
-                        <span className="rounded-full bg-neon/12 px-2 py-0.5 text-[10px] font-bold text-neon">
-                          {provider === "google" ? "Google" : "Email"}
-                        </span>
-                      </div>
-                      <p className="truncate text-sm text-ink-text-3">{major || "전공 미입력"}</p>
-                      {email && (
-                        <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-ink-text-3">
-                          <Mail className="size-3 text-neon" />
-                          {email}
-                        </p>
-                      )}
-                    </div>
+              {/* 프로필 아이덴티티 & 연동 배지 */}
+              <div className="flex items-center gap-4 rounded-[18px] border border-ink-line bg-ink-1 p-5">
+                <MeAvatar name={name} />
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="truncate text-lg font-bold text-ink-text">{name || "—"}</p>
+                    <span className="rounded-full bg-neon/12 px-2 py-0.5 text-[10px] font-bold text-neon">
+                      {provider === "google" ? "Google" : "Email"}
+                    </span>
                   </div>
-
-                  {/* #4 아바타 컬러 팔레트 */}
-                  <div className="flex items-center gap-2 rounded-full border border-ink-line bg-ink-base px-3 py-1.5">
-                    <Palette className="size-3.5 text-ink-text-3" />
-                    <div className="flex items-center gap-1.5">
-                      {AVATAR_TONES.map((t) => (
-                        <button
-                          key={t.id}
-                          type="button"
-                          onClick={() => handleSelectTone(t.id)}
-                          aria-label={`${t.label} 아바타 테마`}
-                          title={t.label}
-                          className={`size-4 rounded-full transition-transform ${t.swatchClass} ${
-                            avatarTone === t.id
-                              ? "scale-110 ring-2 ring-ink-text ring-offset-2 ring-offset-ink-base"
-                              : "opacity-65 hover:opacity-100"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* #5 모임 팀원 표시 미리보기 */}
-              <div className="flex flex-col gap-2.5 rounded-[16px] border border-ink-line bg-ink-1 p-4">
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-ink-text-3">
-                  <Eye className="size-3.5 text-neon" />
-                  모임에서 팀원에게 보이는 모습
-                </span>
-                <div className="flex items-center justify-between gap-3 rounded-[12px] border border-ink-line bg-ink-base px-3.5 py-2.5">
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <MeAvatar name={name} tone={avatarTone} size="sm" />
-                    <div className="min-w-0">
-                      <p className="truncate text-xs font-bold text-ink-text">
-                        {name.trim() || "이름 미입력"}
-                      </p>
-                      <p className="truncate text-[11px] text-ink-text-3">
-                        {major.trim() || "전공 미입력"}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                      ttStats ? "bg-neon/15 text-neon" : "bg-ink-2 text-ink-text-weak"
-                    }`}
-                  >
-                    {ttStats ? "시간표 등록됨" : "시간표 미등록"}
-                  </span>
+                  <p className="truncate text-sm text-ink-text-3">{major || "전공 미입력"}</p>
+                  {email && (
+                    <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-ink-text-3">
+                      <Mail className="size-3 text-neon" />
+                      {email}
+                    </p>
+                  )}
                 </div>
               </div>
 

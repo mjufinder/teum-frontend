@@ -22,56 +22,10 @@ import type { Meeting } from "@/types/meeting";
 
 const DAY_NAMES = ["월", "화", "수", "목", "금", "토", "일"];
 
-export type AvatarToneId = "neon" | "sky" | "violet" | "amber";
-
-export const AVATAR_TONES: {
-  id: AvatarToneId;
-  label: string;
-  ringClass: string;
-  swatchClass: string;
-}[] = [
-  {
-    id: "neon",
-    label: "네온 그린",
-    ringClass: "bg-neon/15 text-neon ring-neon/35",
-    swatchClass: "bg-neon",
-  },
-  {
-    id: "sky",
-    label: "스카이 블루",
-    ringClass: "bg-sky-500/15 text-sky-400 ring-sky-400/35",
-    swatchClass: "bg-sky-400",
-  },
-  {
-    id: "violet",
-    label: "바이올렛",
-    ringClass: "bg-violet-500/15 text-violet-400 ring-violet-400/35",
-    swatchClass: "bg-violet-400",
-  },
-  {
-    id: "amber",
-    label: "앰버",
-    ringClass: "bg-amber-500/15 text-amber-400 ring-amber-400/35",
-    swatchClass: "bg-amber-400",
-  },
-];
-
-export function MeAvatar({
-  name,
-  tone = "neon",
-  size = "lg",
-}: {
-  name: string;
-  tone?: AvatarToneId;
-  size?: "sm" | "lg";
-}) {
+export function MeAvatar({ name }: { name: string }) {
   const initial = name.trim()[0]?.toUpperCase() ?? "?";
-  const toneMeta = AVATAR_TONES.find((t) => t.id === tone) ?? AVATAR_TONES[0];
-  const sizeClass = size === "sm" ? "size-9 text-sm" : "size-16 text-2xl";
   return (
-    <div
-      className={`flex shrink-0 items-center justify-center rounded-full font-bold ring-2 ${sizeClass} ${toneMeta.ringClass}`}
-    >
+    <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-neon/15 text-2xl font-bold text-neon ring-2 ring-neon/35">
       {initial}
     </div>
   );
