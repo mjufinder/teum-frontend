@@ -108,7 +108,7 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
       : null;
 
   return (
-    <div className="flex flex-col gap-3 rounded-[16px] border border-ink-line bg-ink-1 p-4">
+    <div className="flex flex-col gap-3">
       {/* 범례 행 + 모바일 터치 스크롤/칠하기 전환 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-3 text-[11px] text-ink-text-3">
