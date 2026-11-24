@@ -357,12 +357,20 @@ export default function LandingStory({
                   팀원 모두의 공강을 계산하고 투표로 회의 시간을 정해요.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Link href="/signup" className={pillPrimary}>
-                    시간표로 시작하기
-                  </Link>
-                  <Link href="/login" className={pillGhost}>
-                    로그인
-                  </Link>
+                  {isLoggedIn ? (
+                    <Link href="/meetings" className={pillPrimary}>
+                      내 모임
+                    </Link>
+                  ) : (
+                    <>
+                      <Link href="/signup" className={pillPrimary}>
+                        시간표로 시작하기
+                      </Link>
+                      <Link href="/login" className={pillGhost}>
+                        로그인
+                      </Link>
+                    </>
+                  )}
                 </div>
                 {error && (
                   <p className="rounded-[8px] border border-live/40 bg-live/10 px-4 py-2.5 text-sm text-ink-text-2">
@@ -613,12 +621,20 @@ export default function LandingStory({
                 정해집니다.
               </p>
               <div className="mt-2 flex flex-wrap justify-center gap-3">
-                <Link href="/signup" className={pillPrimary}>
-                  시간표로 시작하기
-                </Link>
-                <Link href="/login" className={pillGhost}>
-                  로그인
-                </Link>
+                {isLoggedIn ? (
+                  <Link href="/meetings" className={pillPrimary}>
+                    내 모임
+                  </Link>
+                ) : (
+                  <>
+                    <Link href="/signup" className={pillPrimary}>
+                      시간표로 시작하기
+                    </Link>
+                    <Link href="/login" className={pillGhost}>
+                      로그인
+                    </Link>
+                  </>
+                )}
               </div>
               <p className="mt-10 text-sm text-ink-text-weak">
                 finder · 팀프로젝트 5팀
