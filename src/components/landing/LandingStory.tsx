@@ -328,10 +328,16 @@ function FlowSteps() {
 
 /* ───────────────────────── 페이지 ───────────────────────── */
 
-export default function LandingStory({ error }: { error?: string | null }) {
+export default function LandingStory({
+  error,
+  isLoggedIn = false,
+}: {
+  error?: string | null;
+  isLoggedIn?: boolean;
+}) {
   return (
     <>
-      <SiteHeader showLogin overlay />
+      <SiteHeader showLogin={!isLoggedIn} showNav={isLoggedIn} overlay />
 
       <main className="h-dvh snap-y snap-mandatory overflow-y-auto scroll-smooth bg-ink-base text-ink-text-2">
         {/* ── 뷰 1 : 히어로 + 스탯 ─────────────────── */}

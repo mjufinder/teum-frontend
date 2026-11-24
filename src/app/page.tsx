@@ -16,6 +16,7 @@ import { supabase } from "@/lib/supabase";
 export default function Home() {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,6 +41,12 @@ export default function Home() {
         if (fromOAuth && !oauthError) {
           setError("로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.");
         }
+        setChecking(false);
+        return;
+      }
+
+      if (!fromOAuth) {
+        setLoggedIn(true);
         setChecking(false);
         return;
       }
@@ -74,5 +81,5 @@ export default function Home() {
     );
   }
 
-  return <LandingStory error={error} />;
+  return <LandingStory error={error} isLoggedIn={loggedIn} />;
 }

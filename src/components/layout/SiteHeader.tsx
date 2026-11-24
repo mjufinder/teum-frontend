@@ -69,8 +69,8 @@ export default function SiteHeader({
       />
       <div className="relative mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-2 px-4 sm:px-5 md:px-8">
         <Link
-          href={showNav ? "/meetings" : "/"}
-          aria-label={showNav ? "틈 홈" : "틈 처음 화면"}
+          href="/"
+          aria-label="틈 처음 화면"
           className="flex shrink-0 items-center gap-1.5 font-bold text-ink-text sm:gap-2"
         >
           <BrandMark className="h-5 w-8 sm:h-6 sm:w-9" />
