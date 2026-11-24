@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CheckCircle2, Eraser, ImageUp, Redo2, Save, Undo2 } from "lucide-react";
+import { Check, CheckCircle2, Eraser, ImageUp, Keyboard, Redo2, Save, Undo2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -185,147 +185,191 @@ export default function TimetableEditor({
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* #7 & #8 등록 완료율 프로그레스 + 요일별 등록 슬롯 요약 칩 */}
-      <div className="flex flex-col gap-3 rounded-[16px] border border-ink-line bg-ink-1 px-5 py-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <span className="font-semibold text-ink-text">
-              {TOTAL_SLOTS}비트 중{" "}
-              <strong className="text-neon tabular-nums">{stats.registeredSlots}칸</strong> 등록됨
-            </span>
-            <span className="text-ink-text-3 tabular-nums">
-              수업 {stats.classHours}h · 개인 {stats.manualHours}h · 공강 {stats.freeHours}h
-            </span>
-          </div>
-          <span className="text-xs font-bold text-neon tabular-nums">
-            {stats.registeredPercent}%
-          </span>
-        </div>
-
-        <div className="h-2 w-full overflow-hidden rounded-full bg-ink-base">
-          <div
-            style={{ width: `${stats.registeredPercent}%` }}
-            className="h-full rounded-full bg-neon transition-all duration-300"
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-          {DAY_LABELS.map((label, idx) => (
-            <span
-              key={label}
-              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tabular-nums ${
-                stats.dayCounts[idx] > 0
-                  ? "border-ink-line-2 bg-ink-base text-ink-text"
-                  : "border-ink-line bg-ink-base/50 text-ink-text-weak"
-              }`}
-            >
-              <span>{label}</span>
-              <span className={stats.dayCounts[idx] > 0 ? "text-neon" : ""}>
-                {stats.dayCounts[idx]}
+    <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,2fr)]">
+      {/* 좌측 (7): 시간표 에디터 본문 */}
+      <div className="flex min-w-0 flex-col gap-5">
+        {/* #7 & #8 등록 완료율 프로그레스 + 요일별 등록 슬롯 요약 칩 */}
+        <div className="flex flex-col gap-3 rounded-[16px] border border-ink-line bg-ink-1 px-5 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <span className="font-semibold text-ink-text">
+                {TOTAL_SLOTS}비트 중{" "}
+                <strong className="text-neon tabular-nums">{stats.registeredSlots}칸</strong> 등록됨
               </span>
+              <span className="text-ink-text-3 tabular-nums">
+                수업 {stats.classHours}h · 개인 {stats.manualHours}h · 공강 {stats.freeHours}h
+              </span>
+            </div>
+            <span className="text-xs font-bold text-neon tabular-nums">
+              {stats.registeredPercent}%
             </span>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      {warnings.map((warning, i) => (
-        <div
-          key={i}
-          className="rounded-[12px] border-l-2 border-neon/60 bg-ink-1 px-4 py-3 text-xs leading-relaxed text-ink-text-2"
-        >
-          {warning}
-        </div>
-      ))}
+          <div className="h-2 w-full overflow-hidden rounded-full bg-ink-base">
+            <div
+              style={{ width: `${stats.registeredPercent}%` }}
+              className="h-full rounded-full bg-neon transition-all duration-300"
+            />
+          </div>
 
-      {/* #3 통합 에디터 툴바 + Undo/Redo + 저장 */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            {DAY_LABELS.map((label, idx) => (
+              <span
+                key={label}
+                className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tabular-nums ${
+                  stats.dayCounts[idx] > 0
+                    ? "border-ink-line-2 bg-ink-base text-ink-text"
+                    : "border-ink-line bg-ink-base/50 text-ink-text-weak"
+                }`}
+              >
+                <span>{label}</span>
+                <span className={stats.dayCounts[idx] > 0 ? "text-neon" : ""}>
+                  {stats.dayCounts[idx]}
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {warnings.map((warning, i) => (
           <div
-            className="inline-flex gap-1 rounded-full border border-ink-line bg-ink-1 p-1"
-            role="group"
-            aria-label="칠하기 도구"
+            key={i}
+            className="rounded-[12px] border-l-2 border-neon/60 bg-ink-1 px-4 py-3 text-xs leading-relaxed text-ink-text-2"
           >
-            {tools.map((item) => {
-              const active = tool === item.state;
-              return (
-                <button
-                  key={item.state}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => setTool(item.state)}
-                  className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-xs font-bold transition-colors ${
-                    active
-                      ? "bg-neon text-on-neon shadow-xs"
-                      : "text-ink-text-3 hover:bg-ink-2 hover:text-ink-text"
-                  }`}
-                >
-                  <Swatch state={item.state} active={active} />
-                  {item.label}
-                </button>
-              );
-            })}
+            {warning}
+          </div>
+        ))}
+
+        {/* #3 통합 에디터 툴바 + Undo/Redo + 저장 */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              className="inline-flex gap-1 rounded-full border border-ink-line bg-ink-1 p-1"
+              role="group"
+              aria-label="칠하기 도구"
+            >
+              {tools.map((item) => {
+                const active = tool === item.state;
+                return (
+                  <button
+                    key={item.state}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setTool(item.state)}
+                    className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-xs font-bold transition-colors ${
+                      active
+                        ? "bg-neon text-on-neon shadow-xs"
+                        : "text-ink-text-3 hover:bg-ink-2 hover:text-ink-text"
+                    }`}
+                  >
+                    <Swatch state={item.state} active={active} />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="inline-flex items-center gap-1 rounded-full border border-ink-line bg-ink-1 p-1">
+              <button
+                type="button"
+                onClick={handleUndo}
+                disabled={!canUndo}
+                aria-label="실행 취소"
+                title="실행 취소 (Ctrl+Z)"
+                className="grid size-8 place-items-center rounded-full text-ink-text-2 transition-colors hover:bg-ink-2 hover:text-ink-text disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                <Undo2 className="size-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={handleRedo}
+                disabled={!canRedo}
+                aria-label="다시 실행"
+                title="다시 실행 (Ctrl+Shift+Z)"
+                className="grid size-8 place-items-center rounded-full text-ink-text-2 transition-colors hover:bg-ink-2 hover:text-ink-text disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                <Redo2 className="size-3.5" />
+              </button>
+            </div>
           </div>
 
-          <div className="inline-flex items-center gap-1 rounded-full border border-ink-line bg-ink-1 p-1">
-            <button
-              type="button"
-              onClick={handleUndo}
-              disabled={!canUndo}
-              aria-label="실행 취소"
-              title="실행 취소 (Ctrl+Z)"
-              className="grid size-8 place-items-center rounded-full text-ink-text-2 transition-colors hover:bg-ink-2 hover:text-ink-text disabled:cursor-not-allowed disabled:opacity-35"
-            >
-              <Undo2 className="size-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={handleRedo}
-              disabled={!canRedo}
-              aria-label="다시 실행"
-              title="다시 실행 (Ctrl+Shift+Z)"
-              className="grid size-8 place-items-center rounded-full text-ink-text-2 transition-colors hover:bg-ink-2 hover:text-ink-text disabled:cursor-not-allowed disabled:opacity-35"
-            >
-              <Redo2 className="size-3.5" />
-            </button>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          disabled={saving}
-          onClick={handleSave}
-          className="inline-flex h-10 items-center gap-1.5 rounded-full bg-neon px-5 text-xs font-bold text-on-neon transition-colors hover:bg-neon-2 disabled:opacity-50"
-        >
-          {savedToast ? <Check className="size-3.5" /> : <Save className="size-3.5" />}
-          {saving ? "저장 중..." : dirty ? "변경사항 저장" : "저장"}
-        </button>
-      </div>
-
-      {error && (
-        <p className="rounded-[10px] border-l-2 border-live bg-ink-1 px-4 py-2.5 text-xs text-live">
-          {error}
-        </p>
-      )}
-
-      <TimetableGrid bits={bits} onPaint={handlePaint} />
-
-      {/* #10 에디터 하단 "이미지로 다시 등록" (실수 클릭 방지) */}
-      {onReupload && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ink-line pt-4">
-          <p className="text-xs text-ink-text-3">
-            이미지 인식은 월~금만 지원해요. 토·일 개인 일정은 직접 칠해 주세요.
-          </p>
           <button
             type="button"
-            onClick={onReupload}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-ink-line-2 px-4 text-xs font-semibold text-ink-text-2 transition-colors hover:bg-ink-2 hover:text-ink-text"
+            disabled={saving}
+            onClick={handleSave}
+            className="inline-flex h-10 items-center gap-1.5 rounded-full bg-neon px-5 text-xs font-bold text-on-neon transition-colors hover:bg-neon-2 disabled:opacity-50"
           >
-            <ImageUp className="size-3.5 text-neon" />
-            이미지로 다시 등록
+            {savedToast ? <Check className="size-3.5" /> : <Save className="size-3.5" />}
+            {saving ? "저장 중..." : dirty ? "변경사항 저장" : "저장"}
           </button>
         </div>
-      )}
+
+        {error && (
+          <p className="rounded-[10px] border-l-2 border-live bg-ink-1 px-4 py-2.5 text-xs text-live">
+            {error}
+          </p>
+        )}
+
+        <TimetableGrid bits={bits} onPaint={handlePaint} />
+
+        {/* #10 에디터 하단 "이미지로 다시 등록" (실수 클릭 방지) */}
+        {onReupload && (
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ink-line pt-4">
+            <p className="text-xs text-ink-text-3">
+              이미지 인식은 월~금만 지원해요. 토·일 개인 일정은 직접 칠해 주세요.
+            </p>
+            <button
+              type="button"
+              onClick={onReupload}
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-ink-line-2 px-4 text-xs font-semibold text-ink-text-2 transition-colors hover:bg-ink-2 hover:text-ink-text"
+            >
+              <ImageUp className="size-3.5 text-neon" />
+              이미지로 다시 등록
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* 우측 (2): 단축키 & 사용 팁 사이드바 */}
+      <aside className="flex flex-col gap-4 lg:sticky lg:top-24">
+        <section className="flex flex-col gap-4 rounded-[16px] border border-ink-line bg-ink-1 p-4">
+          <div className="flex items-center gap-2">
+            <Keyboard className="size-4 text-neon" />
+            <h2 className="text-sm font-bold text-ink-text">조작 팁 & 단축키</h2>
+          </div>
+
+          <ul className="flex flex-col gap-3 text-xs leading-relaxed text-ink-text-3">
+            <li className="flex flex-col gap-1">
+              <span className="font-semibold text-ink-text-2">드래그 연속 칠하기</span>
+              <span>칸을 누른 채 위아래·좌우로 끌면 한 번에 채워져요.</span>
+            </li>
+            <li className="flex flex-col gap-1 border-t border-ink-line pt-2.5">
+              <span className="font-semibold text-ink-text-2">줄 단위 일괄 선택</span>
+              <span>
+                상단 요일(<strong className="text-ink-text">월~일</strong>)이나 왼쪽 시간(
+                <strong className="text-ink-text">09:00</strong>) 라벨을 누르면 한 줄 전체가 칠해져요.
+              </span>
+            </li>
+            <li className="flex flex-col gap-1.5 border-t border-ink-line pt-2.5">
+              <span className="font-semibold text-ink-text-2">실행 취소 · 다시 실행</span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <kbd className="rounded border border-ink-line-2 bg-ink-base px-1.5 py-0.5 text-[10px] font-bold text-ink-text">
+                  Ctrl / ⌘ + Z
+                </kbd>
+                <kbd className="rounded border border-ink-line-2 bg-ink-base px-1.5 py-0.5 text-[10px] font-bold text-ink-text">
+                  + Shift + Z
+                </kbd>
+              </div>
+            </li>
+            <li className="flex flex-col gap-1 border-t border-ink-line pt-2.5">
+              <span className="font-semibold text-ink-text-2">모바일 스크롤</span>
+              <span>
+                좁은 화면에서 이동할 땐 상단 <strong className="text-ink-text">스크롤 모드</strong>로 전환하면 실수로 칠해지지 않아요.
+              </span>
+            </li>
+          </ul>
+        </section>
+      </aside>
 
       {/* #6 저장 완료 하단 플로팅 토스트 */}
       {savedToast && (
