@@ -1,17 +1,39 @@
 "use client";
 
-import { ArrowLeft, CalendarPlus, Check } from "lucide-react";
+import {
+  ArrowLeft,
+  BarChart3,
+  CalendarDays,
+  CalendarPlus,
+  Check,
+  Download,
+  ImageUp,
+  SlidersHorizontal,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import TimetableEditor from "@/components/timetable/TimetableEditor";
+import {
+  TimetableExportPanel,
+  TimetablePresetsPanel,
+  TimetableStatsPanel,
+} from "@/components/timetable/TimetableSidePanels";
 import TimetableUpload from "@/components/timetable/TimetableUpload";
 import { ApiError } from "@/lib/api";
 import { getMyTimetable } from "@/lib/timetable-api";
 import type { RecognizedTimetable, TimetableBits } from "@/types/timetable";
 
-type TimetableViewMode = "idle" | "uploading" | "editing";
+type TimetableTab = "grid" | "upload" | "presets" | "stats" | "export";
+
+const MENU_TABS: { id: TimetableTab; label: string; icon: typeof CalendarDays }[] = [
+  { id: "grid", label: "내 시간표", icon: CalendarDays },
+  { id: "upload", label: "이미지로 등록", icon: ImageUp },
+  { id: "presets", label: "고정 일정 · 프리셋", icon: SlidersHorizontal },
+  { id: "stats", label: "시간표 요약 · 통계", icon: BarChart3 },
+  { id: "export", label: "내보내기 · 단축키", icon: Download },
+];
 
 const STEPS = [
   { id: "upload", label: "업로드" },
@@ -23,18 +45,17 @@ export default function MyTimetablePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<TimetableViewMode>("idle");
+  const [activeTab, setActiveTab] = useState<TimetableTab>("grid");
   const [savedOnce, setSavedOnce] = useState(false);
   const [bits, setBits] = useState<TimetableBits | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
-  // 인식 결과가 들어오면 편집기 상태를 새로 시작한다.
+  // 인식 결과나 프리셋이 반영되면 편집기 히스토리를 새로 시작한다.
   const [editorKey, setEditorKey] = useState(0);
 
   useEffect(() => {
     getMyTimetable()
       .then((timetable) => {
         setBits(timetable);
-        setViewMode(timetable ? "editing" : "idle");
         setLoading(false);
       })
       .catch((e) => {
@@ -47,16 +68,6 @@ export default function MyTimetablePage() {
       });
   }, [router]);
 
-  function handleReupload() {
-    const ok = confirm(
-      "수업 시간만 인식 결과로 바꾸고 개인 일정은 그대로 둬요. 저장해야 반영돼요. 계속할까요?"
-    );
-    if (ok) {
-      setSavedOnce(false);
-      setViewMode("uploading");
-    }
-  }
-
   function handleRecognized(result: RecognizedTimetable) {
     setBits((prev) =>
       prev ? { class_bits: result.class_bits, manual_bits: prev.manual_bits } : prev
@@ -64,13 +75,13 @@ export default function MyTimetablePage() {
     setWarnings(result.warnings);
     setEditorKey((key) => key + 1);
     setSavedOnce(false);
-    setViewMode("editing");
+    setActiveTab("grid");
   }
 
   const activeStepIndex =
-    viewMode === "uploading" ? 0 : viewMode === "editing" ? (savedOnce ? 2 : 1) : -1;
+    !bits ? -1 : activeTab === "upload" ? 0 : savedOnce ? 2 : 1;
 
-  function renderContent() {
+  function renderMainPanel() {
     if (loading) {
       return (
         <div className="flex animate-pulse flex-col gap-4">
@@ -86,7 +97,7 @@ export default function MyTimetablePage() {
         </p>
       );
     }
-    if (viewMode === "idle" || !bits) {
+    if (!bits) {
       return (
         <div className="flex flex-col items-start gap-4 rounded-[20px] border border-ink-line bg-ink-1 p-8">
           <div className="flex size-11 items-center justify-center rounded-full bg-neon/15 text-neon">
@@ -107,22 +118,43 @@ export default function MyTimetablePage() {
         </div>
       );
     }
-    if (viewMode === "uploading") {
+
+    if (activeTab === "upload") {
       return (
         <TimetableUpload
           onRecognized={handleRecognized}
-          onManual={() => setViewMode("editing")}
-          onCancel={() => setViewMode("editing")}
+          onManual={() => setActiveTab("grid")}
+          onCancel={() => setActiveTab("grid")}
         />
       );
     }
+    if (activeTab === "presets") {
+      return (
+        <TimetablePresetsPanel
+          bits={bits}
+          onApply={(next) => {
+            setBits(next);
+            setEditorKey((k) => k + 1);
+            setSavedOnce(true);
+          }}
+          onGoToGrid={() => setActiveTab("grid")}
+        />
+      );
+    }
+    if (activeTab === "stats") {
+      return <TimetableStatsPanel bits={bits} />;
+    }
+    if (activeTab === "export") {
+      return <TimetableExportPanel bits={bits} />;
+    }
+
     return (
       <TimetableEditor
         key={editorKey}
         initial={bits}
         warnings={warnings}
+        onBitsChange={setBits}
         onSaved={() => setSavedOnce(true)}
-        onReupload={handleReupload}
       />
     );
   }
@@ -144,7 +176,6 @@ export default function MyTimetablePage() {
             내 정보로 돌아가기
           </Link>
 
-          {/* #9 단계 indicator (업로드 → 확인 → 저장) */}
           {activeStepIndex >= 0 && (
             <div className="flex items-center gap-2 text-[11px] font-semibold">
               {STEPS.map((step, idx) => {
@@ -192,12 +223,43 @@ export default function MyTimetablePage() {
             내 시간표
           </h1>
           <p className="text-sm text-ink-text-3">
-            수업과 개인 일정을 칠해두면 모든 모임 공강 계산에 자동으로 반영돼요.
+            좌측 메뉴에서 시간표 편집, 이미지 등록, 프리셋, 통계 및 내보내기를 이용할 수 있어요.
           </p>
         </div>
       </header>
 
-      {renderContent()}
+      {/* 좌측 메뉴(14rem) + 우측 콘텐츠 */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
+        <aside className="lg:sticky lg:top-24">
+          <nav
+            aria-label="내 시간표 메뉴"
+            className="flex gap-1.5 overflow-x-auto pb-1 lg:flex-col lg:gap-1 lg:overflow-visible lg:pb-0"
+          >
+            {MENU_TABS.map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  aria-current={active ? "page" : undefined}
+                  className={`inline-flex h-10 shrink-0 items-center gap-2.5 rounded-[10px] px-3.5 text-xs font-bold whitespace-nowrap transition-colors lg:w-full ${
+                    active
+                      ? "bg-neon/12 text-neon"
+                      : "text-ink-text-3 hover:bg-ink-1 hover:text-ink-text"
+                  }`}
+                >
+                  <Icon className={`size-4 shrink-0 ${active ? "text-neon" : "text-ink-text-weak"}`} />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+
+        <section className="min-w-0">{renderMainPanel()}</section>
+      </div>
     </div>
   );
 }

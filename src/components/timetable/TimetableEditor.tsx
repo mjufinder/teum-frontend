@@ -50,6 +50,7 @@ function Swatch({ state, active }: { state: SlotState; active: boolean }) {
 interface TimetableEditorProps {
   initial: TimetableBits;
   warnings?: string[];
+  onBitsChange?: (next: TimetableBits) => void;
   onSaved?: () => void;
   onReupload?: () => void;
 }
@@ -57,6 +58,7 @@ interface TimetableEditorProps {
 export default function TimetableEditor({
   initial,
   warnings = [],
+  onBitsChange,
   onSaved,
   onReupload,
 }: TimetableEditorProps) {
@@ -75,16 +77,24 @@ export default function TimetableEditor({
   const canRedo = historyIndex < history.length - 1;
 
   const handleUndo = useCallback(() => {
-    setHistoryIndex((idx) => (idx > 0 ? idx - 1 : idx));
+    setHistoryIndex((idx) => {
+      const nextIdx = idx > 0 ? idx - 1 : idx;
+      if (nextIdx !== idx) onBitsChange?.(history[nextIdx]);
+      return nextIdx;
+    });
     setDirty(true);
     setSavedToast(false);
-  }, []);
+  }, [history, onBitsChange]);
 
   const handleRedo = useCallback(() => {
-    setHistoryIndex((idx) => (idx < history.length - 1 ? idx + 1 : idx));
+    setHistoryIndex((idx) => {
+      const nextIdx = idx < history.length - 1 ? idx + 1 : idx;
+      if (nextIdx !== idx) onBitsChange?.(history[nextIdx]);
+      return nextIdx;
+    });
     setDirty(true);
     setSavedToast(false);
-  }, [history.length]);
+  }, [history, onBitsChange]);
 
   // Undo / Redo 키보드 단축키 (Ctrl/Cmd + Z, Ctrl/Cmd + Shift + Z / Ctrl + Y)
   useEffect(() => {
@@ -159,6 +169,7 @@ export default function TimetableEditor({
     }
     setHistory((prev) => [...prev.slice(0, historyIndex + 1), next]);
     setHistoryIndex((idx) => idx + 1);
+    onBitsChange?.(next);
     setSavedToast(false);
     setDirty(true);
   }
