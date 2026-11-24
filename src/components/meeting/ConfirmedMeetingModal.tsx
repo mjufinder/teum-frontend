@@ -15,7 +15,6 @@ interface ConfirmedMeetingModalProps {
   shareToken: string | null;
   isAdmin: boolean;
   onShareTokenIssued: (token: string) => void;
-  onFocusCard: () => void;
   onClose: () => void;
 }
 
@@ -27,7 +26,6 @@ export default function ConfirmedMeetingModal({
   shareToken,
   isAdmin,
   onShareTokenIssued,
-  onFocusCard,
   onClose,
 }: ConfirmedMeetingModalProps) {
   const router = useRouter();
@@ -184,18 +182,11 @@ export default function ConfirmedMeetingModal({
             {error && <p className="text-xs text-live">{error}</p>}
           </div>
 
-          <div className="flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onFocusCard}
-              className="inline-flex h-9 items-center rounded-[8px] border border-ink-line-2 px-3.5 text-xs font-semibold text-ink-text transition-colors hover:bg-ink-2"
-            >
-              공유 카드 위치 강조해서 보기
-            </button>
+          <div className="flex items-center justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-9 items-center rounded-[8px] px-3 text-xs font-semibold text-ink-text-3 transition-colors hover:bg-ink-2 hover:text-ink-text"
+              className="inline-flex h-9 items-center rounded-[8px] border border-ink-line-2 px-4 text-xs font-semibold text-ink-text-2 transition-colors hover:bg-ink-2 hover:text-ink-text"
             >
               닫기
             </button>

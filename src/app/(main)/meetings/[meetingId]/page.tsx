@@ -102,7 +102,6 @@ function MeetingDetail() {
   const [savingEdit, setSavingEdit] = useState(false);
   const [activeSection, setActiveSection] = useState("section-heatmap");
   const [confirmedModalDismissed, setConfirmedModalDismissed] = useState(false);
-  const [shareCardHighlighted, setShareCardHighlighted] = useState(false);
 
   const handleAvailabilityError = useCallback(
     (e: unknown) => {
@@ -453,7 +452,6 @@ function MeetingDetail() {
               onShareTokenIssued={(token) =>
                 setMeeting((prev) => (prev ? { ...prev, share_token: token } : prev))
               }
-              highlighted={shareCardHighlighted}
               isAdmin={isAdmin}
             />
           )}
@@ -552,7 +550,6 @@ function MeetingDetail() {
             onShareTokenIssued={(token) =>
               setMeeting((prev) => (prev ? { ...prev, share_token: token } : prev))
             }
-            highlighted={shareCardHighlighted}
           />
 
           <MeetingActions
@@ -607,14 +604,6 @@ function MeetingDetail() {
           onShareTokenIssued={(token) =>
             setMeeting((prev) => (prev ? { ...prev, share_token: token } : prev))
           }
-          onFocusCard={() => {
-            setConfirmedModalDismissed(true);
-            setShareCardHighlighted(true);
-            document
-              .getElementById("section-confirmed")
-              ?.scrollIntoView({ behavior: "smooth", block: "center" });
-            setTimeout(() => setShareCardHighlighted(false), 3500);
-          }}
           onClose={() => setConfirmedModalDismissed(true)}
         />
       )}
