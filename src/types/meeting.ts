@@ -1,3 +1,11 @@
+export interface ConfirmedSlot {
+  candidate_id: number;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  confirmed_at: string;
+}
+
 export interface Meeting {
   meeting_id: number;
   name: string;
@@ -9,6 +17,8 @@ export interface Meeting {
   travel_buffer_min: number;
   min_duration_min: number;
   needs_recalc: boolean;
+  share_token?: string | null;
+  confirmed_schedule?: ConfirmedSlot | null;
 }
 
 export interface Member {
@@ -16,4 +26,5 @@ export interface Member {
   user_id: number;
   role: "ADMIN" | "MEMBER";
   status: "ACTIVE" | "LEFT";
+  has_timetable?: boolean;
 }

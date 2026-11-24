@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* 클래스 기반 다크 모드: html.dark 또는 그 하위에서 dark: 변형이 켜진다 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /*
  * 틈 디자인 시스템: 시간표 격자
  * 화면의 구조는 대학 시간표의 구조를 따른다. 선과 칸이 곧 정보이고,
@@ -15,6 +18,58 @@
     #036635 0 2px,
     #ffffff 2px 6px
   );
+
+  /* 랜딩 테마 토큰 — 라이트(화이트 캔버스 + 브랜드 그린) */
+  --c-ink: #f1f2f4;
+  --c-ink-base: #ffffff;
+  --c-ink-1: #fbfcfd;
+  --c-ink-2: #f0f1f2;
+  --c-ink-3: #e3e5e8;
+  --c-ink-line: #e6e7ea;
+  --c-ink-line-2: #cfd1d4;
+  --c-ink-text: #0e0f10;
+  --c-ink-text-2: #202224;
+  --c-ink-text-3: #55585e;
+  --c-ink-text-weak: #8a8d93;
+  --c-neon: #036635;
+  --c-neon-2: #024d28;
+  --c-neon-3: #1bb373;
+  --c-on-neon: #ffffff;
+  /* 메시 그라데이션 (라이트: 밝은 회색·흰색 계열 + 아주 옅은 초록 글로우) */
+  --c-mesh-1: #cfe8dc;
+  --c-mesh-2: #dde6f2;
+  --c-mesh-3: #cde9d9;
+  --c-mesh-4: #e6ddf1;
+  --c-mesh-5: #d2ece0;
+  --mesh-op: 0.8;
+  --c-mesh-glow: rgba(3, 102, 53, 0.06);
+}
+
+/* 랜딩 테마 토큰 — 다크(블랙 캔버스 + 네온 그린, 치지직 레퍼런스) */
+.dark {
+  --c-ink: #0e0f10;
+  --c-ink-base: #141517;
+  --c-ink-1: #1c1d1f;
+  --c-ink-2: #202224;
+  --c-ink-3: #2e3033;
+  --c-ink-line: #2a2c2f;
+  --c-ink-line-2: #4d4d4d;
+  --c-ink-text: #ffffff;
+  --c-ink-text-2: #dfe2ea;
+  --c-ink-text-3: #9da5b6;
+  --c-ink-text-weak: #697183;
+  --c-neon: #00ffa3;
+  --c-neon-2: #00e693;
+  --c-neon-3: #00cc82;
+  --c-on-neon: #0e0f10;
+  /* 메시 그라데이션 (다크: 블랙 계열 + 네온 글로우) */
+  --c-mesh-1: #0f5e45;
+  --c-mesh-2: #11495c;
+  --c-mesh-3: #1a6b3b;
+  --c-mesh-4: #1b3a66;
+  --c-mesh-5: #0c7a5a;
+  --mesh-op: 0.6;
+  --c-mesh-glow: rgba(0, 255, 163, 0.1);
 }
 
 @theme inline {
@@ -26,6 +81,28 @@
   --color-brand-deep: #024d28;
   /* 아주 옅은 초록: 선택된 행, 비어 있는 강조 영역 */
   --color-brand-soft: #e6f0ea;
+  /* 민트/에메랄드: 공강(모두 비는 시간)·두 번째 강조색. 진초록과 같은 계열의 차분한 톤 */
+  --color-lime: #3f9173;
+  --color-lime-bright: #93cdb3;
+  --color-lime-soft: #e4f0ea;
+  /* 랜딩 전용 토큰 — 실제 값은 :root(라이트)/.dark(다크)의 --c-* 로 테마 전환된다 */
+  --color-ink: var(--c-ink);
+  --color-ink-base: var(--c-ink-base);
+  --color-ink-1: var(--c-ink-1);
+  --color-ink-2: var(--c-ink-2);
+  --color-ink-3: var(--c-ink-3);
+  --color-ink-line: var(--c-ink-line);
+  --color-ink-line-2: var(--c-ink-line-2);
+  --color-ink-text: var(--c-ink-text);
+  --color-ink-text-2: var(--c-ink-text-2);
+  --color-ink-text-3: var(--c-ink-text-3);
+  --color-ink-text-weak: var(--c-ink-text-weak);
+  --color-neon: var(--c-neon);
+  --color-neon-2: var(--c-neon-2);
+  --color-neon-3: var(--c-neon-3);
+  --color-on-neon: var(--c-on-neon);
+  --color-violet: #4e41db;
+  --color-live: #e02020;
   /* 강조색을 따로 두지 않으므로 '보조 표시'도 초록 계열로 맞춘다 */
   --color-accent: #036635;
   --color-accent-strong: #1e4d35;
@@ -146,6 +223,18 @@ body {
   .input::placeholder {
     @apply text-muted;
   }
+  .dark .input {
+    @apply border-ink-line-2 bg-ink-base text-ink-text placeholder:text-ink-text-weak;
+  }
+  .dark .input:hover {
+    @apply border-ink-text-3;
+  }
+  .dark .input:focus {
+    @apply border-neon outline-neon;
+  }
+  .dark .input:disabled {
+    @apply bg-ink-2 text-ink-text-weak;
+  }
   input[type="file"].input {
     @apply h-auto border-dashed py-3 text-sm file:mr-3 file:cursor-pointer file:rounded-[6px] file:border-0 file:bg-brand file:px-4 file:py-2 file:text-sm file:font-bold file:text-white;
   }
@@ -257,6 +346,14 @@ body {
     transform: scale(1);
   }
 }
+@keyframes dash-march {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+.animate-dash-march {
+  animation: dash-march 0.7s linear infinite;
+}
 .hero-slot {
   transform-origin: top;
   animation: slot-fill 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
@@ -272,6 +369,103 @@ body {
   .hero-slot,
   .hero-gap {
     transition: none;
+    animation: none;
+  }
+}
+
+/* ───── 메시 그라데이션 배경 (랜딩 히어로) — 몽환적 멀티톤, 색은 --c-mesh-* 로 테마 전환 ───── */
+.mesh-bg {
+  --mx: 50%;
+  --my: 24%;
+}
+.mesh-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(104px);
+  opacity: var(--mesh-op);
+  will-change: transform;
+}
+.mesh-blob-1 {
+  width: 52rem;
+  height: 52rem;
+  top: -22rem;
+  left: -16rem;
+  background: var(--c-mesh-1);
+  animation: mesh-drift-1 28s ease-in-out infinite;
+}
+.mesh-blob-2 {
+  width: 48rem;
+  height: 48rem;
+  top: -18rem;
+  right: -18rem;
+  background: var(--c-mesh-2);
+  animation: mesh-drift-2 32s ease-in-out infinite;
+}
+.mesh-blob-3 {
+  width: 46rem;
+  height: 46rem;
+  bottom: -20rem;
+  left: 22%;
+  background: var(--c-mesh-3);
+  animation: mesh-drift-3 36s ease-in-out infinite;
+}
+.mesh-blob-4 {
+  width: 42rem;
+  height: 42rem;
+  bottom: -14rem;
+  left: -12rem;
+  background: var(--c-mesh-4);
+  animation: mesh-drift-1 40s ease-in-out infinite reverse;
+}
+.mesh-blob-5 {
+  width: 44rem;
+  height: 44rem;
+  top: 22%;
+  right: -14rem;
+  background: var(--c-mesh-5);
+  animation: mesh-drift-2 34s ease-in-out infinite reverse;
+}
+/* 마우스를 따라오는 은은한 글로우 */
+.mesh-glow {
+  position: absolute;
+  inset: -25%;
+  background: radial-gradient(
+    50rem 50rem at var(--mx) var(--my),
+    var(--c-mesh-glow),
+    transparent 74%
+  );
+  filter: blur(44px);
+  transition: background 160ms linear;
+}
+@keyframes mesh-drift-1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(6rem, 4rem) scale(1.12);
+  }
+}
+@keyframes mesh-drift-2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-5rem, 5rem) scale(1.14);
+  }
+}
+@keyframes mesh-drift-3 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(4rem, -5rem) scale(1.1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mesh-blob {
     animation: none;
   }
 }

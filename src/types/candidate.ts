@@ -20,3 +20,10 @@ export interface CandidateSet {
   created_at: string;
   candidates: Candidate[];
 }
+
+export interface MeetingAvailability {
+  meeting_id: number;
+  total_member_count: number;
+  registered_member_count: number;
+  slots: number[][];
+}

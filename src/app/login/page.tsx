@@ -6,8 +6,13 @@ import { useState } from "react";
 
 import { ApiError } from "@/lib/api";
 import { getNextPath } from "@/lib/auth-flow";
+import AuthShell, {
+  authBtnPrimary,
+  authInput,
+  authLabel,
+  authNotice,
+} from "@/components/auth/AuthShell";
 import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
-import Logo from "@/components/layout/Logo";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
@@ -49,19 +54,20 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col justify-center gap-6 px-5 py-12">
-      <Link href="/" aria-label="틈 처음 화면" className="self-start">
-        <Logo />
-      </Link>
-      <div className="flex flex-col gap-1">
-        <h1 className="page-title">로그인</h1>
-        <p className="text-sm text-muted">다시 만나서 반가워요.</p>
-      </div>
-      <form
-        onSubmit={handleSubmit}
-        className="card flex w-full flex-col gap-5"
-      >
-        <label className="field-label">
+    <AuthShell
+      title="로그인"
+      subtitle="다시 만나서 반가워요."
+      footer={
+        <>
+          계정이 없으신가요?{" "}
+          <Link href="/signup" className="font-bold text-neon-3 hover:underline">
+            회원가입
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="flex w-full flex-col gap-5">
+        <label className={authLabel}>
           이메일
           <input
             type="email"
@@ -70,10 +76,10 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="input"
+            className={authInput}
           />
         </label>
-        <label className="field-label">
+        <label className={authLabel}>
           비밀번호
           <input
             type="password"
@@ -82,22 +88,17 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="input"
+            className={authInput}
           />
         </label>
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn btn-primary"
-        >
+        <button type="submit" disabled={loading} className={authBtnPrimary}>
           {loading ? "처리 중..." : "로그인"}
         </button>
-        {error && <p className="notice notice-danger">{error}</p>}
+        {error && <p className={authNotice}>{error}</p>}
       </form>
-      <GoogleLoginButton />
-      <Link href="/signup" className="text-link self-start text-sm">
-        계정이 없으신가요? 회원가입
-      </Link>
-    </main>
+      <div className="mt-6">
+        <GoogleLoginButton />
+      </div>
+    </AuthShell>
   );
 }
