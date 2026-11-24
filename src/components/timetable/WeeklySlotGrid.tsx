@@ -48,9 +48,9 @@ export default function WeeklySlotGrid({
   onMouseLeave,
 }: WeeklySlotGridProps) {
   return (
-    <div className="flex flex-col gap-3 rounded-[12px] border border-ink-line bg-ink-1 p-4">
+    <div className="flex flex-col gap-3">
       {inspector && (
-        <div className="flex min-h-[2.25rem] flex-wrap items-center justify-between gap-2 rounded-[8px] border border-ink-line bg-ink-base px-3 py-1.5 text-xs">
+        <div className="flex min-h-[2.25rem] flex-wrap items-center justify-between gap-2 rounded-[8px] border border-ink-line bg-ink-1/50 px-3 py-1.5 text-xs">
           {inspector}
         </div>
       )}

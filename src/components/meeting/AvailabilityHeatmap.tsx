@@ -45,7 +45,7 @@ interface BubblePos {
 }
 
 function slotTone(count: number, total: number): string {
-  if (total <= 0 || count <= 0) return "bg-ink-base";
+  if (total <= 0 || count <= 0) return "bg-transparent";
   const ratio = count / total;
   if (ratio >= 1) return "bg-emerald-600/80 dark:bg-neon/65";
   if (ratio >= 0.75) return "bg-emerald-600/65 dark:bg-emerald-400/60";
@@ -282,7 +282,7 @@ export default function AvailabilityHeatmap({
         {/* 농도 범례 */}
         <div className="flex items-center gap-1.5 text-[11px] text-ink-text-3">
           <span>적음</span>
-          <span className="size-3 rounded-[3px] border border-ink-line bg-ink-base" />
+          <span className="size-3 rounded-[3px] border border-ink-line bg-transparent" />
           <span className="size-3 rounded-[3px] bg-emerald-500/20 dark:bg-emerald-400/20" />
           <span className="size-3 rounded-[3px] bg-emerald-500/50 dark:bg-emerald-400/45" />
           <span className="size-3 rounded-[3px] bg-emerald-600/65 dark:bg-emerald-400/60" />

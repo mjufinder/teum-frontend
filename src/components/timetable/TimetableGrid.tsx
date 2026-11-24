@@ -9,13 +9,13 @@ import type { SlotState, TimetableBits } from "@/types/timetable";
 const cellTones: Record<SlotState, string> = {
   class: "bg-emerald-600/80 dark:bg-neon/65",
   manual: "bg-emerald-500/35 dark:bg-emerald-400/30",
-  free: "bg-ink-base",
+  free: "bg-transparent",
 };
 
 const legend: { state: SlotState; label: string; swatch: string }[] = [
   { state: "class", label: "수업", swatch: "bg-emerald-600/80 dark:bg-neon/65" },
   { state: "manual", label: "개인 일정", swatch: "bg-emerald-500/35 dark:bg-emerald-400/30" },
-  { state: "free", label: "공강(가능)", swatch: "border border-ink-line bg-ink-base" },
+  { state: "free", label: "공강(가능)", swatch: "border border-ink-line bg-transparent" },
 ];
 
 const stateText: Record<SlotState, string> = {
