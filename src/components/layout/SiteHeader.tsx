@@ -1,5 +1,6 @@
 "use client";
 
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -53,7 +54,6 @@ export default function SiteHeader({
           : window.scrollY;
       setScrolled(top > 8);
     };
-    setScrolled(false);
     // 캡처 단계로 들어야 내부 스크롤 컨테이너(랜딩 main)의 스크롤도 잡힌다.
     document.addEventListener("scroll", onScroll, { passive: true, capture: true });
     return () => document.removeEventListener("scroll", onScroll, true);
@@ -76,34 +76,44 @@ export default function SiteHeader({
           <BrandMark className="h-5 w-8 sm:h-6 sm:w-9" />
           <span className="text-base sm:text-lg">틈</span>
         </Link>
-        <div className="flex min-w-0 items-center gap-1 sm:gap-2">
+        <div className="flex min-w-0 items-center gap-1.5 sm:gap-2.5">
           {showNav && (
-            <nav aria-label="주 메뉴" className="flex items-center gap-0.5 sm:gap-1">
-              {navLinks.map((link) => {
-                const active = isActive(pathname, link.href);
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    aria-current={active ? "page" : undefined}
-                    className={`rounded-full px-1.5 py-1 text-[11px] font-bold whitespace-nowrap transition-colors sm:px-3 sm:py-1.5 sm:text-sm ${
-                      active
-                        ? "bg-neon/12 text-neon"
-                        : "text-ink-text-3 hover:bg-ink-2 hover:text-ink-text"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
+            <div className="flex items-center gap-1.5 sm:gap-2.5">
+              <nav
+                aria-label="주 메뉴"
+                className="flex items-center gap-0.5 rounded-full border border-ink-line bg-ink-1/90 p-1"
+              >
+                {navLinks.map((link) => {
+                  const active = isActive(pathname, link.href);
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      aria-current={active ? "page" : undefined}
+                      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold whitespace-nowrap transition-colors sm:px-3.5 sm:py-1.5 sm:text-xs ${
+                        active
+                          ? "bg-ink-base text-neon shadow-xs ring-1 ring-ink-line"
+                          : "text-ink-text-3 hover:text-ink-text"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              <span aria-hidden className="hidden h-4 w-px bg-ink-line sm:inline-block" />
+
               <button
                 type="button"
                 onClick={logout}
-                className="rounded-full px-1.5 py-1 text-[11px] font-bold whitespace-nowrap text-ink-text-3 transition-colors hover:bg-ink-2 hover:text-ink-text sm:px-3 sm:py-1.5 sm:text-sm"
+                aria-label="로그아웃"
+                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-transparent px-2 text-[11px] font-semibold whitespace-nowrap text-ink-text-3 transition-colors hover:border-ink-line hover:bg-ink-1 hover:text-ink-text sm:h-9 sm:px-3 sm:text-xs"
               >
-                로그아웃
+                <LogOut className="size-3.5" />
+                <span className="hidden sm:inline">로그아웃</span>
               </button>
-            </nav>
+            </div>
           )}
           <ThemeToggle />
           {showLogin && (
