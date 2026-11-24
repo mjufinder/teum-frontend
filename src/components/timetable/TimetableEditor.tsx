@@ -197,49 +197,6 @@ export default function TimetableEditor({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* #7 & #8 등록 완료율 프로그레스 + 요일별 등록 슬롯 요약 칩 */}
-      <div className="flex flex-col gap-3 rounded-[16px] border border-ink-line bg-ink-1 px-5 py-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <span className="font-semibold text-ink-text">
-              {TOTAL_SLOTS}비트 중{" "}
-              <strong className="text-neon tabular-nums">{stats.registeredSlots}칸</strong> 등록됨
-            </span>
-            <span className="text-ink-text-3 tabular-nums">
-              수업 {stats.classHours}h · 개인 {stats.manualHours}h · 공강 {stats.freeHours}h
-            </span>
-          </div>
-          <span className="text-xs font-bold text-neon tabular-nums">
-            {stats.registeredPercent}%
-          </span>
-        </div>
-
-        <div className="h-2 w-full overflow-hidden rounded-full bg-ink-base">
-          <div
-            style={{ width: `${stats.registeredPercent}%` }}
-            className="h-full rounded-full bg-neon transition-all duration-300"
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-          {DAY_LABELS.map((label, idx) => (
-            <span
-              key={label}
-              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tabular-nums ${
-                stats.dayCounts[idx] > 0
-                  ? "border-ink-line-2 bg-ink-base text-ink-text"
-                  : "border-ink-line bg-ink-base/50 text-ink-text-weak"
-              }`}
-            >
-              <span>{label}</span>
-              <span className={stats.dayCounts[idx] > 0 ? "text-neon" : ""}>
-                {stats.dayCounts[idx]}
-              </span>
-            </span>
-          ))}
-        </div>
-      </div>
-
       {warnings.map((warning, i) => (
         <div
           key={i}
@@ -320,6 +277,49 @@ export default function TimetableEditor({
       )}
 
       <TimetableGrid bits={bits} onPaint={handlePaint} />
+
+      {/* #7 & #8 등록 완료율 프로그레스 + 요일별 등록 슬롯 요약 칩 (시간표 하단 배치) */}
+      <div className="flex flex-col gap-3 rounded-[16px] border border-ink-line bg-ink-1 px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span className="font-semibold text-ink-text">
+              {TOTAL_SLOTS}비트 중{" "}
+              <strong className="text-neon tabular-nums">{stats.registeredSlots}칸</strong> 등록됨
+            </span>
+            <span className="text-ink-text-3 tabular-nums">
+              수업 {stats.classHours}h · 개인 {stats.manualHours}h · 공강 {stats.freeHours}h
+            </span>
+          </div>
+          <span className="text-xs font-bold text-neon tabular-nums">
+            {stats.registeredPercent}%
+          </span>
+        </div>
+
+        <div className="h-2 w-full overflow-hidden rounded-full bg-ink-base">
+          <div
+            style={{ width: `${stats.registeredPercent}%` }}
+            className="h-full rounded-full bg-neon transition-all duration-300"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+          {DAY_LABELS.map((label, idx) => (
+            <span
+              key={label}
+              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tabular-nums ${
+                stats.dayCounts[idx] > 0
+                  ? "border-ink-line-2 bg-ink-base text-ink-text"
+                  : "border-ink-line bg-ink-base/50 text-ink-text-weak"
+              }`}
+            >
+              <span>{label}</span>
+              <span className={stats.dayCounts[idx] > 0 ? "text-neon" : ""}>
+                {stats.dayCounts[idx]}
+              </span>
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* #10 에디터 하단 "이미지로 다시 등록" (실수 클릭 방지) */}
       {onReupload && (

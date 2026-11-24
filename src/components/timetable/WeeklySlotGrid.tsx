@@ -62,7 +62,7 @@ export default function WeeklySlotGrid({
         </div>
       )}
 
-      <div className={`overflow-x-auto ${scrollContainerClassName}`}>
+      <div className={`overflow-x-auto p-[2px] ${scrollContainerClassName}`}>
         <div
           ref={gridRef}
           className={`relative grid min-w-[26rem] select-none grid-cols-[2.75rem_repeat(7,minmax(0,1fr))] ${
