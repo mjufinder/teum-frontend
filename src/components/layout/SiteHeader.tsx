@@ -76,44 +76,37 @@ export default function SiteHeader({
           <BrandMark className="h-5 w-8 sm:h-6 sm:w-9" />
           <span className="text-base sm:text-lg">틈</span>
         </Link>
-        <div className="flex min-w-0 items-center gap-1.5 sm:gap-2.5">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           {showNav && (
-            <div className="flex items-center gap-1.5 sm:gap-2.5">
-              <nav
-                aria-label="주 메뉴"
-                className="flex items-center gap-0.5 rounded-full border border-ink-line bg-ink-1/90 p-1"
-              >
-                {navLinks.map((link) => {
-                  const active = isActive(pathname, link.href);
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      aria-current={active ? "page" : undefined}
-                      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold whitespace-nowrap transition-colors sm:px-3.5 sm:py-1.5 sm:text-xs ${
-                        active
-                          ? "bg-ink-base text-neon shadow-xs ring-1 ring-ink-line"
-                          : "text-ink-text-3 hover:text-ink-text"
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  );
-                })}
-              </nav>
-
-              <span aria-hidden className="hidden h-4 w-px bg-ink-line sm:inline-block" />
+            <nav aria-label="주 메뉴" className="flex items-center gap-1 sm:gap-3">
+              {navLinks.map((link) => {
+                const active = isActive(pathname, link.href);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    aria-current={active ? "page" : undefined}
+                    className={`relative px-2 py-2 text-xs font-bold whitespace-nowrap transition-colors sm:px-2.5 sm:text-sm ${
+                      active
+                        ? "text-ink-text after:absolute after:inset-x-1.5 after:bottom-0 after:h-[2px] after:bg-neon"
+                        : "text-ink-text-3 hover:text-ink-text"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
 
               <button
                 type="button"
                 onClick={logout}
                 aria-label="로그아웃"
-                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-transparent px-2 text-[11px] font-semibold whitespace-nowrap text-ink-text-3 transition-colors hover:border-ink-line hover:bg-ink-1 hover:text-ink-text sm:h-9 sm:px-3 sm:text-xs"
+                className="ml-1 inline-flex items-center gap-1 px-2 py-2 text-xs font-semibold whitespace-nowrap text-ink-text-3 transition-colors hover:text-live sm:ml-2 sm:text-sm"
               >
                 <LogOut className="size-3.5" />
                 <span className="hidden sm:inline">로그아웃</span>
               </button>
-            </div>
+            </nav>
           )}
           <ThemeToggle />
           {showLogin && (
