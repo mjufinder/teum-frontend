@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { ApiError } from "@/lib/api";
 import { getNextPath } from "@/lib/auth-flow";
+import { withPendingInvite } from "@/lib/invites";
 import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
 import Logo from "@/components/layout/Logo";
 import { supabase } from "@/lib/supabase";
@@ -37,7 +38,8 @@ export default function LoginPage() {
       const path = await getNextPath();
       // 이동 후에도 화면 상태가 유지되므로 로그아웃하고 돌아왔을 때 비밀번호가 남지 않게 한다.
       setPassword("");
-      router.replace(path);
+      // 초대 링크로 들어왔다면 내 모임 대신 초대 화면으로 돌아간다.
+      router.replace(withPendingInvite(path));
     } catch (err) {
       // 탈퇴한 계정이면 세션을 남기지 않는다.
       if (err instanceof ApiError && err.status === 401) {

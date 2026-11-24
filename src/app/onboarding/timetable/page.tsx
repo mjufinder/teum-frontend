@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import TimetableEditor from "@/components/timetable/TimetableEditor";
 import TimetableUpload from "@/components/timetable/TimetableUpload";
 import { ApiError } from "@/lib/api";
+import { withPendingInvite } from "@/lib/invites";
 import { emptyBits } from "@/lib/timetable";
 import { getMyTimetable } from "@/lib/timetable-api";
 import type { RecognizedTimetable, TimetableBits } from "@/types/timetable";
@@ -51,7 +52,7 @@ export default function OnboardingTimetablePage() {
         <TimetableEditor
           initial={bits}
           warnings={warnings}
-          onSaved={() => router.push("/meetings")}
+          onSaved={() => router.push(withPendingInvite("/meetings"))}
         />
       );
     }

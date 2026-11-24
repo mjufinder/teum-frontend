@@ -13,6 +13,7 @@ import {
   getNextPath,
   waitForSession,
 } from "@/lib/auth-flow";
+import { withPendingInvite } from "@/lib/invites";
 import { supabase } from "@/lib/supabase";
 
 export default function Home() {
@@ -48,7 +49,8 @@ export default function Home() {
 
       try {
         const path = await getNextPath();
-        if (!cancelled) router.replace(path);
+        // 초대 링크에서 구글 로그인으로 다녀온 경우 초대 화면으로 돌려보낸다.
+        if (!cancelled) router.replace(withPendingInvite(path));
       } catch (e) {
         if (cancelled) return;
         if (e instanceof ApiError && e.status === 401) {

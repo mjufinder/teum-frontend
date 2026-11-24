@@ -6,6 +6,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 
 import AddMemberForm from "@/components/meeting/AddMemberForm";
 import CandidateList from "@/components/meeting/CandidateList";
+import InvitePanel from "@/components/meeting/InvitePanel";
 import MeetingActions from "@/components/meeting/MeetingActions";
 import MemoBoard from "@/components/meeting/MemoBoard";
 import MemberList, { memberLabel } from "@/components/meeting/MemberList";
@@ -201,6 +202,8 @@ function MeetingDetail() {
         />
         {transferError && <p className="text-sm text-danger">{transferError}</p>}
       </section>
+
+      {isAdmin && <InvitePanel meetingId={meetingId} meetingName={meeting.name} />}
 
       {isAdmin && (
         <AddMemberForm
