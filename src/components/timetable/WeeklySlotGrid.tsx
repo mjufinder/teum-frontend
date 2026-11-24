@@ -23,6 +23,10 @@ interface WeeklySlotGridProps {
   overlay?: ReactNode;
   gridRef?: RefObject<HTMLDivElement | null>;
   scrollContainerClassName?: string;
+  /** "scroll"이면 모바일 터치 스와이프 시 페이지 스크롤을 우선한다 */
+  touchMode?: "paint" | "scroll";
+  onDayClick?: (day: number) => void;
+  onSlotRowClick?: (slot: number) => void;
   onPointerDown?: (e: React.PointerEvent<HTMLDivElement>) => void;
   onPointerMove?: (e: React.PointerEvent<HTMLDivElement>) => void;
   onPointerUp?: () => void;
@@ -40,6 +44,9 @@ export default function WeeklySlotGrid({
   overlay,
   gridRef,
   scrollContainerClassName = "",
+  touchMode = "paint",
+  onDayClick,
+  onSlotRowClick,
   onPointerDown,
   onPointerMove,
   onPointerUp,
@@ -58,7 +65,9 @@ export default function WeeklySlotGrid({
       <div className={`overflow-x-auto ${scrollContainerClassName}`}>
         <div
           ref={gridRef}
-          className="relative grid min-w-[26rem] touch-none select-none grid-cols-[2.75rem_repeat(7,minmax(0,1fr))]"
+          className={`relative grid min-w-[26rem] select-none grid-cols-[2.75rem_repeat(7,minmax(0,1fr))] ${
+            touchMode === "scroll" ? "touch-pan-x touch-pan-y" : "touch-none"
+          }`}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
@@ -67,20 +76,43 @@ export default function WeeklySlotGrid({
           onMouseLeave={onMouseLeave}
         >
           <div />
-          {DAY_LABELS.map((label) => (
-            <div
-              key={label}
-              className="pb-1.5 text-center text-xs font-bold text-ink-text-2"
-            >
-              {label}
-            </div>
-          ))}
+          {DAY_LABELS.map((label, day) =>
+            onDayClick ? (
+              <button
+                key={label}
+                type="button"
+                onClick={() => onDayClick(day)}
+                title={`${label}요일 전체 칠하기`}
+                className="pb-1.5 text-center text-xs font-bold text-ink-text-2 transition-colors hover:text-neon"
+              >
+                {label}
+              </button>
+            ) : (
+              <div
+                key={label}
+                className="pb-1.5 text-center text-xs font-bold text-ink-text-2"
+              >
+                {label}
+              </div>
+            )
+          )}
 
           {SLOTS.map((slot) => (
             <Fragment key={slot}>
-              <div className="h-5 pr-2 text-right text-[10px] leading-none text-ink-text-weak tabular-nums">
-                {slot % 2 === 0 && slotLabel(slot)}
-              </div>
+              {slot % 2 === 0 && onSlotRowClick ? (
+                <button
+                  type="button"
+                  onClick={() => onSlotRowClick(slot)}
+                  title={`${slotLabel(slot)} 시간대 전체 칠하기`}
+                  className="h-5 pr-2 text-right text-[10px] leading-none text-ink-text-weak tabular-nums transition-colors hover:text-neon"
+                >
+                  {slotLabel(slot)}
+                </button>
+              ) : (
+                <div className="h-5 pr-2 text-right text-[10px] leading-none text-ink-text-weak tabular-nums">
+                  {slot % 2 === 0 && slotLabel(slot)}
+                </div>
+              )}
               {DAY_LABELS.map((_, day) => {
                 const cell = index(day, slot);
                 const baseCellClass = `relative h-5 border-t border-l border-ink-line/70 ${

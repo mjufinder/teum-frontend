@@ -1,9 +1,10 @@
 "use client";
 
+import { Hand, Paintbrush } from "lucide-react";
 import { useRef, useState } from "react";
 
 import WeeklySlotGrid from "@/components/timetable/WeeklySlotGrid";
-import { DAY_LABELS, SLOT_COUNT, slotLabel, slotState } from "@/lib/timetable";
+import { DAY_LABELS, SLOT_COUNT, index, slotLabel, slotState } from "@/lib/timetable";
 import type { SlotState, TimetableBits } from "@/types/timetable";
 
 const cellTones: Record<SlotState, string> = {
@@ -50,9 +51,11 @@ interface TimetableGridProps {
 export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
   const lastCell = useRef<number | null>(null);
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
+  const [touchMode, setTouchMode] = useState<"paint" | "scroll">("paint");
 
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (!onPaint || e.button !== 0) return;
+    if (touchMode === "scroll" && e.pointerType === "touch") return;
     const cell = cellAt(e.clientX, e.clientY);
     if (cell === null) return;
     // 터치는 누른 칸에 포인터가 묶이므로 격자로 옮기고 좌표로 칸을 찾는다.
@@ -66,6 +69,7 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
     const cell = cellAt(e.clientX, e.clientY);
     if (cell !== null) setHoveredCell(cell);
     if (!onPaint || lastCell.current === null) return;
+    if (touchMode === "scroll" && e.pointerType === "touch") return;
     if (cell === null || cell === lastCell.current) return;
     onPaint(cellsBetween(lastCell.current, cell));
     lastCell.current = cell;
@@ -73,6 +77,24 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
 
   function stopPainting() {
     lastCell.current = null;
+  }
+
+  function handleDayClick(day: number) {
+    if (!onPaint) return;
+    const cells = Array.from({ length: SLOT_COUNT }, (_, s) => index(day, s));
+    onPaint(cells);
+  }
+
+  function handleSlotRowClick(slot: number) {
+    if (!onPaint) return;
+    const cells: number[] = [];
+    for (let day = 0; day < DAY_LABELS.length; day += 1) {
+      cells.push(index(day, slot));
+      if (slot + 1 < SLOT_COUNT) {
+        cells.push(index(day, slot + 1));
+      }
+    }
+    onPaint(cells);
   }
 
   const hoveredInfo =
@@ -87,7 +109,7 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* 모임 히트맵과 동일한 범례 행 */}
+      {/* 모임 히트맵과 동일한 범례 행 + 모바일 터치 스크롤/칠하기 전환 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-3 text-[11px] text-ink-text-3">
           {legend.map((item) => (
@@ -97,9 +119,37 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
             </span>
           ))}
         </div>
+
+        {onPaint && (
+          <button
+            type="button"
+            onClick={() => setTouchMode((m) => (m === "paint" ? "scroll" : "paint"))}
+            aria-pressed={touchMode === "scroll"}
+            className={`inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-[11px] font-semibold transition-colors md:hidden ${
+              touchMode === "scroll"
+                ? "border-neon/50 bg-neon/12 text-neon"
+                : "border-ink-line-2 bg-ink-1 text-ink-text-2"
+            }`}
+          >
+            {touchMode === "scroll" ? (
+              <>
+                <Hand className="size-3" />
+                스크롤 모드
+              </>
+            ) : (
+              <>
+                <Paintbrush className="size-3 text-neon" />
+                칠하기 모드
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       <WeeklySlotGrid
+        touchMode={touchMode}
+        onDayClick={onPaint ? handleDayClick : undefined}
+        onSlotRowClick={onPaint ? handleSlotRowClick : undefined}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={stopPainting}
@@ -115,7 +165,9 @@ export default function TimetableGrid({ bits, onPaint }: TimetableGridProps) {
             </>
           ) : (
             <span className="text-ink-text-3">
-              칸을 누르거나 드래그하면 수업·개인 일정을 바로 칠할 수 있어요.
+              {touchMode === "scroll"
+                ? "스크롤 모드예요. 요일·시간 라벨을 눌러 일괄 선택하거나 칠하기 모드로 전환하세요."
+                : "칸을 드래그하거나 요일·시간 라벨을 눌러 한 번에 칠할 수 있어요."}
             </span>
           )
         }

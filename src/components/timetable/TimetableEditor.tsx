@@ -2,7 +2,7 @@
 
 import { Check, Eraser, ImageUp, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import TimetableGrid from "@/components/timetable/TimetableGrid";
 import { ApiError } from "@/lib/api";
@@ -60,6 +60,17 @@ export default function TimetableEditor({
   const [saved, setSaved] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 미저장 변경사항이 있을 때 페이지 이탈 경고
+  useEffect(() => {
+    if (!dirty) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [dirty]);
 
   const stats = useMemo(() => {
     let classSlots = 0;
