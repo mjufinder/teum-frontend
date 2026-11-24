@@ -85,11 +85,9 @@ export default function ConfirmedMeetingModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md overflow-hidden rounded-[18px] border border-neon/45 bg-ink-base shadow-[0_24px_70px_rgba(0,0,0,0.5)]"
+        className="w-full max-w-md overflow-hidden rounded-[18px] border border-ink-line-2 bg-ink-base shadow-[0_24px_70px_rgba(0,0,0,0.5)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="h-1 w-full bg-neon" />
-
         <div className="flex flex-col gap-5 p-6">
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1.5">
