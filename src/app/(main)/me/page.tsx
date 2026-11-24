@@ -196,7 +196,6 @@ export default function MePage() {
         {/* 좌측: 아이덴티티 & 내 시간표 요약 */}
         <aside className="flex flex-col gap-4">
           <div className="overflow-hidden rounded-[20px] border border-ink-line bg-ink-1">
-            <div className="h-1.5 w-full bg-gradient-to-r from-neon/60 via-neon to-neon/60" />
             <div className="flex flex-col gap-4 p-5">
               <div className="flex items-center gap-4">
                 <Avatar name={name} />
