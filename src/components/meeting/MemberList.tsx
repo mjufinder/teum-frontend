@@ -4,6 +4,8 @@ interface MemberListProps {
   members: Member[];
   myUserId: number;
   emails: Record<number, string>;
+  // 후보 시간 호버 시 참석 가능한 member_id 목록 (#5 역하이라이트)
+  availableMemberIds?: number[] | null;
   // 넘기면 관리자가 아닌 다른 구성원 옆에 위임 버튼을 보여 준다
   onTransfer?: (member: Member) => void;
   busy?: boolean;
@@ -22,47 +24,84 @@ export default function MemberList({
   members,
   myUserId,
   emails,
+  availableMemberIds = null,
   onTransfer,
   busy = false,
 }: MemberListProps) {
+  const availableSet = availableMemberIds ? new Set(availableMemberIds) : null;
+
   return (
-    <ul className="border-t-2 border-brand">
-      {members.map((m) => (
-        <li
-          key={m.member_id}
-          className="flex items-center gap-3 border-b border-line py-3 text-sm"
-        >
-          <span
-            aria-hidden
-            className={`grid size-8 shrink-0 place-items-center text-xs font-bold ${
-              m.user_id === myUserId
-                ? "bg-brand text-white"
-                : "border-[1.5px] border-brand text-brand"
+    <ul className="divide-y divide-ink-line">
+      {members.map((m) => {
+        const isMe = m.user_id === myUserId;
+        const isAdmin = m.role === "ADMIN";
+        const isAvailable = availableSet ? availableSet.has(m.member_id) : null;
+
+        return (
+          <li
+            key={m.member_id}
+            className={`flex items-center gap-2.5 py-2.5 text-sm transition-opacity first:pt-0 last:pb-0 ${
+              isAvailable === false ? "opacity-45" : ""
             }`}
           >
-            {m.user_id === myUserId ? "나" : m.user_id}
-          </span>
-          <span className="font-bold">
-            {m.user_id === myUserId ? "나" : `팀원 ${m.user_id}`}
-          </span>
-          {emails[m.user_id] && (
-            <span className="min-w-0 truncate text-muted">{emails[m.user_id]}</span>
-          )}
-          {m.role === "ADMIN" && (
-            <span className="badge badge-brand">관리자</span>
-          )}
-          {onTransfer && m.role !== "ADMIN" && m.user_id !== myUserId && (
-            <button
-              type="button"
-              onClick={() => onTransfer(m)}
-              disabled={busy}
-              className="btn btn-secondary btn-sm ml-auto"
+            <span
+              aria-hidden
+              className={`grid size-7 shrink-0 place-items-center rounded-full text-[11px] font-bold ${
+                isMe ? "bg-neon text-on-neon" : "bg-ink-3 text-ink-text-2"
+              }`}
             >
-              관리자 넘기기
-            </button>
-          )}
-        </li>
-      ))}
+              {isMe ? "나" : m.user_id}
+            </span>
+
+            <div className="flex min-w-0 flex-1 flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-semibold text-ink-text">
+                  {isMe ? "나" : `팀원 ${m.user_id}`}
+                </span>
+                {isAdmin && (
+                  <span className="text-[11px] font-semibold text-neon">관리자</span>
+                )}
+                {m.has_timetable === false && (
+                  <span className="rounded bg-ink-2 px-1.5 py-0.5 text-[10px] font-medium text-ink-text-weak">
+                    시간표 미등록
+                  </span>
+                )}
+                {isAvailable !== null && (
+                  <span
+                    className={`ml-1 inline-flex items-center gap-1 text-[10px] font-bold ${
+                      isAvailable ? "text-neon" : "text-ink-text-weak"
+                    }`}
+                  >
+                    <span
+                      aria-hidden
+                      className={`size-1.5 rounded-full ${
+                        isAvailable ? "bg-neon" : "bg-ink-text-weak"
+                      }`}
+                    />
+                    {isAvailable ? "가능" : "어려움"}
+                  </span>
+                )}
+              </div>
+              {emails[m.user_id] && (
+                <span className="truncate text-[11px] text-ink-text-3">
+                  {emails[m.user_id]}
+                </span>
+              )}
+            </div>
+
+            {onTransfer && !isAdmin && !isMe && (
+              <button
+                type="button"
+                onClick={() => onTransfer(m)}
+                disabled={busy}
+                className="shrink-0 rounded-[6px] border border-ink-line-2 px-2 py-1 text-[11px] font-semibold text-ink-text-3 transition-colors hover:bg-ink-2 hover:text-ink-text disabled:opacity-50"
+              >
+                위임
+              </button>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }

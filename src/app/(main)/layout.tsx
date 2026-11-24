@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import AppHeader from "@/components/layout/AppHeader";
+import SiteHeader from "@/components/layout/SiteHeader";
 import { ApiError } from "@/lib/api";
 import { getNextPath } from "@/lib/auth-flow";
 
@@ -45,20 +45,22 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   if (!ready) {
     return (
-      <main className="mx-auto w-full max-w-[720px] px-5 py-10">
-        {error ? (
-          <p className="text-sm text-danger">{error}</p>
-        ) : (
-          <p className="text-sm text-muted">불러오는 중...</p>
-        )}
-      </main>
+      <div className="min-h-dvh bg-ink-base text-ink-text-2">
+        <main className="mx-auto w-full max-w-6xl px-5 pt-24 pb-12 md:px-8">
+          {error ? (
+            <p className="text-sm text-live">{error}</p>
+          ) : (
+            <p className="text-sm text-ink-text-3">불러오는 중...</p>
+          )}
+        </main>
+      </div>
     );
   }
 
   return (
-    <>
-      <AppHeader />
-      <main className="mx-auto w-full max-w-[720px] px-5 py-10">{children}</main>
-    </>
+    <div className="min-h-dvh overflow-x-clip bg-ink-base text-ink-text-2">
+      <SiteHeader showNav />
+      <main className="mx-auto w-full max-w-6xl px-5 pt-24 pb-12 md:px-8">{children}</main>
+    </div>
   );
 }
