@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import LandingStory from "@/components/landing/LandingStory";
+import BrandMark from "@/components/layout/BrandMark";
 import { ApiError } from "@/lib/api";
 import {
   clearOAuthParams,
@@ -74,9 +75,36 @@ export default function Home() {
   }, [router]);
 
   if (checking) {
+    const delays = [0, 120, 240, 120, 240, 360, 240, 360, 480];
     return (
-      <main className="flex min-h-screen items-center justify-center p-8">
-        <p className="text-sm text-muted">불러오는 중...</p>
+      <main
+        aria-busy="true"
+        className="flex min-h-screen flex-col items-center justify-center gap-6 bg-ink-base p-8"
+      >
+        {/* 틈(TEUM) 미니 공강 격자 로더 */}
+        <div aria-hidden className="grid grid-cols-3 gap-1.5">
+          {delays.map((delay, idx) =>
+            idx === 4 ? (
+              <span
+                key={idx}
+                style={{ animationDelay: "300ms" }}
+                className="teum-loader-gap size-4 rounded-[4px] bg-neon"
+              />
+            ) : (
+              <span
+                key={idx}
+                style={{ animationDelay: `${delay}ms` }}
+                className="teum-loader-cell size-4 rounded-[4px] bg-ink-3"
+              />
+            )
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 text-ink-text-2">
+          <BrandMark className="h-5 w-8" />
+          <span className="text-sm font-bold tracking-tight">틈</span>
+        </div>
+        <span className="sr-only">불러오는 중...</span>
       </main>
     );
   }

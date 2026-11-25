@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 
 import SharedScheduleClient from "@/app/share/[token]/SharedScheduleClient";
@@ -52,12 +53,20 @@ export async function generateMetadata({
   };
 }
 
+async function ScheduleContent({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
+  return <SharedScheduleClient token={token} />;
+}
+
 // 로그인 없이 확정 일정을 보는 공개 페이지 (VOTE-04)
-export default async function SharedSchedulePage({
+export default function SharedSchedulePage({
   params,
 }: {
   params: Promise<{ token: string }>;
 }) {
-  const { token } = await params;
-  return <SharedScheduleClient token={token} />;
+  return (
+    <Suspense fallback={<p className="p-10 text-sm text-ink-text-weak">불러오는 중...</p>}>
+      <ScheduleContent params={params} />
+    </Suspense>
+  );
 }
