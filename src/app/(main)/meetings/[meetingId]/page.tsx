@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Pencil, X } from "lucide-react";
+import { ArrowLeft, Check, Pencil, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -9,6 +9,7 @@ import AddMemberForm from "@/components/meeting/AddMemberForm";
 import AvailabilityHeatmap from "@/components/meeting/AvailabilityHeatmap";
 import CandidateList, { formatSlot } from "@/components/meeting/CandidateList";
 import ConfirmDialog from "@/components/meeting/ConfirmDialog";
+import ConfirmedMeetingModal from "@/components/meeting/ConfirmedMeetingModal";
 import ConfirmedSchedule from "@/components/meeting/ConfirmedSchedule";
 import MeetingActions from "@/components/meeting/MeetingActions";
 import MeetingForm, { type MeetingFormValues } from "@/components/meeting/MeetingForm";
@@ -32,15 +33,17 @@ function StepBar({
   hasMembers,
   hasCandidates,
   voteClosed,
+  confirmed,
 }: {
   hasMembers: boolean;
   hasCandidates: boolean;
   voteClosed: boolean;
+  confirmed: boolean;
 }) {
   const steps = [
-    { label: "팀원 구성", done: hasMembers },
-    { label: "공강 매칭", done: hasCandidates },
-    { label: "투표 · 확정", done: voteClosed },
+    { label: "팀원 구성", done: confirmed || hasMembers },
+    { label: "공강 매칭", done: confirmed || hasCandidates },
+    { label: "투표 · 확정", done: confirmed || voteClosed },
   ];
 
   return (
@@ -54,12 +57,11 @@ function StepBar({
                 : "bg-ink-2 text-ink-text-weak"
             }`}
           >
-            <span
-              aria-hidden
-              className={`size-1.5 rounded-full ${
-                s.done ? "bg-neon" : "bg-ink-text-weak/50"
-              }`}
-            />
+            {s.done ? (
+              <Check className="size-3" strokeWidth={2.5} />
+            ) : (
+              <span aria-hidden className="size-1.5 rounded-full bg-ink-text-weak/50" />
+            )}
             {s.label}
           </span>
           {idx < steps.length - 1 && (
@@ -67,6 +69,11 @@ function StepBar({
           )}
         </div>
       ))}
+      {confirmed && (
+        <span className="rounded-full bg-neon px-2 py-0.5 text-[10px] font-bold text-on-neon">
+          완료
+        </span>
+      )}
     </div>
   );
 }
@@ -94,6 +101,7 @@ function MeetingDetail() {
   const [pendingEditBody, setPendingEditBody] = useState<MeetingUpdateBody | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
   const [activeSection, setActiveSection] = useState("section-heatmap");
+  const [confirmedModalDismissed, setConfirmedModalDismissed] = useState(false);
 
   const handleAvailabilityError = useCallback(
     (e: unknown) => {
@@ -328,6 +336,7 @@ function MeetingDetail() {
             hasMembers={members.length > 1}
             hasCandidates={hasCandidates}
             voteClosed={Boolean(voteClosed)}
+            confirmed={Boolean(meeting.confirmed_schedule)}
           />
         </div>
 
@@ -579,6 +588,25 @@ function MeetingDetail() {
         }}
         onCancel={() => setPendingEditBody(null)}
       />
+
+      {meeting.confirmed_schedule && (
+        <ConfirmedMeetingModal
+          open={!confirmedModalDismissed}
+          meetingId={meetingId}
+          meetingName={meeting.name}
+          slotLabel={formatSlot(
+            meeting.confirmed_schedule.day_of_week,
+            meeting.confirmed_schedule.start_time,
+            meeting.confirmed_schedule.end_time
+          )}
+          shareToken={meeting.share_token ?? null}
+          isAdmin={isAdmin}
+          onShareTokenIssued={(token) =>
+            setMeeting((prev) => (prev ? { ...prev, share_token: token } : prev))
+          }
+          onClose={() => setConfirmedModalDismissed(true)}
+        />
+      )}
     </div>
   );
 }

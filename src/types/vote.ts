@@ -49,6 +49,8 @@ export interface ShareLink {
 
 export interface PublicSchedule {
   meeting_name: string;
+  description?: string | null;
+  member_count?: number;
   day_of_week: number;
   start_time: string;
   end_time: string;

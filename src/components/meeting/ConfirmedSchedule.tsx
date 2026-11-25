@@ -19,6 +19,7 @@ interface ConfirmedScheduleProps {
   slotLabel: string | null;
   initialShareToken?: string | null;
   onShareTokenIssued?: (token: string) => void;
+  highlighted?: boolean;
   isAdmin: boolean;
 }
 
@@ -31,6 +32,7 @@ export default function ConfirmedSchedule({
   slotLabel,
   initialShareToken,
   onShareTokenIssued,
+  highlighted = false,
   isAdmin,
 }: ConfirmedScheduleProps) {
   const router = useRouter();
@@ -108,7 +110,14 @@ export default function ConfirmedSchedule({
 
   return (
     <>
-      <div className="flex flex-col gap-3 rounded-[12px] border border-neon/40 bg-neon/8 p-4">
+      <div
+        id="section-confirmed"
+        className={`flex scroll-mt-28 flex-col gap-3 rounded-[12px] border p-4 transition-all duration-300 ${
+          highlighted
+            ? "border-neon bg-neon/14 ring-2 ring-neon/50 shadow-[0_0_28px_rgba(0,255,163,0.22)]"
+            : "border-neon/40 bg-neon/8"
+        }`}
+      >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded bg-neon px-2 py-0.5 text-[0.7rem] font-bold text-on-neon">

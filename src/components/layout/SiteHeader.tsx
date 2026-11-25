@@ -1,5 +1,6 @@
 "use client";
 
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -53,7 +54,6 @@ export default function SiteHeader({
           : window.scrollY;
       setScrolled(top > 8);
     };
-    setScrolled(false);
     // 캡처 단계로 들어야 내부 스크롤 컨테이너(랜딩 main)의 스크롤도 잡힌다.
     document.addEventListener("scroll", onScroll, { passive: true, capture: true });
     return () => document.removeEventListener("scroll", onScroll, true);
@@ -69,16 +69,16 @@ export default function SiteHeader({
       />
       <div className="relative mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-2 px-4 sm:px-5 md:px-8">
         <Link
-          href={showNav ? "/meetings" : "/"}
-          aria-label={showNav ? "틈 홈" : "틈 처음 화면"}
+          href="/"
+          aria-label="틈 처음 화면"
           className="flex shrink-0 items-center gap-1.5 font-bold text-ink-text sm:gap-2"
         >
           <BrandMark className="h-5 w-8 sm:h-6 sm:w-9" />
           <span className="text-base sm:text-lg">틈</span>
         </Link>
-        <div className="flex min-w-0 items-center gap-1 sm:gap-2">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           {showNav && (
-            <nav aria-label="주 메뉴" className="flex items-center gap-0.5 sm:gap-1">
+            <nav aria-label="주 메뉴" className="flex items-center gap-1 sm:gap-3">
               {navLinks.map((link) => {
                 const active = isActive(pathname, link.href);
                 return (
@@ -86,22 +86,25 @@ export default function SiteHeader({
                     key={link.href}
                     href={link.href}
                     aria-current={active ? "page" : undefined}
-                    className={`rounded-full px-1.5 py-1 text-[11px] font-bold whitespace-nowrap transition-colors sm:px-3 sm:py-1.5 sm:text-sm ${
+                    className={`relative px-2 py-2 text-xs font-bold whitespace-nowrap transition-colors sm:px-2.5 sm:text-sm ${
                       active
-                        ? "bg-neon/12 text-neon"
-                        : "text-ink-text-3 hover:bg-ink-2 hover:text-ink-text"
+                        ? "text-ink-text after:absolute after:inset-x-1.5 after:bottom-0 after:h-[2px] after:bg-neon"
+                        : "text-ink-text-3 hover:text-ink-text"
                     }`}
                   >
                     {link.label}
                   </Link>
                 );
               })}
+
               <button
                 type="button"
                 onClick={logout}
-                className="rounded-full px-1.5 py-1 text-[11px] font-bold whitespace-nowrap text-ink-text-3 transition-colors hover:bg-ink-2 hover:text-ink-text sm:px-3 sm:py-1.5 sm:text-sm"
+                aria-label="로그아웃"
+                className="ml-1 inline-flex items-center gap-1 px-2 py-2 text-xs font-semibold whitespace-nowrap text-ink-text-3 transition-colors hover:text-live sm:ml-2 sm:text-sm"
               >
-                로그아웃
+                <LogOut className="size-3.5" />
+                <span className="hidden sm:inline">로그아웃</span>
               </button>
             </nav>
           )}

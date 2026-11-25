@@ -13,6 +13,7 @@ interface ShareLinkCardProps {
   isAdmin: boolean;
   initialShareToken?: string | null;
   onShareTokenIssued?: (token: string) => void;
+  highlighted?: boolean;
 }
 
 export default function ShareLinkCard({
@@ -20,6 +21,7 @@ export default function ShareLinkCard({
   isAdmin,
   initialShareToken,
   onShareTokenIssued,
+  highlighted = false,
 }: ShareLinkCardProps) {
   const router = useRouter();
   const [issuedToken, setIssuedToken] = useState<string | null>(null);
@@ -74,7 +76,13 @@ export default function ShareLinkCard({
 
   return (
     <>
-      <section className="flex flex-col gap-3 rounded-[12px] border border-ink-line bg-ink-1 p-4">
+      <section
+        className={`flex flex-col gap-3 rounded-[12px] border bg-ink-1 p-4 transition-all duration-300 ${
+          highlighted
+            ? "border-neon ring-2 ring-neon/50 shadow-[0_0_24px_rgba(0,255,163,0.18)]"
+            : "border-ink-line"
+        }`}
+      >
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-ink-text">공유 링크</h2>
           <button
