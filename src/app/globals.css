@@ -348,16 +348,35 @@ body {
   }
 }
 
-@keyframes loader-slide {
-  0% {
-    transform: translateX(-100%);
-  }
+@keyframes teum-slot-pulse {
+  0%,
   100% {
-    transform: translateX(260%);
+    opacity: 0.28;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1);
   }
 }
-.loader-bar {
-  animation: loader-slide 1.15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+@keyframes teum-gap-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.9);
+    box-shadow: 0 0 8px rgba(0, 255, 163, 0.15);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+    box-shadow: 0 0 22px rgba(0, 255, 163, 0.55);
+  }
+}
+.teum-loader-cell {
+  animation: teum-slot-pulse 1.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+.teum-loader-gap {
+  animation: teum-gap-glow 1.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* 첫 화면 격자: 수업 블록이 한 번 채워지고, 모두가 비는 칸이 마지막에 드러난다 */
