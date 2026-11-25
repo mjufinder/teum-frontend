@@ -636,9 +636,9 @@ export default function LandingStory({
                   </>
                 )}
               </div>
-              <p className="mt-10 text-sm text-ink-text-weak">
-                finder · 팀프로젝트 5팀
-              </p>
+              <footer className="mt-10 text-sm text-ink-text-weak">
+                finder · 팀프로젝트 5팀 · ㅎㅇㅋㅋ
+              </footer>
             </Reveal>
           </div>
         </section>

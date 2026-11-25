@@ -58,9 +58,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <div className="min-h-dvh overflow-x-clip bg-ink-base text-ink-text-2">
+    <div className="flex min-h-dvh flex-col overflow-x-clip bg-ink-base text-ink-text-2">
       <SiteHeader showNav />
-      <main className="mx-auto w-full max-w-6xl px-5 pt-24 pb-12 md:px-8">{children}</main>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-5 pt-24 pb-12 md:px-8">{children}</main>
+      <footer className="mx-auto w-full max-w-6xl border-t border-ink-line px-5 py-6 text-xs text-ink-text-weak md:px-8">
+        ㅎㅇㅋㅋ
+      </footer>
     </div>
   );
 }
