@@ -1,78 +1,72 @@
-"use client";
+import { Suspense } from "react";
+import type { Metadata } from "next";
 
-import Link from "next/link";
-import { useParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
-
-import Logo from "@/components/layout/Logo";
-import { formatSlot } from "@/components/meeting/CandidateList";
-import { ApiError } from "@/lib/api";
-import { getSharedSchedule } from "@/lib/confirm";
+import SharedScheduleClient from "@/app/share/[token]/SharedScheduleClient";
+import { toHHMM } from "@/lib/meetings";
 import type { PublicSchedule } from "@/types/vote";
 
-function formatConfirmedAt(iso: string) {
-  return new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    timeZone: "Asia/Seoul",
-  }).format(new Date(iso));
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+const DAY_NAMES = ["월", "화", "수", "목", "금", "토", "일"];
+
+async function fetchPublicSchedule(token: string): Promise<PublicSchedule | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/v1/share/${encodeURIComponent(token)}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as PublicSchedule;
+  } catch {
+    return null;
+  }
 }
 
-function SharedSchedule() {
-  const { token } = useParams<{ token: string }>();
-  const [schedule, setSchedule] = useState<PublicSchedule | null>(null);
-  const [error, setError] = useState<string | null>(null);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}): Promise<Metadata> {
+  const { token } = await params;
+  const schedule = await fetchPublicSchedule(token);
 
-  useEffect(() => {
-    getSharedSchedule(token)
-      .then(setSchedule)
-      .catch((e) =>
-        setError(
-          e instanceof ApiError && e.status === 404
-            ? "유효하지 않거나 만료된 링크예요. 링크를 보낸 사람에게 새 링크를 요청해 주세요."
-            : "일정을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."
-        )
-      );
-  }, [token]);
+  if (!schedule) {
+    return {
+      title: "확정된 모임 일정 · 틈",
+      description: "팀원 시간표로 공강을 찾아 회의 시간을 정해요",
+    };
+  }
 
-  return (
-    <>
-      {error ? (
-        <p className="notice notice-danger">{error}</p>
-      ) : !schedule ? (
-        <p className="text-sm text-muted">불러오는 중...</p>
-      ) : (
-        <div className="flex flex-col gap-4">
-          <h1 className="page-title">{schedule.meeting_name}</h1>
-          <div className="flex flex-col gap-1 rounded-[8px] bg-brand p-5 text-white">
-            <span className="text-sm text-white/85">확정된 모임 시간</span>
-            <span className="text-[1.75rem] leading-tight font-bold tracking-[-0.015em] tabular-nums">
-              매주 {formatSlot(schedule.day_of_week, schedule.start_time, schedule.end_time)}
-            </span>
-          </div>
-          <p className="text-xs text-muted">{formatConfirmedAt(schedule.confirmed_at)} 확정</p>
-        </div>
-      )}
-    </>
-  );
+  const day = DAY_NAMES[schedule.day_of_week] ?? "";
+  const timeRange = `${toHHMM(schedule.start_time)}–${toHHMM(schedule.end_time)}`;
+  const title = `${schedule.meeting_name} · 매주 ${day}요일 ${timeRange}`;
+  const description = schedule.description
+    ? `${schedule.description} (${timeRange} 확정)`
+    : `매주 ${day}요일 ${timeRange} 확정된 모임 일정입니다.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+    },
+  };
+}
+
+async function ScheduleContent({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
+  return <SharedScheduleClient token={token} />;
 }
 
 // 로그인 없이 확정 일정을 보는 공개 페이지 (VOTE-04)
-export default function SharedSchedulePage() {
+export default function SharedSchedulePage({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}) {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center gap-8 px-5 py-12">
-      <Link href="/" aria-label="틈 처음 화면" className="self-start">
-        <Logo />
-      </Link>
-      <div className="card">
-        <Suspense fallback={<p className="text-sm text-muted">불러오는 중...</p>}>
-          <SharedSchedule />
-        </Suspense>
-      </div>
-      <Link href="/" className="text-link self-start text-sm">
-        틈으로 우리 팀 시간도 찾아보기
-      </Link>
-    </main>
+    <Suspense fallback={<p className="p-10 text-sm text-ink-text-weak">불러오는 중...</p>}>
+      <ScheduleContent params={params} />
+    </Suspense>
   );
 }

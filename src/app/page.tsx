@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import GapGrid from "@/components/landing/GapGrid";
-import Logo from "@/components/layout/Logo";
+import LandingStory from "@/components/landing/LandingStory";
 import { ApiError } from "@/lib/api";
 import {
   clearOAuthParams,
@@ -18,6 +16,7 @@ import { supabase } from "@/lib/supabase";
 export default function Home() {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -42,6 +41,12 @@ export default function Home() {
         if (fromOAuth && !oauthError) {
           setError("로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.");
         }
+        setChecking(false);
+        return;
+      }
+
+      if (!fromOAuth) {
+        setLoggedIn(true);
         setChecking(false);
         return;
       }
@@ -76,34 +81,5 @@ export default function Home() {
     );
   }
 
-  return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[960px] flex-col px-5 py-6">
-      <header>
-        <Logo />
-      </header>
-      <div className="grid flex-1 items-center gap-12 py-12 md:grid-cols-[1fr_minmax(0,22rem)] md:gap-16">
-        <div className="flex max-w-[30rem] flex-col gap-6">
-          <h1 className="text-[clamp(2rem,4.4vw,2.75rem)] leading-[1.22] font-bold tracking-[-0.025em]">
-            팀원 시간표를 겹쳐
-            <br />
-            모두가 비는 시간을 찾아요
-          </h1>
-          <p className="text-[1.0625rem] text-muted">
-            에브리타임 시간표 이미지를 올리거나 칸을 칠해 등록하면, 모임에 들어온 팀원
-            모두의 빈 시간에서 회의 시간을 골라 투표할 수 있어요.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/signup" className="btn btn-primary">
-              시간표로 시작하기
-            </Link>
-            <Link href="/login" className="btn btn-secondary">
-              로그인
-            </Link>
-          </div>
-          {error && <p className="notice notice-danger">{error}</p>}
-        </div>
-        <GapGrid />
-      </div>
-    </main>
-  );
+  return <LandingStory error={error} isLoggedIn={loggedIn} />;
 }

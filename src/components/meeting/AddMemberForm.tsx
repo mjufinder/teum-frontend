@@ -59,11 +59,11 @@ export default function AddMemberForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="card flex flex-col gap-3">
-      <label htmlFor="member-email" className="text-sm font-bold">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2 border-t border-ink-line pt-3.5">
+      <label htmlFor="member-email" className="text-xs font-semibold text-ink-text-2">
         팀원 추가
       </label>
-      <div className="flex gap-2">
+      <div className="flex gap-1.5">
         <input
           id="member-email"
           type="email"
@@ -71,24 +71,28 @@ export default function AddMemberForm({
           onChange={(e) => setEmail(e.target.value)}
           placeholder="teammate@example.com"
           disabled={submitting}
-          className="input"
+          className="h-9 min-w-0 flex-1 rounded-[8px] border border-ink-line-2 bg-ink-base px-3 text-xs text-ink-text placeholder:text-ink-text-weak transition-colors focus:border-neon focus:outline-none disabled:opacity-50"
         />
-        <button type="submit" disabled={submitting} className="btn btn-primary shrink-0">
-          {submitting ? "추가 중..." : "추가"}
+        <button
+          type="submit"
+          disabled={submitting || !email.trim()}
+          className="inline-flex h-9 shrink-0 items-center justify-center rounded-[8px] bg-neon px-3.5 text-xs font-bold text-on-neon transition-colors hover:bg-neon-2 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {submitting ? "추가 중" : "추가"}
         </button>
       </div>
-      <p className="text-sm text-muted">
-        상대가 먼저 틈에 로그인해야 추가할 수 있어요. 추가하면 추천 시간을 다시 계산해요.
+      <p className="text-[11px] leading-relaxed text-ink-text-weak">
+        상대가 먼저 틈에 로그인해야 추가할 수 있어요.
       </p>
       {error && (
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm text-danger">{error}</p>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-live">
+          <span>{error}</span>
           {retryEmail && (
             <button
               type="button"
               onClick={() => submit(retryEmail)}
               disabled={submitting}
-              className="btn btn-secondary btn-sm"
+              className="underline underline-offset-2 hover:text-ink-text"
             >
               추천 다시 계산하기
             </button>
