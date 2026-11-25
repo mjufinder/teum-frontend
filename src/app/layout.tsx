@@ -20,8 +20,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="flex min-h-full flex-col bg-ink-base">
-        <div className="flex-1">{children}</div>
+      <body className="flex min-h-dvh flex-col bg-ink-base">
+        <div className="flex flex-1 flex-col">{children}</div>
         <SiteFooter />
       </body>
     </html>

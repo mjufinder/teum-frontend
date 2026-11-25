@@ -80,8 +80,8 @@ export default function SiteFooter() {
               <h2 className="text-xs font-bold tracking-wide text-white uppercase">정보</h2>
               <ul className="flex flex-col gap-2 text-xs text-white/75">
                 <li>명지대학교 팀프로젝트</li>
+                <li>finder · 5팀</li>
                 <li>시간표 기반 공강 매칭</li>
-                <li className="font-semibold text-white/90">ㅎㅇㅋㅋ</li>
               </ul>
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function SiteFooter() {
         {/* 하단 Copyright 바 */}
         <div className="flex flex-col justify-between gap-2 border-t border-white/15 pt-6 text-[11px] text-white/70 sm:flex-row sm:items-center">
           <p>© 2026 TEUM (틈) · finder 팀프로젝트 5팀. All rights reserved.</p>
-          <p>Built for Campus Teams · ㅎㅇㅋㅋ</p>
+          <p>Built for Campus Teams</p>
         </div>
       </div>
     </footer>

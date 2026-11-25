@@ -637,7 +637,7 @@ export default function LandingStory({
                 )}
               </div>
               <footer className="mt-10 text-sm text-ink-text-weak">
-                finder · 팀프로젝트 5팀 · ㅎㅇㅋㅋ
+                finder · 팀프로젝트 5팀
               </footer>
             </Reveal>
           </div>
