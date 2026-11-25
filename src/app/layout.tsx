@@ -4,6 +4,8 @@ import "@fontsource/ibm-plex-sans-kr/500.css";
 import "@fontsource/ibm-plex-sans-kr/700.css";
 import "./globals.css";
 
+import SiteFooter from "@/components/layout/SiteFooter";
+
 export const metadata: Metadata = {
   title: "틈",
   description: "팀원 시간표로 공강을 찾아 회의 시간을 정해요",
@@ -18,7 +20,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col bg-ink-base">
+        <div className="flex-1">{children}</div>
+        <SiteFooter />
+      </body>
     </html>
   );
 }
