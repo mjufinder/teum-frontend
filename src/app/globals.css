@@ -223,6 +223,18 @@ body {
   .input::placeholder {
     @apply text-muted;
   }
+  .dark .input {
+    @apply border-ink-line-2 bg-ink-base text-ink-text placeholder:text-ink-text-weak;
+  }
+  .dark .input:hover {
+    @apply border-ink-text-3;
+  }
+  .dark .input:focus {
+    @apply border-neon outline-neon;
+  }
+  .dark .input:disabled {
+    @apply bg-ink-2 text-ink-text-weak;
+  }
   input[type="file"].input {
     @apply h-auto border-dashed py-3 text-sm file:mr-3 file:cursor-pointer file:rounded-[6px] file:border-0 file:bg-brand file:px-4 file:py-2 file:text-sm file:font-bold file:text-white;
   }
@@ -333,6 +345,14 @@ body {
     opacity: 1;
     transform: scale(1);
   }
+}
+@keyframes dash-march {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+.animate-dash-march {
+  animation: dash-march 0.7s linear infinite;
 }
 .hero-slot {
   transform-origin: top;

@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -100,11 +101,11 @@ function EditMeeting() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-start gap-3">
-        <p className="text-sm text-danger">{error}</p>
+      <div className="mx-auto flex w-full max-w-2xl flex-col items-start gap-3 rounded-[12px] border border-ink-line bg-ink-1 p-6">
+        <p className="text-sm text-live">{error}</p>
         <Link
           href="/meetings"
-          className="btn btn-secondary"
+          className="inline-flex h-9 items-center rounded-[8px] border border-ink-line-2 px-4 text-sm font-semibold text-ink-text hover:bg-ink-2"
         >
           내 모임으로
         </Link>
@@ -113,12 +114,29 @@ function EditMeeting() {
   }
 
   if (!meeting) {
-    return <p className="text-sm text-muted">불러오는 중...</p>;
+    return (
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
+        <div className="h-6 w-28 animate-pulse rounded bg-ink-2" />
+        <div className="h-72 animate-pulse rounded-[12px] border border-ink-line bg-ink-1" />
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="page-title">모임 수정</h1>
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <Link
+          href={`/meetings/${meetingId}`}
+          className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-ink-text-3 transition-colors hover:text-ink-text"
+        >
+          <ArrowLeft className="size-3.5" />
+          {meeting.name}
+        </Link>
+        <h1 className="text-2xl font-bold tracking-[-0.02em] text-ink-text">
+          모임 수정
+        </h1>
+      </div>
+
       <MeetingForm
         initial={toFormValues(meeting)}
         submitLabel="저장"
@@ -130,7 +148,7 @@ function EditMeeting() {
 
 export default function EditMeetingPage() {
   return (
-    <Suspense fallback={<p className="text-sm text-muted">불러오는 중...</p>}>
+    <Suspense fallback={<p className="text-sm text-ink-text-3">불러오는 중...</p>}>
       <EditMeeting />
     </Suspense>
   );
