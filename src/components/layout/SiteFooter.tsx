@@ -1,8 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import BrandMark from "@/components/layout/BrandMark";
 
-export default function SiteFooter() {
+export default function SiteFooter({ forceShow = false }: { forceShow?: boolean }) {
+  const pathname = usePathname();
+  if (!forceShow && pathname === "/") return null;
+
   return (
     <footer className="bg-brand text-white">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-5 py-12 md:px-8">

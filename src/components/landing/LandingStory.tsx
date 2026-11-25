@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import MeshBackground from "@/components/landing/MeshBackground";
+import SiteFooter from "@/components/layout/SiteFooter";
 import SiteHeader from "@/components/layout/SiteHeader";
 
 /* ───────────────────────── 공통 ───────────────────────── */
@@ -636,12 +637,13 @@ export default function LandingStory({
                   </>
                 )}
               </div>
-              <footer className="mt-10 text-sm text-ink-text-weak">
-                finder · 팀프로젝트 5팀
-              </footer>
             </Reveal>
           </div>
         </section>
+
+        <div className="snap-end">
+          <SiteFooter forceShow />
+        </div>
       </main>
     </>
   );
