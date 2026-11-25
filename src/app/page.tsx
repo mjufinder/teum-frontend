@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import LandingStory from "@/components/landing/LandingStory";
+import BrandMark from "@/components/layout/BrandMark";
 import { ApiError } from "@/lib/api";
 import {
   clearOAuthParams,
@@ -75,8 +76,18 @@ export default function Home() {
 
   if (checking) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-8">
-        <p className="text-sm text-muted">불러오는 중...</p>
+      <main
+        aria-busy="true"
+        className="flex min-h-screen flex-col items-center justify-center gap-5 bg-ink-base p-8"
+      >
+        <div className="flex items-center gap-2.5 text-ink-text">
+          <BrandMark className="h-7 w-11" />
+          <span className="text-xl font-bold tracking-tight">틈</span>
+        </div>
+        <div className="h-1 w-40 overflow-hidden rounded-full bg-ink-2">
+          <div className="loader-bar h-full w-2/5 rounded-full bg-neon" />
+        </div>
+        <span className="sr-only">불러오는 중...</span>
       </main>
     );
   }
