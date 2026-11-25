@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 
 import BrandMark from "@/components/layout/BrandMark";
 
-export default function SiteFooter({ forceShow = false }: { forceShow?: boolean }) {
+function FooterInner({ forceShow }: { forceShow: boolean }) {
   const pathname = usePathname();
   if (!forceShow && pathname === "/") return null;
 
@@ -100,5 +101,13 @@ export default function SiteFooter({ forceShow = false }: { forceShow?: boolean 
         </div>
       </div>
     </footer>
+  );
+}
+
+export default function SiteFooter({ forceShow = false }: { forceShow?: boolean }) {
+  return (
+    <Suspense>
+      <FooterInner forceShow={forceShow} />
+    </Suspense>
   );
 }
