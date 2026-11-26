@@ -18,6 +18,7 @@ export interface Meeting {
   min_duration_min: number;
   needs_recalc: boolean;
   share_token?: string | null;
+  invite_code?: string | null;
   confirmed_schedule?: ConfirmedSlot | null;
 }
 

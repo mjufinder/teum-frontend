@@ -16,6 +16,7 @@ import MeetingActions from "@/components/meeting/MeetingActions";
 import MeetingForm, { type MeetingFormValues } from "@/components/meeting/MeetingForm";
 import MemoBoard from "@/components/meeting/MemoBoard";
 import MemberList, { memberLabel } from "@/components/meeting/MemberList";
+import InviteLinkCard from "@/components/meeting/InviteLinkCard";
 import ShareLinkCard from "@/components/meeting/ShareLinkCard";
 import { ApiError, authFetch } from "@/lib/api";
 import { addCustomCandidate, getCandidates, getMeetingAvailability } from "@/lib/candidates";
@@ -543,6 +544,12 @@ function MeetingDetail() {
               />
             )}
           </section>
+
+          <InviteLinkCard
+            meetingId={meetingId}
+            isAdmin={isAdmin}
+            initialInviteCode={meeting.invite_code ?? null}
+          />
 
           <ShareLinkCard
             meetingId={meetingId}
