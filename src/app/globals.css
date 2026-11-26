@@ -520,4 +520,54 @@ body {
   .mesh-blob {
     animation: none;
   }
+  .teum-loader-ring,
+  .teum-loader-ring-reverse,
+  .teum-loader-cell,
+  .teum-loader-gap {
+    animation: none !important;
+  }
+}
+
+/* 틈(TEUM) 전역 로더 애니메이션 */
+.teum-loader-ring {
+  animation: teum-spin 1.15s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;
+}
+.teum-loader-ring-reverse {
+  animation: teum-spin 2.6s linear infinite reverse;
+}
+.teum-loader-cell {
+  animation: teum-cell-wave 1.35s ease-in-out infinite;
+}
+.teum-loader-gap {
+  animation: teum-gap-pulse 1.35s ease-in-out infinite;
+}
+
+@keyframes teum-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes teum-cell-wave {
+  0%,
+  100% {
+    transform: scale(0.76);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.95;
+  }
+}
+
+@keyframes teum-gap-pulse {
+  0%,
+  100% {
+    transform: scale(0.84) rotate(0deg);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-neon) 0%, transparent);
+  }
+  50% {
+    transform: scale(1.16) rotate(90deg);
+    box-shadow: 0 0 14px 2px color-mix(in srgb, var(--c-neon) 55%, transparent);
+  }
 }
