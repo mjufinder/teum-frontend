@@ -3,7 +3,7 @@
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import BrandMark from "@/components/layout/BrandMark";
 import ThemeToggle from "@/components/layout/ThemeToggle";
@@ -21,6 +21,41 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function SiteHeaderNav({ onLogout }: { onLogout: () => void }) {
+  const pathname = usePathname();
+  return (
+    <nav aria-label="주 메뉴" className="flex items-center gap-1 sm:gap-3">
+      {navLinks.map((link) => {
+        const active = isActive(pathname, link.href);
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            aria-current={active ? "page" : undefined}
+            className={`relative px-2 py-2 text-xs font-bold whitespace-nowrap transition-colors sm:px-2.5 sm:text-sm ${
+              active
+                ? "text-ink-text after:absolute after:inset-x-1.5 after:bottom-0 after:h-[2px] after:bg-neon"
+                : "text-ink-text-3 hover:text-ink-text"
+            }`}
+          >
+            {link.label}
+          </Link>
+        );
+      })}
+
+      <button
+        type="button"
+        onClick={onLogout}
+        aria-label="로그아웃"
+        className="ml-1 inline-flex items-center gap-1 px-2 py-2 text-xs font-semibold whitespace-nowrap text-ink-text-3 transition-colors hover:text-live sm:ml-2 sm:text-sm"
+      >
+        <LogOut className="size-3.5" />
+        <span className="hidden sm:inline">로그아웃</span>
+      </button>
+    </nav>
+  );
+}
+
 /**
  * 전역 공용 헤더. 메인 콘텐츠와 동일한 좌우 여백(max-w-6xl + px).
  * overlay=true 면 최상단에서 배경 없이 투명, 스크롤하면 배경이 스르륵 나타난다.
@@ -36,7 +71,6 @@ export default function SiteHeader({
   overlay?: boolean;
 }) {
   const router = useRouter();
-  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(!overlay);
 
   async function logout() {
@@ -78,35 +112,9 @@ export default function SiteHeader({
         </Link>
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           {showNav && (
-            <nav aria-label="주 메뉴" className="flex items-center gap-1 sm:gap-3">
-              {navLinks.map((link) => {
-                const active = isActive(pathname, link.href);
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    aria-current={active ? "page" : undefined}
-                    className={`relative px-2 py-2 text-xs font-bold whitespace-nowrap transition-colors sm:px-2.5 sm:text-sm ${
-                      active
-                        ? "text-ink-text after:absolute after:inset-x-1.5 after:bottom-0 after:h-[2px] after:bg-neon"
-                        : "text-ink-text-3 hover:text-ink-text"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-
-              <button
-                type="button"
-                onClick={logout}
-                aria-label="로그아웃"
-                className="ml-1 inline-flex items-center gap-1 px-2 py-2 text-xs font-semibold whitespace-nowrap text-ink-text-3 transition-colors hover:text-live sm:ml-2 sm:text-sm"
-              >
-                <LogOut className="size-3.5" />
-                <span className="hidden sm:inline">로그아웃</span>
-              </button>
-            </nav>
+            <Suspense fallback={<div className="h-9 w-44 sm:w-64" />}>
+              <SiteHeaderNav onLogout={logout} />
+            </Suspense>
           )}
           <ThemeToggle />
           {showLogin && (
