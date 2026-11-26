@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
+import TeumLoader from "@/components/layout/TeumLoader";
 import MeetingForm, { type MeetingFormValues } from "@/components/meeting/MeetingForm";
 import { ApiError, authFetch } from "@/lib/api";
 import {
@@ -148,7 +149,7 @@ function EditMeeting() {
 
 export default function EditMeetingPage() {
   return (
-    <Suspense fallback={<p className="text-sm text-ink-text-3">불러오는 중...</p>}>
+    <Suspense fallback={<TeumLoader />}>
       <EditMeeting />
     </Suspense>
   );

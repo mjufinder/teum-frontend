@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 
 import SharedScheduleClient from "@/app/share/[token]/SharedScheduleClient";
+import TeumLoader from "@/components/layout/TeumLoader";
 import { toHHMM } from "@/lib/meetings";
 import type { PublicSchedule } from "@/types/vote";
 
@@ -65,7 +66,7 @@ export default function SharedSchedulePage({
   params: Promise<{ token: string }>;
 }) {
   return (
-    <Suspense fallback={<p className="p-10 text-sm text-ink-text-weak">불러오는 중...</p>}>
+    <Suspense fallback={<TeumLoader fullScreen />}>
       <ScheduleContent params={params} />
     </Suspense>
   );

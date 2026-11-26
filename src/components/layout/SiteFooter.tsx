@@ -12,8 +12,8 @@ function FooterInner({ forceShow }: { forceShow: boolean }) {
 
   return (
     <footer className="bg-brand text-white">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-5 py-12 md:px-8">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-0 px-5 py-4 md:gap-10 md:px-8 md:py-12">
+        <div className="hidden grid-cols-1 gap-10 md:grid md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           {/* 브랜드 소개 */}
           <div className="flex flex-col gap-3">
             <Link
@@ -40,7 +40,7 @@ function FooterInner({ forceShow }: { forceShow: boolean }) {
           </div>
 
           {/* 바로가기 링크 */}
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-8">
             <div className="flex flex-col gap-2.5">
               <h2 className="text-xs font-bold tracking-wide text-white uppercase">서비스</h2>
               <ul className="flex flex-col gap-2 text-xs text-white/75">
@@ -86,18 +86,18 @@ function FooterInner({ forceShow }: { forceShow: boolean }) {
             <div className="flex flex-col gap-2.5">
               <h2 className="text-xs font-bold tracking-wide text-white uppercase">정보</h2>
               <ul className="flex flex-col gap-2 text-xs text-white/75">
-                <li>명지대학교 팀프로젝트</li>
+                <li>명지대 팀플</li>
                 <li>finder · 5팀</li>
-                <li>시간표 기반 공강 매칭</li>
+                <li>공강 매칭</li>
               </ul>
             </div>
           </div>
         </div>
 
-        {/* 하단 Copyright 바 */}
-        <div className="flex flex-col justify-between gap-2 border-t border-white/15 pt-6 text-[11px] text-white/70 sm:flex-row sm:items-center">
+        {/* 하단 Copyright 바 (모바일에서는 컴팩트하게 가운데 정렬만 표시) */}
+        <div className="flex flex-col items-center justify-center gap-1 text-center text-[11px] text-white/80 md:flex-row md:justify-between md:border-t md:border-white/15 md:pt-6 md:text-left md:text-white/70">
           <p>© 2026 TEUM (틈) · finder 팀프로젝트 5팀. All rights reserved.</p>
-          <p>Built for Campus Teams</p>
+          <p className="hidden md:block">Built for Campus Teams</p>
         </div>
       </div>
     </footer>

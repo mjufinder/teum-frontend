@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 
+import TeumLoader from "@/components/layout/TeumLoader";
 import AddMemberForm from "@/components/meeting/AddMemberForm";
 import AvailabilityHeatmap from "@/components/meeting/AvailabilityHeatmap";
 import CandidateList, { formatSlot } from "@/components/meeting/CandidateList";
@@ -613,7 +614,7 @@ function MeetingDetail() {
 
 export default function MeetingDetailPage() {
   return (
-    <Suspense fallback={<p className="text-sm text-ink-text-3">불러오는 중...</p>}>
+    <Suspense fallback={<TeumLoader />}>
       <MeetingDetail />
     </Suspense>
   );

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import SiteHeader from "@/components/layout/SiteHeader";
+import TeumLoader from "@/components/layout/TeumLoader";
 import { ApiError } from "@/lib/api";
 import { getNextPath } from "@/lib/auth-flow";
 
@@ -45,12 +46,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   if (!ready) {
     return (
-      <div className="flex-1 bg-ink-base text-ink-text-2">
-        <main className="mx-auto w-full max-w-6xl px-5 pt-24 pb-12 md:px-8">
+      <div className="flex flex-1 flex-col bg-ink-base text-ink-text-2">
+        <SiteHeader showNav />
+        <main className="mx-auto w-full max-w-6xl flex-1 px-5 pt-24 pb-12 md:px-8">
           {error ? (
-            <p className="text-sm text-live">{error}</p>
+            <p className="rounded-[12px] border-l-2 border-live bg-ink-1 px-4 py-3 text-sm text-ink-text-2">
+              {error}
+            </p>
           ) : (
-            <p className="text-sm text-ink-text-3">불러오는 중...</p>
+            <TeumLoader />
           )}
         </main>
       </div>
