@@ -149,13 +149,6 @@ function NeonGrid() {
 
 /* ───────────────────────── 데이터 ───────────────────────── */
 
-const STATS = [
-  { n: "11", unit: "", label: "도메인 클래스" },
-  { n: "182", unit: "bit", label: "시간표 비트맵" },
-  { n: "94", unit: "", label: "자동 테스트 통과" },
-  { n: "5", unit: "단계", label: "입력부터 확정까지" },
-];
-
 const PROBLEMS = [
   { k: "공유", t: "일일이 눈으로 비교", b: "시간표 캡처를 단톡방에 올리고 사람이 직접 겹쳐 봐요." },
   { k: "변경", t: "바뀌면 처음부터 다시", b: "인원이 늘거나 일정이 바뀌면 조율을 매번 반복해요." },
@@ -383,25 +376,6 @@ export default function LandingStory({
                 <NeonGrid />
               </Reveal>
             </div>
-
-            {/* 스탯 스트립 */}
-            <Reveal delay={250}>
-              <dl className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-[16px] border border-ink-line bg-ink-line sm:grid-cols-4">
-                {STATS.map((s) => (
-                  <div key={s.label} className="bg-ink-base px-5 py-5">
-                    <dt className="text-[2rem] leading-none font-bold tracking-[-0.02em] text-neon tabular-nums">
-                      {s.n}
-                      <span className="ml-0.5 text-sm font-bold text-ink-text-3">
-                        {s.unit}
-                      </span>
-                    </dt>
-                    <dd className="mt-2 text-[0.8rem] text-ink-text-3">
-                      {s.label}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </Reveal>
           </div>
 
           <div className="pointer-events-none absolute inset-x-0 bottom-6 z-10 flex flex-col items-center gap-1 text-ink-text-weak">
