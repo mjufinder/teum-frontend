@@ -1,4 +1,4 @@
-import { authFetch } from "@/lib/api";
+import { apiFetch, authFetch } from "@/lib/api";
 import { SLOT_COUNT, slotLabel } from "@/lib/timetable";
 import type { Meeting, Member } from "@/types/meeting";
 
@@ -112,5 +112,36 @@ export function transferAdmin(id: string, targetUserId: number) {
 export function leaveMeeting(id: string) {
   return authFetch<void>(`/api/v1/meetings/${id}/members/me`, {
     method: "DELETE",
+  });
+}
+
+export interface InviteCodeOut {
+  invite_code: string;
+  invite_url: string;
+}
+
+export interface InvitePreviewOut {
+  meeting_id: number;
+  name: string;
+  description: string | null;
+  member_count: number;
+}
+
+// 초대 코드 발급/재발급 (관리자 전용, MEET-08)
+export function issueInviteCode(id: string) {
+  return authFetch<InviteCodeOut>(`/api/v1/meetings/${id}/invite-code`, {
+    method: "POST",
+  });
+}
+
+// 초대 코드로 모임 미리보기 (비인증)
+export function getInvitePreview(code: string) {
+  return apiFetch<InvitePreviewOut>(`/api/v1/meetings/join/${encodeURIComponent(code)}`);
+}
+
+// 초대 코드로 모임 참가 (인증 필요)
+export function joinByInviteCode(code: string) {
+  return authFetch<Member>(`/api/v1/meetings/join/${encodeURIComponent(code)}`, {
+    method: "POST",
   });
 }
