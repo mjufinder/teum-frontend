@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase";
 const navLinks = [
   { href: "/meetings", label: "내 모임" },
   { href: "/me/timetable", label: "내 시간표" },
+  { href: "/notices", label: "공지사항" },
   { href: "/me", label: "내 정보" },
 ];
 
